@@ -630,6 +630,88 @@ body.light-mode .cafe-time-select option {
     width: 100%;
 }
 
+/* Multilingual Settings Inputs (Kurdish, Arabic, English) */
+.settings-multilang-field {
+    align-items: flex-start;
+}
+
+.settings-field-title {
+    display: block;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px !important;
+}
+
+.settings-multilang-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .settings-multilang-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+.settings-lang-input-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+}
+
+.settings-lang-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    width: fit-content;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+}
+
+.settings-lang-tag.tag-ku {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.settings-lang-tag.tag-ar {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.settings-lang-tag.tag-en {
+    color: #3b82f6;
+    background: rgba(59, 130, 246, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.settings-lang-input-item input {
+    font-size: 0.88rem;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.settings-lang-input-item input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb, 59, 130, 246), 0.15);
+}
+
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;

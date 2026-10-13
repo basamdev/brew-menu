@@ -1438,6 +1438,7 @@ document.addEventListener('DOMContentLoaded', function () {
     hydrateAdminFromLocalCache();
 
     var LOGO_CANDIDATES = [
+        'images/Brew-logo.png',
         'images/zayed-logo.png',
         'assets/icon-512.png',
         'assets/logo.svg'
@@ -5046,8 +5047,8 @@ function buildReceiptPrintHtml(options) {
     '</head>' +
     '<body class="' + langClass + '">' +
         '<div class="receipt">' +
-            '<img class="brand-logo" src="' + escapeReceiptHtml(options.logoUrl || 'images/zayed-logo.png') + '" alt="" onerror="this.style.display=\'none\'">' +
-             '<div class="brand-title"><span class="en">ZAYED ALKHAIR</span></div>' +
+            '<img class="brand-logo" src="' + escapeReceiptHtml(options.logoUrl || 'images/Brew-logo.png') + '" alt="" onerror="this.style.display=\'none\'">' +
+             '<div class="brand-title"><span class="en">' + escapeReceiptHtml(localStorage.getItem('cafeNameEn') || 'BREW CAFE & REST') + '</span></div>' +
             '<div class="brand-tagline">Premium Coffee House</div>' +
             (options.location ? '<div class="brand-location">' + escapeReceiptHtml(options.location) + '</div>' : '') +
             '<hr class="rule">' +
@@ -5168,7 +5169,7 @@ function printReceipt(itemsOverride) {
     var phone = formatReceiptPhone(localStorage.getItem('whatsappPhone') || '9647506454656');
     var location = localStorage.getItem('cafeLocationLabel') || 'بەحرکە-مجەمع';
 
-    var logoUrl = new URL('images/zayed-logo.png', window.location.href).href;
+    var logoUrl = new URL('images/Brew-logo.png', window.location.href).href;
 
     var receiptHTML = buildReceiptPrintHtml({
         lang: lang,
@@ -5471,6 +5472,7 @@ function getCafeTimeMinuteOptions(parts, lang) {
 }
 
 function buildCafeTimePickerMarkup(idPrefix, timeValue, fallback, S, lang) {
+    lang = lang || localStorage.getItem('selectedLang') || 'ku';
     var parts = typeof parseCafeTimeParts === 'function'
         ? parseCafeTimeParts(timeValue, fallback)
         : { normalized: fallback, hour12: 2, minute: 0, isPm: idPrefix === 'cafeOpen' };
@@ -5485,9 +5487,11 @@ function buildCafeTimePickerMarkup(idPrefix, timeValue, fallback, S, lang) {
     getCafeTimeMinuteOptions(parts, lang).forEach(function (item) {
         minOpts += '<option value="' + item.value + '"' + (parseInt(item.value, 10) === parts.minute ? ' selected' : '') + '>' + item.label + '</option>';
     });
+    var periodAm = lang === 'ku' ? 'بەیانی' : (lang === 'ar' ? 'صباحاً' : 'AM');
+    var periodPm = lang === 'ku' ? 'شەو' : (lang === 'ar' ? 'مساءً' : 'PM');
     var periodOpts =
-        '<option value="am"' + (!parts.isPm ? ' selected' : '') + '>' + (S.timeAm || 'بەیانی') + '</option>' +
-        '<option value="pm"' + (parts.isPm ? ' selected' : '') + '>' + (S.timePm || 'دوای نیوەڕۆ') + '</option>';
+        '<option value="am"' + (!parts.isPm ? ' selected' : '') + '>' + periodAm + '</option>' +
+        '<option value="pm"' + (parts.isPm ? ' selected' : '') + '>' + periodPm + '</option>';
     var display = typeof formatCafeTimeForDisplay === 'function'
         ? formatCafeTimeForDisplay(parts.normalized, lang)
         : parts.normalized;
@@ -5505,7 +5509,7 @@ function buildCafeTimePickerMarkup(idPrefix, timeValue, fallback, S, lang) {
                 '<select class="cafe-time-select" id="' + idPrefix + 'Minute" aria-label="minute">' + minOpts + '</select>' +
             '</div>' +
             '<select class="cafe-time-select cafe-time-period" id="' + idPrefix + 'Period" aria-label="period">' + periodOpts + '</select>' +
-            '<button type="button" class="btn-secondary cafe-time-apply-btn" id="' + idPrefix + 'TimeApply">' + (S.applyTime || 'Apply') + '</button>' +
+            '<button type="button" class="btn-secondary cafe-time-apply-btn" id="' + idPrefix + 'TimeApply">' + (S.applyTime || (lang === 'ku' ? 'تەواو' : (lang === 'ar' ? 'تطبيق' : 'Apply'))) + '</button>' +
         '</div>' +
         '<input type="hidden" id="' + idPrefix + 'Time" value="' + parts.normalized + '">' +
     '</div>';
@@ -5992,7 +5996,8 @@ function deleteOffer(offerId) {
 }
 
 function loadSettings() {
-    var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
+    var currentLang = localStorage.getItem('selectedLang') || 'ku';
+    var S = i18n[currentLang] || i18n.en;
     var adminContent = document.getElementById('adminContent');
     if (!adminContent) return;
 
@@ -6003,7 +6008,7 @@ function loadSettings() {
         ar: { title: 'سمة الألوان', hint: 'اختر لوناً لتغيير مظهر لوحة التحكم بالكامل', gold: 'ذهبي', emerald: 'زمردي', sapphire: 'أزرق ياقوتي', amethyst: 'بنفسجي', ruby: 'ياقوتي', sunset: 'برتقالي', rose: 'وردي', graphite: 'رمادي', cyan: 'سماوي' },
         en: { title: 'Color Theme', hint: 'Pick a color to restyle the entire dashboard', gold: 'Gold', emerald: 'Emerald', sapphire: 'Sapphire', amethyst: 'Amethyst', ruby: 'Ruby', sunset: 'Sunset', rose: 'Rose', graphite: 'Graphite', cyan: 'Cyan' }
     };
-    var TL = themeLabels[localStorage.getItem('selectedLang') || 'ku'] || themeLabels.en;
+    var TL = themeLabels[currentLang] || themeLabels.en;
     var themes = [
         { id: 'sapphire', color: '#3B82F6', dark: '#1D4ED8' },
         { id: 'gold', color: '#D4AF37', dark: '#B8910C' },
@@ -6043,11 +6048,25 @@ function loadSettings() {
     adminContent.innerHTML =
         '<div class="card settings-contact-card">' +
             '<h2>' + escapeHtmlText(S.settings) + '</h2>' +
-            '<div class="settings-social-field">' +
+            '<div class="settings-social-field settings-multilang-field">' +
                 '<span class="settings-social-icon settings-social-icon--cafe" aria-hidden="true"><i class="fa-solid fa-mug-hot"></i></span>' +
                 '<div class="settings-social-input-wrap">' +
-                    '<label for="cafeName">' + escapeHtmlText(S.cafeName) + '</label>' +
-                    '<input type="text" id="cafeName" value="' + settingsVal('cafeName', S.siteName || 'ZAYED ALKHAIR') + '">' +
+                    '<label class="settings-field-title">' + escapeHtmlText(S.cafeName || 'ناوی کافێ') + '</label>' +
+                    '<div class="settings-multilang-grid">' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-ku">کوردی</span>' +
+                            '<input type="text" id="cafeNameKu" value="' + settingsVal('cafeNameKu', 'بریو کافێ') + '" placeholder="بریو کافێ" dir="rtl">' +
+                        '</div>' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-ar">عربي</span>' +
+                            '<input type="text" id="cafeNameAr" value="' + settingsVal('cafeNameAr', 'بریو کوفي') + '" placeholder="بریو کوفي" dir="rtl">' +
+                        '</div>' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-en">English</span>' +
+                            '<input type="text" id="cafeNameEn" value="' + settingsVal('cafeNameEn', 'BREW CAFE & REST') + '" placeholder="BREW CAFE & REST" dir="ltr">' +
+                        '</div>' +
+                    '</div>' +
+                    '<input type="hidden" id="cafeName" value="' + settingsVal('cafeName', 'BREW CAFE & REST') + '">' +
                 '</div>' +
             '</div>' +
             '<div class="settings-social-field">' +
@@ -6067,11 +6086,25 @@ function loadSettings() {
                     '<input type="url" id="cafeLocationUrl" value="' + settingsVal('cafeLocationUrl', 'https://maps.app.goo.gl/mmi5iv7mnGKxKZoq9?g_st=ic') + '" placeholder="https://maps.google.com/...">' +
                 '</div>' +
             '</div>' +
-            '<div class="settings-social-field">' +
+            '<div class="settings-social-field settings-multilang-field">' +
                 '<span class="settings-social-icon settings-social-icon--pin" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>' +
                 '<div class="settings-social-input-wrap">' +
-                    '<label for="cafeLocationLabel">' + escapeHtmlText(S.locationLabelField) + '</label>' +
-                    '<input type="text" id="cafeLocationLabel" value="' + settingsVal('cafeLocationLabel', 'بەحرکە-مجەمع') + '">' +
+                    '<label class="settings-field-title">' + escapeHtmlText(S.locationLabelField || 'ناونیشان (دەردەکەوێت لە مێنوو)') + '</label>' +
+                    '<div class="settings-multilang-grid">' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-ku">کوردی</span>' +
+                            '<input type="text" id="cafeLocationLabelKu" value="' + settingsVal('cafeLocationLabelKu', 'بەحرکە-مجەمع') + '" placeholder="بەحرکە-مجەمع" dir="rtl">' +
+                        '</div>' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-ar">عربي</span>' +
+                            '<input type="text" id="cafeLocationLabelAr" value="' + settingsVal('cafeLocationLabelAr', 'بحركة-المجمع') + '" placeholder="بحركة-المجمع" dir="rtl">' +
+                        '</div>' +
+                        '<div class="settings-lang-input-item">' +
+                            '<span class="settings-lang-tag tag-en">English</span>' +
+                            '<input type="text" id="cafeLocationLabelEn" value="' + settingsVal('cafeLocationLabelEn', 'Baharka - Complex') + '" placeholder="Baharka - Complex" dir="ltr">' +
+                        '</div>' +
+                    '</div>' +
+                    '<input type="hidden" id="cafeLocationLabel" value="' + settingsVal('cafeLocationLabel', 'بەحرکە-مجەمع') + '">' +
                 '</div>' +
             '</div>' +
             '<div class="settings-social-field">' +
@@ -6088,12 +6121,12 @@ function loadSettings() {
                 '<div class="settings-social-input-wrap settings-hours-block">' +
                     '<div class="settings-hours-row">' +
                         '<div class="settings-hours-input">' +
-                            '<label for="cafeOpenTime">' + escapeHtmlText(S.cafeOpenTimeLabel) + '</label>' +
-                            '<input type="time" id="cafeOpenTime" class="cafe-time-input" value="' + escapeHtmlAttr(openTimeValue) + '">' +
+                            '<label for="cafeOpenTimeBtn">' + escapeHtmlText(S.cafeOpenTimeLabel) + '</label>' +
+                            buildCafeTimePickerMarkup('cafeOpen', openTimeValue, '14:00', S, currentLang) +
                         '</div>' +
                         '<div class="settings-hours-input">' +
-                            '<label for="cafeCloseTime">' + escapeHtmlText(S.cafeCloseTimeLabel) + '</label>' +
-                            '<input type="time" id="cafeCloseTime" class="cafe-time-input" value="' + escapeHtmlAttr(closeTimeValue) + '">' +
+                            '<label for="cafeCloseTimeBtn">' + escapeHtmlText(S.cafeCloseTimeLabel) + '</label>' +
+                            buildCafeTimePickerMarkup('cafeClose', closeTimeValue, '02:00', S, currentLang) +
                         '</div>' +
                     '</div>' +
                 '</div>' +
@@ -6138,6 +6171,8 @@ function loadSettings() {
             '<div class="theme-picker" id="themePicker">' + swatchesHtml + '</div>' +
         '</div>';
 
+    setupCafeTimePickers(currentLang);
+
     function markSettingsDirty(e) {
         var el = e && e.target;
         if (el && el.tagName === 'INPUT') el.setAttribute('data-dirty', '1');
@@ -6172,14 +6207,20 @@ function loadSettings() {
     if (saveBtn) {
         saveBtn.addEventListener('click', function () {
             try {
-                var cafeName = typeof normalizeCafeBrandName === 'function'
-                    ? normalizeCafeBrandName(readInputValue('cafeName'))
-                    : readInputValue('cafeName') || 'ZAYED ALKHAIR';
+                var cafeNameKu = readInputValue('cafeNameKu');
+                var cafeNameAr = readInputValue('cafeNameAr');
+                var cafeNameEn = readInputValue('cafeNameEn');
+                var cafeName = cafeNameEn || cafeNameKu || cafeNameAr || 'BREW CAFE & REST';
+
+                var cafeLocationLabelKu = readInputValue('cafeLocationLabelKu');
+                var cafeLocationLabelAr = readInputValue('cafeLocationLabelAr');
+                var cafeLocationLabelEn = readInputValue('cafeLocationLabelEn');
+                var cafeLocationLabel = cafeLocationLabelKu || cafeLocationLabelAr || cafeLocationLabelEn || 'بەحرکە-مجەمع';
+
                 var whatsappPhone = typeof normalizeWhatsAppPhone === 'function'
                     ? normalizeWhatsAppPhone(readInputValue('whatsappPhone'))
                     : readInputValue('whatsappPhone');
                 var cafeLocationUrl = readInputValue('cafeLocationUrl');
-                var cafeLocationLabel = readInputValue('cafeLocationLabel');
                 var cafeInstagram = typeof normalizeSocialUrl === 'function'
                     ? normalizeSocialUrl(readInputValue('cafeInstagram'), 'instagram')
                     : readInputValue('cafeInstagram');
@@ -6208,9 +6249,15 @@ function loadSettings() {
                 }
 
                 storeSetting('cafeName', cafeName);
+                storeSetting('cafeNameKu', cafeNameKu);
+                storeSetting('cafeNameAr', cafeNameAr);
+                storeSetting('cafeNameEn', cafeNameEn);
+                storeSetting('cafeLocationLabel', cafeLocationLabel);
+                storeSetting('cafeLocationLabelKu', cafeLocationLabelKu);
+                storeSetting('cafeLocationLabelAr', cafeLocationLabelAr);
+                storeSetting('cafeLocationLabelEn', cafeLocationLabelEn);
                 storeSetting('whatsappPhone', whatsappPhone);
                 storeSetting('cafeLocationUrl', cafeLocationUrl);
-                storeSetting('cafeLocationLabel', cafeLocationLabel);
                 storeSetting('cafeInstagram', cafeInstagram);
                 storeSetting('cafeTiktok', cafeTiktok);
                 storeSetting('cafeSnapchat', cafeSnapchat);
@@ -6224,9 +6271,15 @@ function loadSettings() {
                 } catch (e) {}
 
                 setInputValue('cafeName', cafeName);
+                setInputValue('cafeNameKu', cafeNameKu);
+                setInputValue('cafeNameAr', cafeNameAr);
+                setInputValue('cafeNameEn', cafeNameEn);
+                setInputValue('cafeLocationLabel', cafeLocationLabel);
+                setInputValue('cafeLocationLabelKu', cafeLocationLabelKu);
+                setInputValue('cafeLocationLabelAr', cafeLocationLabelAr);
+                setInputValue('cafeLocationLabelEn', cafeLocationLabelEn);
                 setInputValue('whatsappPhone', whatsappPhone);
                 setInputValue('cafeLocationUrl', cafeLocationUrl);
-                setInputValue('cafeLocationLabel', cafeLocationLabel);
                 setInputValue('cafeInstagram', cafeInstagram);
                 setInputValue('cafeTiktok', cafeTiktok);
                 setInputValue('cafeSnapchat', cafeSnapchat);
@@ -6234,16 +6287,22 @@ function loadSettings() {
                 setInputValue('cafeOpenTime', cafeOpenTime);
                 setInputValue('cafeCloseTime', cafeCloseTime);
 
-                ['cafeName', 'whatsappPhone', 'cafeLocationUrl', 'cafeLocationLabel', 'cafeInstagram', 'cafeTiktok', 'cafeSnapchat', 'cafeFacebook', 'cafeOpenTime', 'cafeCloseTime'].forEach(function (id) {
+                ['cafeName', 'cafeNameKu', 'cafeNameAr', 'cafeNameEn', 'whatsappPhone', 'cafeLocationUrl', 'cafeLocationLabel', 'cafeLocationLabelKu', 'cafeLocationLabelAr', 'cafeLocationLabelEn', 'cafeInstagram', 'cafeTiktok', 'cafeSnapchat', 'cafeFacebook', 'cafeOpenTime', 'cafeCloseTime'].forEach(function (id) {
                     var input = document.getElementById(id);
                     if (input) input.removeAttribute('data-dirty');
                 });
 
                 var settingsPayload = {
                     cafeName: cafeName,
+                    cafeNameKu: cafeNameKu,
+                    cafeNameAr: cafeNameAr,
+                    cafeNameEn: cafeNameEn,
+                    cafeLocationLabel: cafeLocationLabel,
+                    cafeLocationLabelKu: cafeLocationLabelKu,
+                    cafeLocationLabelAr: cafeLocationLabelAr,
+                    cafeLocationLabelEn: cafeLocationLabelEn,
                     whatsappPhone: whatsappPhone,
                     cafeLocationUrl: cafeLocationUrl,
-                    cafeLocationLabel: cafeLocationLabel,
                     cafeInstagram: cafeInstagram,
                     cafeTiktok: cafeTiktok,
                     cafeSnapchat: cafeSnapchat,
@@ -6287,9 +6346,15 @@ function loadSettings() {
 
             var fields = {
                 cafeName: 'cafeName',
+                cafeNameKu: 'cafeNameKu',
+                cafeNameAr: 'cafeNameAr',
+                cafeNameEn: 'cafeNameEn',
                 whatsappPhone: 'whatsappPhone',
                 cafeLocationUrl: 'cafeLocationUrl',
                 cafeLocationLabel: 'cafeLocationLabel',
+                cafeLocationLabelKu: 'cafeLocationLabelKu',
+                cafeLocationLabelAr: 'cafeLocationLabelAr',
+                cafeLocationLabelEn: 'cafeLocationLabelEn',
                 cafeInstagram: 'cafeInstagram',
                 cafeTiktok: 'cafeTiktok',
                 cafeSnapchat: 'cafeSnapchat',
@@ -6315,11 +6380,17 @@ function loadSettings() {
                 openLoaded.value = (typeof normalizeCafeTimeValue === 'function'
                     ? normalizeCafeTimeValue(localStorage.getItem('cafeOpenTime') || '14:00', '14:00')
                     : (localStorage.getItem('cafeOpenTime') || '14:00'));
+                if (typeof syncCafeTimePickerFromStorage === 'function') {
+                    syncCafeTimePickerFromStorage('cafeOpen', currentLang);
+                }
             }
             if (closeLoaded && closeLoaded.getAttribute('data-dirty') !== '1' && document.activeElement !== closeLoaded) {
                 closeLoaded.value = (typeof normalizeCafeTimeValue === 'function'
                     ? normalizeCafeTimeValue(localStorage.getItem('cafeCloseTime') || '02:00', '02:00')
                     : (localStorage.getItem('cafeCloseTime') || '02:00'));
+                if (typeof syncCafeTimePickerFromStorage === 'function') {
+                    syncCafeTimePickerFromStorage('cafeClose', currentLang);
+                }
             }
         });
     }

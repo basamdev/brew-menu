@@ -300,7 +300,7 @@ const i18n = {
         cafeOpenTimePlaceholder: '٢:٠٠ دوای نیوەڕۆ',
         cafeCloseTimePlaceholder: '٢:٠٠ بەیانی',
         timeAm: 'بەیانی',
-        timePm: 'ئێوارە',
+        timePm: 'شەو',
         applyTime: 'جێبەجێکردن',
         saveHours: 'پاشەکەوتکردنی کاتەکان',
         hoursSaved: 'کاتەکان پاشەکەوت کران!',
@@ -807,8 +807,8 @@ const i18n = {
         menuExpirePreview: 'Preview expired screen',
         cafeOpenTimePlaceholder: '2:00 PM',
         cafeCloseTimePlaceholder: '2:00 AM',
-        timeAm: 'Morning',
-        timePm: 'Evening',
+        timeAm: 'AM',
+        timePm: 'PM',
         applyTime: 'Apply',
         saveHours: 'Save hours',
         hoursSaved: 'Hours saved!',
@@ -4167,9 +4167,15 @@ window.initMenuOffersSlideshow = initMenuOffersSlideshow;
 
 var CAFE_SETTING_KEYS = [
     'cafeName',
+    'cafeNameKu',
+    'cafeNameAr',
+    'cafeNameEn',
     'whatsappPhone',
     'cafeLocationUrl',
     'cafeLocationLabel',
+    'cafeLocationLabelKu',
+    'cafeLocationLabelAr',
+    'cafeLocationLabelEn',
     'cafeOpenTime',
     'cafeCloseTime',
     'cafeInstagram',
@@ -4344,18 +4350,25 @@ function formatCafeTimeForDisplay(timeStr, lang) {
     var parts = normalized.split(':');
     var hour24 = parseInt(parts[0], 10);
     var minute = parseInt(parts[1], 10);
-    var strings = i18n[lang] || i18n.en;
     var hour12 = hour24 % 12 || 12;
     var minuteStr = String(minute).padStart(2, '0');
     var isPm = hour24 >= 12;
 
+    var period = '';
+    if (lang === 'ku') {
+        period = isPm ? 'شەو' : 'بەیانی';
+    } else if (lang === 'ar') {
+        period = isPm ? 'مساءً' : 'صباحاً';
+    } else {
+        period = isPm ? 'PM' : 'AM';
+    }
+
     if (lang === 'ku' || lang === 'ar') {
         var clock = toLocaleDigits(hour12, lang) + ':' + toLocaleDigits(minuteStr, lang);
-        var period = isPm ? (strings.timePm || 'PM') : (strings.timeAm || 'AM');
         return clock + ' ' + period;
     }
 
-    return hour12 + ':' + minuteStr + ' ' + (isPm ? 'PM' : 'AM');
+    return hour12 + ':' + minuteStr + ' ' + period;
 }
 
 function formatCafeHoursDisplay(info, lang) {
@@ -4632,9 +4645,21 @@ function normalizeCafeBrandName(name) {
     return n;
 }
 
-function getCafeInfo() {
+function getCafeInfo(targetLang) {
+    var lang = targetLang || localStorage.getItem('selectedLang') || document.documentElement.lang || 'ku';
     var defaultUrl = 'https://maps.app.goo.gl/mmi5iv7mnGKxKZoq9?g_st=ic';
-    var defaultLabel = 'بەحرکە-مجەمع';
+
+    var defaultNames = {
+        ku: 'بریو کافێ',
+        ar: 'بریو کوفي',
+        en: 'BREW CAFE & REST'
+    };
+    var defaultLabels = {
+        ku: 'بەحرکە-مجەمع',
+        ar: 'بحركة-المجمع',
+        en: 'Baharka - Complex'
+    };
+
     var storedUrl = localStorage.getItem('cafeLocationUrl');
     var storedLabel = localStorage.getItem('cafeLocationLabel');
 
@@ -4643,8 +4668,8 @@ function getCafeInfo() {
         storedUrl = defaultUrl;
     }
     if (storedLabel === 'baharka-erbil | شارع 150') {
-        localStorage.setItem('cafeLocationLabel', defaultLabel);
-        storedLabel = defaultLabel;
+        localStorage.setItem('cafeLocationLabel', defaultLabels.ku);
+        storedLabel = defaultLabels.ku;
     }
 
     var openTime = normalizeCafeTimeValue(localStorage.getItem('cafeOpenTime'), '14:00');
@@ -4652,19 +4677,38 @@ function getCafeInfo() {
     var openMinutes = parseCafeTimeToMinutes(openTime, 14);
     var closeMinutes = parseCafeTimeToMinutes(closeTime, 2);
 
+    // Multilingual Name Resolution with fallback
+    var resolvedName = '';
+    if (lang === 'ku') {
+        resolvedName = localStorage.getItem('cafeNameKu') || localStorage.getItem('cafeName') || defaultNames.ku;
+    } else if (lang === 'ar') {
+        resolvedName = localStorage.getItem('cafeNameAr') || localStorage.getItem('cafeName') || defaultNames.ar;
+    } else {
+        resolvedName = localStorage.getItem('cafeNameEn') || localStorage.getItem('cafeName') || defaultNames.en;
+    }
+    resolvedName = normalizeCafeBrandName(resolvedName);
+
+    // Multilingual Location Label Resolution with fallback
+    var resolvedLabel = '';
+    if (lang === 'ku') {
+        resolvedLabel = localStorage.getItem('cafeLocationLabelKu') || storedLabel || defaultLabels.ku;
+    } else if (lang === 'ar') {
+        resolvedLabel = localStorage.getItem('cafeLocationLabelAr') || storedLabel || defaultLabels.ar;
+    } else {
+        resolvedLabel = localStorage.getItem('cafeLocationLabelEn') || storedLabel || defaultLabels.en;
+    }
+
     return {
-        name: (function () {
-            var brand = normalizeCafeBrandName(localStorage.getItem('cafeName') || DEFAULT_CAFE_BRAND_NAME);
-            try {
-                if (localStorage.getItem('cafeName') !== brand) {
-                    localStorage.setItem('cafeName', brand);
-                }
-            } catch (e) { /* ignore */ }
-            return brand;
-        })(),
+        name: resolvedName,
+        nameKu: localStorage.getItem('cafeNameKu') || defaultNames.ku,
+        nameAr: localStorage.getItem('cafeNameAr') || defaultNames.ar,
+        nameEn: localStorage.getItem('cafeNameEn') || defaultNames.en,
         phone: normalizeWhatsAppPhone(localStorage.getItem('whatsappPhone') || '9647506454656'),
         locationUrl: storedUrl || defaultUrl,
-        locationLabel: storedLabel || defaultLabel,
+        locationLabel: resolvedLabel,
+        locationLabelKu: localStorage.getItem('cafeLocationLabelKu') || defaultLabels.ku,
+        locationLabelAr: localStorage.getItem('cafeLocationLabelAr') || defaultLabels.ar,
+        locationLabelEn: localStorage.getItem('cafeLocationLabelEn') || defaultLabels.en,
         instagram: localStorage.getItem('cafeInstagram') || '',
         tiktok: localStorage.getItem('cafeTiktok') || '',
         snapchat: localStorage.getItem('cafeSnapchat') || '',
