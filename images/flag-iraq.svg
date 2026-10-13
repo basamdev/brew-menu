@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" aria-hidden="true">
+  <rect width="900" height="200" fill="#CE1126"/>
+  <rect y="200" width="900" height="200" fill="#FFFFFF"/>
+  <rect y="400" width="900" height="200" fill="#000000"/>
+  <!-- Kufic script "الله أكبر" -->
+  <g fill="#007A3D" transform="translate(450, 300)">
+    <!-- ALLAH (Right side in Arabic) -->
+    <path d="M 60,35 L 60,-35 L 76,-35 L 76,20 L 96,20 L 96,-35 L 112,-35 L 112,20 L 132,20 L 132,-35 L 148,-35 L 148,35 Z"/>
+    <rect x="76" y="-55" width="36" height="14"/>
+    <!-- AKBAR (Left side in Arabic) -->
+    <path d="M -150,35 L -150,-35 L -134,-35 L -134,20 L -114,20 L -114,-35 L -98,-35 L -98,35 Z"/>
+    <path d="M -80,35 L -80,-15 L -20,-15 L -20,-35 L -80,-35 L -80,-35 L -5,-35 L -5,5 L -62,5 L -62,20 L 5,20 L 5,35 Z"/>
+    <rect x="-134" y="-55" width="20" height="14"/>
+    <rect x="-45" y="-12" width="16" height="12"/>
+  </g>
+</svg>

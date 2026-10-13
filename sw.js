@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zayed-v133';
+const CACHE_NAME = 'zayed-v134';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
@@ -18,7 +18,9 @@ const STATIC_ASSETS = [
     './assets/icon-512-maskable.png',
     './assets/apple-touch-icon.png',
     './assets/logo.svg',
-    './images/flag-kurdistan.svg'
+    './images/flag-kurdistan.svg',
+    './images/flag-iraq.svg',
+    './images/flag-uk.svg'
 ];
 
 self.addEventListener('message', function (event) {
