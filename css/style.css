@@ -7639,10 +7639,245 @@ body.emenu-layout .category-heading::before {
 }
 
 /* Grid ↔ List layouts */
-body.emenu-layout .menu-grid.layout-horizontal {
+/* ==================================================================
+   EXACT 2-COLUMN LUXURY GRID LAYOUT (MATCHING SCREENSHOT)
+   - 2 columns side by side (gap: 12px)
+   - Card: 18px rounded corners, dark navy/slate background
+   - Image: 140px height, 18px top rounded corners
+   - Floating "+" button: circular light-blue button with dark "+" at bottom-left of image
+   - Card foot: single horizontal row with Heart button on left & Title + Price on right
+================================================================== */
+body.emenu-layout .menu-grid.layout-horizontal,
+body.emenu-layout .menu-grid.layout-horizontal .category-section {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 14px !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    border-radius: 18px !important;
+    background: #18283B !important;
+    background: linear-gradient(180deg, rgba(27, 49, 75, 0.95) 0%, rgba(20, 36, 56, 0.98) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 0.22s ease !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+    width: 100% !important;
+    height: 140px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border-radius: 17px 17px 0 0 !important;
+    background: #111D2D !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
+    transform: scale(1.05) !important;
+}
+
+/* Floating Circular Light Blue "+" Button on Image (bottom-left) */
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
+    display: inline-flex !important;
+    position: absolute !important;
+    bottom: 9px !important;
+    left: 9px !important;
+    z-index: 5 !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 50% !important;
+    background: #5B9CF6 !important;
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    border: none !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 0 10px rgba(96, 165, 250, 0.25) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #0F172A !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                box-shadow 0.2s ease !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #0F172A !important;
+    stroke-width: 2.8 !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.6) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:active {
+    transform: scale(0.92) !important;
+}
+
+/* Hide the list "+" button in grid view */
+body.emenu-layout .menu-grid.layout-horizontal .list-add-btn {
+    display: none !important;
+}
+
+/* Card Foot: horizontal row with Heart on left & Title+Price on right */
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 12px 12px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    min-height: 52px !important;
+}
+
+/* In RTL: Title & Price on right, Heart on left */
+html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+    flex-direction: row !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    text-align: right !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    text-align: left !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-title,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
+    font-size: 0.94rem !important;
+    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.25 !important;
+    letter-spacing: -0.01em !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-desc,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-desc {
+    display: none !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-price,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price,
+body.emenu-layout .menu-grid.layout-horizontal .card-price-range,
+body.emenu-layout .menu-grid.layout-horizontal .card-price-single {
+    font-family: var(--font-en, 'Outfit', sans-serif) !important;
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    color: #F59E0B !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.01em !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 11px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                background 0.2s ease,
+                border-color 0.2s ease,
+                color 0.2s ease !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav svg {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:hover {
+    transform: scale(1.08) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:active {
+    transform: scale(0.92) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav {
+    color: #EF4444 !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav svg {
+    fill: #EF4444 !important;
 }
 
 /* ==================================================================
@@ -7694,6 +7929,11 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
 }
 
+/* List view: hide the floating grid add button */
+body.emenu-layout .menu-grid.layout-vertical .grid-add-btn {
+    display: none !important;
+}
+
 /* 2. The Image (Fixed Size: width: 90px, height: 90px, flex-shrink: 0, border-radius: 12px) */
 body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
     flex-shrink: 0 !important;
@@ -7724,6 +7964,23 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-img {
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card:hover .menu-card-img {
     transform: scale(1.05) !important;
+}
+
+/* List view card foot: flex row spanning remaining space */
+body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-sizing: border-box !important;
+    gap: 12px !important;
 }
 
 /* 3. The Text & Details Content (Flexible Space: flex: 1, column, start-aligned) */
@@ -7861,8 +8118,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-fav.is-fav svg {
 }
 
 /* Modern "+" Action Button in list view */
-body.emenu-layout .menu-grid.layout-vertical .menu-card-add,
-body.emenu-layout .menu-grid.layout-vertical .menu-card-cart {
+body.emenu-layout .menu-grid.layout-vertical .list-add-btn {
     position: static !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -7883,22 +8139,19 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-cart {
                 box-shadow 0.2s ease !important;
 }
 
-body.emenu-layout .menu-grid.layout-vertical .menu-card-add svg,
-body.emenu-layout .menu-grid.layout-vertical .menu-card-cart svg {
+body.emenu-layout .menu-grid.layout-vertical .list-add-btn svg {
     width: 18px !important;
     height: 18px !important;
     stroke: #FFFFFF !important;
     stroke-width: 2.8 !important;
 }
 
-body.emenu-layout .menu-grid.layout-vertical .menu-card-add:hover,
-body.emenu-layout .menu-grid.layout-vertical .menu-card-cart:hover {
+body.emenu-layout .menu-grid.layout-vertical .list-add-btn:hover {
     transform: scale(1.08) !important;
     box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.5) !important;
 }
 
-body.emenu-layout .menu-grid.layout-vertical .menu-card-add:active,
-body.emenu-layout .menu-grid.layout-vertical .menu-card-cart:active {
+body.emenu-layout .menu-grid.layout-vertical .list-add-btn:active {
     transform: scale(0.92) !important;
 }
 
@@ -10416,20 +10669,24 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-width: 100% !important;
     }
 
+    /* ==================================================================
+       EXACT 2-COLUMN LUXURY GRID LAYOUT (MATCHING SCREENSHOT)
+       ================================================================== */
     body.emenu-layout .menu-grid.layout-horizontal .menu-card {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
-        border-radius: 16px !important;
-        background: rgba(255, 255, 255, 0.05) !important;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #1B314B) !important;
+        border-radius: 18px !important;
+        background: #18283B !important;
+        background: linear-gradient(180deg, rgba(27, 49, 75, 0.95) 0%, rgba(20, 36, 56, 0.98) 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
         overflow: hidden !important;
         cursor: pointer !important;
         box-sizing: border-box !important;
+        position: relative !important;
         transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
                     box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
                     border-color 0.22s ease !important;
@@ -10438,19 +10695,20 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
         transform: translateY(-2px) !important;
         border-color: rgba(255, 255, 255, 0.18) !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36) !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
         width: 100% !important;
-        height: 124px !important;
-        min-height: 124px !important;
-        max-height: 124px !important;
+        height: 140px !important;
+        min-height: 140px !important;
+        max-height: 140px !important;
         position: relative !important;
         overflow: hidden !important;
-        border-radius: 15px 15px 0 0 !important;
-        background: #14253B !important;
+        border-radius: 17px 17px 0 0 !important;
+        background: #111D2D !important;
         margin: 0 !important;
+        padding: 0 !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
@@ -10463,18 +10721,85 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
-        transform: scale(1.06) !important;
+        transform: scale(1.05) !important;
+    }
+
+    /* Floating Circular Light Blue "+" Button on Image (bottom-left) */
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
+        display: inline-flex !important;
+        position: absolute !important;
+        bottom: 9px !important;
+        left: 9px !important;
+        z-index: 5 !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 50% !important;
+        background: #5B9CF6 !important;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        border: none !important;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 0 10px rgba(96, 165, 250, 0.25) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #0F172A !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.2s ease !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
+        width: 18px !important;
+        height: 18px !important;
+        stroke: #0F172A !important;
+        stroke-width: 2.8 !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.6) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:active {
+        transform: scale(0.92) !important;
+    }
+
+    /* Hide the list "+" button in grid view */
+    body.emenu-layout .menu-grid.layout-horizontal .list-add-btn {
+        display: none !important;
+    }
+
+    /* Card Foot: horizontal row with Heart on left & Title+Price on right */
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 10px 12px 12px !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+        min-height: 52px !important;
+    }
+
+    /* In RTL: Title & Price on right, Heart on left */
+    html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+        flex-direction: row !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
-        padding: 8px 10px 4px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
-        gap: 3px !important;
-        min-width: 0 !important;
+        gap: 2px !important;
         text-align: right !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
@@ -10484,13 +10809,14 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-title,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
-        font-size: 0.90rem !important;
+        font-size: 0.94rem !important;
         font-weight: 700 !important;
-        color: var(--emenu-text, #FFFFFF) !important;
+        color: #FFFFFF !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         line-height: 1.25 !important;
+        letter-spacing: -0.01em !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-desc,
@@ -10503,37 +10829,44 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-horizontal .card-price-range,
     body.emenu-layout .menu-grid.layout-horizontal .card-price-single {
         font-family: var(--font-en, 'Outfit', sans-serif) !important;
-        font-size: 0.88rem !important;
+        font-size: 0.92rem !important;
         font-weight: 700 !important;
         color: #F59E0B !important;
         line-height: 1.2 !important;
         white-space: nowrap !important;
+        letter-spacing: 0.01em !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
-        padding: 4px 10px 10px !important;
+        flex-shrink: 0 !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: space-between !important;
-        box-sizing: border-box !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        border-radius: 11px !important;
-        background: rgba(255, 255, 255, 0.06) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        color: rgba(255, 255, 255, 0.9) !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 0 !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        border-radius: 11px !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #FFFFFF !important;
         cursor: pointer !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    background 0.2s ease,
+                    border-color 0.2s ease,
+                    color 0.2s ease !important;
     }
 
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav svg {
@@ -10544,38 +10877,28 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         fill: none !important;
     }
 
-    body.emenu-layout .menu-grid.layout-horizontal .menu-card-add,
-    body.emenu-layout .menu-grid.layout-horizontal .menu-card-cart {
-        position: static !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        border-radius: 11px !important;
-        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
-        border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-        color: #FFFFFF !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        cursor: pointer !important;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45) !important;
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:hover {
+        transform: scale(1.08) !important;
+        background: rgba(255, 255, 255, 0.12) !important;
     }
 
-    body.emenu-layout .menu-grid.layout-horizontal .menu-card-add svg,
-    body.emenu-layout .menu-grid.layout-horizontal .menu-card-cart svg {
-        width: 17px !important;
-        height: 17px !important;
-        stroke: #FFFFFF !important;
-        stroke-width: 2.8 !important;
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:active {
+        transform: scale(0.92) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav {
+        color: #EF4444 !important;
+        background: rgba(239, 68, 68, 0.15) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav svg {
+        fill: #EF4444 !important;
     }
 
     /* ==================================================================
        STRICT HORIZONTAL FLEXBOX LAYOUT (LIST VIEW / SINGLE-COLUMN)
-       1. Wrapper: display: flex, flex-direction: row, align-items: center, gap: 16px (RTL supported)
-       2. Image: fixed size flex-shrink: 0, width: 90px, height: 90px, object-fit: cover, border-radius: 12px
-       3. Text & Details: flex: 1, column, start-aligned (RTL right, LTR left)
-       4. Action Buttons: flex-shrink: 0 at far edge, Heart & "+" together
-    ================================================================== */
+       ================================================================== */
     body.emenu-layout .menu-grid.layout-vertical,
     body.emenu-layout .menu-grid.layout-vertical .category-section {
         display: flex !important;
@@ -10618,9 +10941,15 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
     }
 
+    /* List view: hide the floating grid add button */
+    body.emenu-layout .menu-grid.layout-vertical .grid-add-btn {
+        display: none !important;
+    }
+
     /* 2. The Image (Fixed Size: width: 90px, height: 90px, flex-shrink: 0, border-radius: 12px) */
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
         flex-shrink: 0 !important;
+        flex-grow: 0 !important;
         width: 90px !important;
         min-width: 90px !important;
         max-width: 90px !important;
@@ -10649,10 +10978,27 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         transform: scale(1.05) !important;
     }
 
+    /* List view card foot: flex row spanning remaining space */
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        height: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-sizing: border-box !important;
+        gap: 12px !important;
+    }
+
     /* 3. The Text & Details Content (Flexible Space: flex: 1, column, start-aligned) */
     body.emenu-layout .menu-grid.layout-vertical .menu-card-content,
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
-        flex: 1 !important;
+        flex: 1 1 auto !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
@@ -10666,11 +11012,13 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     html[dir="rtl"] body.emenu-layout .menu-grid.layout-vertical .menu-card-content,
     html[dir="rtl"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
         text-align: right !important;
+        align-items: flex-start !important;
     }
 
     html[dir="ltr"] body.emenu-layout .menu-grid.layout-vertical .menu-card-content,
     html[dir="ltr"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
         text-align: left !important;
+        align-items: flex-start !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-title,
@@ -10719,6 +11067,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-vertical .menu-card-actions,
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
         flex-shrink: 0 !important;
+        flex-grow: 0 !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
@@ -10781,8 +11130,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     }
 
     /* Modern "+" Action Button in list view */
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-add,
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-cart {
+    body.emenu-layout .menu-grid.layout-vertical .list-add-btn {
         position: static !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -10803,22 +11151,19 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
                     box-shadow 0.2s ease !important;
     }
 
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-add svg,
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-cart svg {
+    body.emenu-layout .menu-grid.layout-vertical .list-add-btn svg {
         width: 18px !important;
         height: 18px !important;
         stroke: #FFFFFF !important;
         stroke-width: 2.8 !important;
     }
 
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-add:hover,
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-cart:hover {
+    body.emenu-layout .menu-grid.layout-vertical .list-add-btn:hover {
         transform: scale(1.08) !important;
         box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.5) !important;
     }
 
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-add:active,
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-cart:active {
+    body.emenu-layout .menu-grid.layout-vertical .list-add-btn:active {
         transform: scale(0.92) !important;
     }
 }
