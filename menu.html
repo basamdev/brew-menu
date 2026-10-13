@@ -97,6 +97,196 @@
                 min-width: 46px !important;
             }
         }
+
+        /* ------------------------------------------------------------------
+           LUXURY SMART SERVE BOTTOM BRANDING BAR (MATCHING REFERENCE DESIGN)
+        ------------------------------------------------------------------ */
+        .menu-powered-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 16px calc(9px + env(safe-area-inset-bottom, 0px)) 16px;
+            background: rgba(239, 228, 218, 0.94);
+            border-top: 1px solid rgba(92, 64, 51, 0.14);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+            user-select: none;
+            transition: background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        border-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        box-shadow 0.3s ease;
+        }
+
+        /* Bottom clearance so menu items scroll cleanly above the bar */
+        body.emenu-layout {
+            padding-bottom: calc(54px + env(safe-area-inset-bottom, 0px)) !important;
+        }
+        body.emenu-layout .menu-sheet {
+            padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
+        }
+
+        /* Theme Adapters */
+        body.emenu-layout[data-menu-theme="mocha"] .menu-powered-bar {
+            background: rgba(239, 228, 218, 0.94);
+            border-top: 1px solid rgba(92, 64, 51, 0.14);
+        }
+        body.emenu-layout[data-menu-theme="cream"] .menu-powered-bar {
+            background: rgba(228, 212, 164, 0.94);
+            border-top: 1px solid rgba(184, 137, 30, 0.18);
+        }
+        body.emenu-layout[data-menu-theme="forest"] .menu-powered-bar {
+            background: rgba(10, 28, 18, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45);
+        }
+        body.emenu-layout[data-menu-theme="midnight"] .menu-powered-bar {
+            background: rgba(6, 11, 20, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.45);
+        }
+        body.emenu-layout[data-menu-theme="dark"] .menu-powered-bar {
+            background: rgba(9, 9, 9, 0.94);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+        }
+        body.emenu-layout[data-menu-theme="rose"] .menu-powered-bar {
+            background: rgba(18, 10, 14, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+        }
+        body.emenu-layout[data-menu-theme="gold"] .menu-powered-bar {
+            background: rgba(14, 11, 6, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+        }
+        body.emenu-layout[data-menu-theme="olive"] .menu-powered-bar {
+            background: rgba(16, 22, 12, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.09);
+        }
+
+        .menu-powered-inner {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 4px 14px;
+            border-radius: 999px;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        opacity 0.2s ease;
+        }
+
+        .menu-powered-inner:hover {
+            transform: scale(1.035);
+        }
+
+        .menu-powered-inner:active {
+            transform: scale(0.97);
+        }
+
+        /* Label Text */
+        .menu-powered-label {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--emenu-muted, #6B5A50);
+            line-height: 1;
+            letter-spacing: 0.01em;
+            transition: color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        body[dir="rtl"] .menu-powered-label,
+        html[dir="rtl"] .menu-powered-label {
+            font-family: var(--font-ku, 'Noto Kufi Arabic', 'Cairo', sans-serif) !important;
+            font-size: 0.88rem;
+            letter-spacing: 0;
+            font-weight: 700;
+        }
+
+        body.light-mode .menu-powered-label {
+            color: #6B5A50;
+        }
+        body:not(.light-mode) .menu-powered-label {
+            color: #9BB9AA;
+        }
+
+        .menu-powered-inner:hover .menu-powered-label {
+            color: var(--emenu-text, #261A14);
+        }
+
+        /* Brand Row (Emblem + Name) */
+        .menu-powered-brand {
+            display: inline-flex;
+            flex-direction: row !important;
+            direction: ltr !important;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .smart-serve-emblem-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 25px;
+            height: 25px;
+            min-width: 25px;
+            border-radius: 50%;
+            background: #000000;
+            box-shadow: 0 0 8px rgba(0, 195, 255, 0.5), 0 0 14px rgba(168, 85, 247, 0.38);
+            overflow: hidden;
+            border: 1px solid rgba(0, 240, 255, 0.55);
+            flex-shrink: 0;
+            transition: box-shadow 0.25s ease, transform 0.25s ease;
+        }
+
+        .menu-powered-inner:hover .smart-serve-emblem-wrap {
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.85), 0 0 20px rgba(168, 85, 247, 0.6);
+            transform: rotate(8deg);
+        }
+
+        .smart-serve-emblem-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .smart-serve-name {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 0.92rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            background: linear-gradient(135deg, #00F5D4 0%, #00C6FF 45%, #A855F7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 380px) {
+            .menu-powered-bar {
+                padding: 7px 10px calc(7px + env(safe-area-inset-bottom, 0px)) 10px;
+            }
+            .menu-powered-label {
+                font-size: 0.78rem;
+            }
+            .smart-serve-emblem-wrap {
+                width: 22px;
+                height: 22px;
+                min-width: 22px;
+            }
+            .smart-serve-name {
+                font-size: 0.84rem;
+            }
+        }
     </style>
 </head>
 <body class="menu-page emenu-layout" data-menu-theme="mocha">
@@ -210,6 +400,14 @@
             el.style.setProperty('border-color', t.border, 'important');
             el.style.setProperty('color', t.text, 'important');
         });
+        var pBar = document.getElementById('menuPoweredBar');
+        if (pBar) {
+            pBar.style.setProperty('border-top-color', t.border);
+        }
+        var pLabel = document.getElementById('menuPoweredLabel');
+        if (pLabel) {
+            pLabel.style.color = t.muted || (t.light ? '#6B5A50' : '#A9C2B5');
+        }
     }
 
     var themes = {
@@ -452,6 +650,19 @@
         </main>
     </div>
 
+    <!-- Luxury Smart Serve Bottom Branding Bar (Matching Reference Design) -->
+    <footer class="menu-powered-bar" id="menuPoweredBar" role="contentinfo" aria-label="Smart Serve Branding">
+        <a href="index.html" class="menu-powered-inner" id="menuPoweredLink" title="Smart Serve — Digital Menu System">
+            <span class="menu-powered-label" id="menuPoweredLabel" data-i18n="poweredBy">پشتگیری کراوە لەلایەن</span>
+            <div class="menu-powered-brand">
+                <div class="smart-serve-emblem-wrap" title="Smart Serve">
+                    <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="smart-serve-emblem-img">
+                </div>
+                <span class="smart-serve-name">Smart Serve</span>
+            </div>
+        </a>
+    </footer>
+
     <div class="detail-overlay" id="detailOverlay">
         <div class="detail-backdrop" id="detailBackdrop"></div>
         <div class="detail-panel" id="detailPanel">
@@ -691,6 +902,18 @@
             function goIndex() { window.location.href = 'index.html'; }
             setupLogoClickActions(heroLogo, goIndex, 'admin.html');
             setupLogoClickActions(headerLogo, goIndex, 'admin.html');
+
+            function syncPoweredLabel() {
+                var currentLang = localStorage.getItem('selectedLang') || 'ku';
+                var poweredLabel = document.getElementById('menuPoweredLabel');
+                if (poweredLabel) {
+                    if (currentLang === 'ku') poweredLabel.textContent = 'پشتگیری کراوە لەلایەن';
+                    else if (currentLang === 'ar') poweredLabel.textContent = 'التطوير بواسطة';
+                    else if (currentLang === 'en') poweredLabel.textContent = 'Powered by';
+                }
+            }
+            syncPoweredLabel();
+            window.addEventListener('storage', syncPoweredLabel);
         })();
     </script>
 </body>

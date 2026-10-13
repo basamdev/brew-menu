@@ -12,15 +12,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$dbPath = __DIR__ . '/../database/shawarma.db';
+$dbDir = __DIR__ . '/../database';
+if (!is_dir($dbDir)) {
+    @mkdir($dbDir, 0777, true);
+}
+$dbPath = $dbDir . '/shawarma.db';
 $pdo = new PDO('sqlite:' . $dbPath);
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
 // Initialize database schema
 function initDatabase($pdo) {
-    $schema = file_get_contents(__DIR__ . '/../database/schema.sql');
-    $pdo->exec($schema);
+    $schemaFile = __DIR__ . '/../database/schema.sql';
+    if (file_exists($schemaFile)) {
+        $schema = file_get_contents($schemaFile);
+        $pdo->exec($schema);
+    }
 }
 
 try {

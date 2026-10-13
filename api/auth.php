@@ -19,16 +19,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 session_start();
 
-// Admin credentials (in production, use proper password hashing)
-$adminEmail = 'admin@shawarma.com';
-$adminPassword = 'admin123';
+// Admin credentials
+$validAdmins = [
+    'admin@brew.com' => 'admin123',
+    'admin@coffee.com' => 'admin123',
+    'admin@shawarma.com' => 'admin123',
+    'admin@admin.com' => 'admin123'
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = getJsonInput();
-    $email = $data['email'] ?? '';
+    $email = strtolower(trim($data['email'] ?? ''));
     $password = $data['password'] ?? '';
     
-    if ($email === $adminEmail && $password === $adminPassword) {
+    if (isset($validAdmins[$email]) && $validAdmins[$email] === $password) {
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_email'] = $email;
         

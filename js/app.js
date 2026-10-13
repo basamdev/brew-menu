@@ -176,6 +176,7 @@ function useCurrentLocation() {
 
 const i18n = {
     ku: {
+        poweredBy: 'پشتگیری کراوە لەلایەن',
         menuTitle: 'مێنووی ئێمە',
         loadingMenu: 'داگرتنی مێنوو...',
         noItems: 'هیچ شتێک نییە لە مێنوودا.',
@@ -428,6 +429,7 @@ const i18n = {
         installNow: 'ئێستا دابمەزرێنە',
     },
     ar: {
+        poweredBy: 'التطوير بواسطة',
         menuTitle: 'قائمتنا',
         loadingMenu: 'جارٍ تحميل القائمة...',
         noItems: 'لا توجد عناصر في القائمة.',
@@ -680,6 +682,7 @@ const i18n = {
         androidStep4: 'اضغط «Install» — يُثبت تطبيق بریو کوفي',
     },
     en: {
+        poweredBy: 'Powered by',
         menuTitle: 'Our Menu',
         loadingMenu: 'Loading menu items...',
         noItems: 'No menu items found.',
