@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=192">
+    <link rel="stylesheet" href="css/style.css?v=193">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -217,22 +217,484 @@
             padding-bottom: calc(42px + env(safe-area-inset-bottom, 0px)) !important;
         }
 
-        /* Luxury Card Styles Matching Active Theme */
-        body.emenu-layout .menu-card {
-            background: var(--emenu-card-bg, #4A271B) !important;
-            border: none !important;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14) !important;
+        /* ==================================================================
+           PERFECT LUXURY MENU DESIGN SYSTEM (GRID & LIST / VERTICAL & HORIZONTAL)
+           Fixes over-expansion, establishes balanced luxury proportions
+        ================================================================== */
+
+        /* Centered luxury container across all viewports & orientations */
+        body.emenu-layout .menu-layout {
+            width: 100% !important;
+            max-width: 680px !important;
+            margin: 0 auto !important;
+            padding: 0 16px max(56px, env(safe-area-inset-bottom, 0px)) !important;
+            box-sizing: border-box !important;
         }
-        body.emenu-layout .menu-card-foot {
-            background: var(--emenu-card-bg, #4A271B) !important;
+
+        @media (min-width: 768px) {
+            body.emenu-layout .menu-layout {
+                max-width: 720px !important;
+            }
         }
-        body.emenu-layout .menu-card-foot-title {
+
+        @media (min-width: 1100px) {
+            body.emenu-layout .menu-layout {
+                max-width: 760px !important;
+            }
+        }
+
+        /* ------------------------------------------------------------------
+           CATEGORY HEADING ROW & LAYOUT TOGGLE
+        ------------------------------------------------------------------ */
+        body.emenu-layout .category-heading-row {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            margin: 18px 0 12px !important;
+            padding: 0 2px !important;
+            box-sizing: border-box !important;
+        }
+
+        html[dir="rtl"] body.emenu-layout .category-heading-row {
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+        }
+
+        body.emenu-layout .category-heading-row .category-heading,
+        body.emenu-layout .category-heading-row .category-section-header {
+            margin: 0 !important;
+            font-size: 1.15rem !important;
+            font-weight: 800 !important;
             color: var(--emenu-text, #FFFFFF) !important;
+            letter-spacing: 0.01em;
+            line-height: 1.3 !important;
         }
-        body.emenu-layout .menu-card-foot-price,
-        body.emenu-layout .card-price-range,
-        body.emenu-layout .card-price-single {
-            color: var(--emenu-price, #FAF0E6) !important;
+
+        body.emenu-layout .category-heading-row .section-layout-icon {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 12px !important;
+            background: var(--emenu-action, rgba(255, 255, 255, 0.08)) !important;
+            border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.16)) !important;
+            color: var(--emenu-accent, #E8C56A) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            opacity: 1 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        }
+
+        body.emenu-layout .category-heading-row .section-layout-icon:hover,
+        body.emenu-layout .category-heading-row .section-layout-icon:focus-visible {
+            transform: scale(1.06) !important;
+            border-color: var(--emenu-accent, #E8C56A) !important;
+            background: color-mix(in srgb, var(--emenu-accent, #E8C56A) 22%, var(--emenu-action)) !important;
+            box-shadow: 0 4px 14px color-mix(in srgb, var(--emenu-accent, #E8C56A) 25%, transparent) !important;
+        }
+
+        /* ------------------------------------------------------------------
+           LIST LAYOUT (VERTICAL / ROW VIEW) — SLEEK LUXURY CARDS
+        ------------------------------------------------------------------ */
+        body.emenu-layout .menu-grid.layout-vertical,
+        body.emenu-layout .menu-grid.layout-vertical .category-section {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 11px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card,
+        body.emenu-layout .menu-grid.layout-vertical .menu-card {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: stretch !important;
+            height: 104px !important;
+            min-height: 104px !important;
+            max-height: 104px !important;
+            width: 100% !important;
+            grid-column: auto !important;
+            border-radius: 18px !important;
+            background: linear-gradient(135deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 86%, #000 14%) 100%) !important;
+            border: 1px solid color-mix(in srgb, var(--emenu-accent, #E8C56A) 16%, rgba(255, 255, 255, 0.08)) !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+            overflow: hidden !important;
+            position: relative !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        border-color 0.22s ease !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
+            transform: translateY(-2px) !important;
+            border-color: color-mix(in srgb, var(--emenu-accent, #E8C56A) 42%, rgba(255, 255, 255, 0.2)) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 16px color-mix(in srgb, var(--emenu-accent, #E8C56A) 16%, transparent) !important;
+        }
+
+        /* Fixed Image Square in List View (Never tall, never distorted) */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
+            width: 104px !important;
+            min-width: 104px !important;
+            max-width: 104px !important;
+            height: 104px !important;
+            min-height: 104px !important;
+            max-height: 104px !important;
+            position: relative !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
+            background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 65%, #000 35%) !important;
+            margin: 0 !important;
+        }
+
+        html[dir="rtl"] body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
+            order: 2 !important;
+            border-radius: 0 17px 17px 0 !important;
+        }
+        html[dir="ltr"] body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
+            order: 1 !important;
+            border-radius: 17px 0 0 17px !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center center !important;
+            display: block !important;
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card:hover .menu-card-img {
+            transform: scale(1.06) !important;
+        }
+
+        /* Hide the overlay floating button from the image in list mode */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .menu-card-add {
+            display: none !important;
+        }
+
+        /* Content Area in List View */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+            flex: 1 !important;
+            min-width: 0 !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 10px 14px !important;
+            gap: 12px !important;
+            background: transparent !important;
+            border: none !important;
+            box-sizing: border-box !important;
+        }
+
+        html[dir="rtl"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+            order: 1 !important;
+        }
+        html[dir="ltr"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+            order: 2 !important;
+        }
+
+        /* Title + Description + Price column */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
+            flex: 1 !important;
+            min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            overflow: hidden !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-title {
+            font-size: 1.02rem !important;
+            font-weight: 700 !important;
+            color: var(--emenu-text, #FFFFFF) !important;
+            line-height: 1.3 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-desc {
+            font-size: 0.76rem !important;
+            color: var(--emenu-muted, rgba(255, 255, 255, 0.65)) !important;
+            line-height: 1.25 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            margin: 0 !important;
+            opacity: 0.85;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
+            font-family: var(--font-en, 'Outfit', sans-serif) !important;
+            font-size: 0.98rem !important;
+            font-weight: 800 !important;
+            color: var(--emenu-price, #FBBF24) !important;
+            letter-spacing: 0.02em !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            margin-top: 2px !important;
+        }
+
+        /* Actions Column on opposite side (Eliminates empty void) */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 8px !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Favorite heart button in list view */
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-fav {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 11px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: var(--emenu-action, rgba(255, 255, 255, 0.08)) !important;
+            border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.16)) !important;
+            color: var(--emenu-muted, rgba(255, 255, 255, 0.65)) !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            transition: all 0.18s ease !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:hover {
+            color: #FF4757 !important;
+            transform: scale(1.08) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-fav.is-fav {
+            color: #FF4757 !important;
+            border-color: rgba(255, 71, 87, 0.45) !important;
+            background: rgba(255, 71, 87, 0.14) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-vertical .menu-card-fav svg {
+            width: 17px !important;
+            height: 17px !important;
+        }
+
+        /* Luxury Sizes Pill in List View */
+        body.emenu-layout .menu-card-size-pill {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            padding: 6px 11px !important;
+            border-radius: 11px !important;
+            background: color-mix(in srgb, var(--emenu-accent, #E8C56A) 15%, var(--emenu-action, rgba(255, 255, 255, 0.08))) !important;
+            border: 1px solid color-mix(in srgb, var(--emenu-accent, #E8C56A) 38%, transparent) !important;
+            color: var(--emenu-accent, #E8C56A) !important;
+            font-size: 0.74rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
+            white-space: nowrap !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+            transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        }
+
+        body.emenu-layout .menu-card:hover .menu-card-size-pill {
+            background: color-mix(in srgb, var(--emenu-accent, #E8C56A) 26%, var(--emenu-action)) !important;
+            border-color: var(--emenu-accent, #E8C56A) !important;
+            transform: scale(1.04) !important;
+        }
+
+        body.emenu-layout .menu-card-size-pill i {
+            font-size: 0.72rem !important;
+        }
+
+        /* Quick Add Button in List View */
+        body.emenu-layout .menu-card-add-list {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            border-radius: 11px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: var(--emenu-accent, #E8C56A) !important;
+            color: #0E1A14 !important;
+            border: none !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            box-shadow: 0 2px 10px color-mix(in srgb, var(--emenu-accent, #E8C56A) 40%, transparent) !important;
+            transition: transform 0.18s ease, filter 0.18s ease !important;
+        }
+
+        body.emenu-layout .menu-card-add-list:hover {
+            transform: scale(1.08) !important;
+            filter: brightness(1.1) !important;
+        }
+
+        body.emenu-layout .menu-card-add-list svg {
+            stroke: #0E1A14 !important;
+        }
+
+        /* ------------------------------------------------------------------
+           GRID LAYOUT (HORIZONTAL / CARD VIEW) — PROPORTIONED TILES
+        ------------------------------------------------------------------ */
+        body.emenu-layout .menu-grid.layout-horizontal,
+        body.emenu-layout .menu-grid.layout-horizontal .category-section {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 12px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Prevent single item in category from stretching across entire row */
+        body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
+            grid-column: auto !important;
+            max-width: 100% !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card {
+            display: flex !important;
+            flex-direction: column !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            width: 100% !important;
+            border-radius: 18px !important;
+            background: linear-gradient(135deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 86%, #000 14%) 100%) !important;
+            border: 1px solid color-mix(in srgb, var(--emenu-accent, #E8C56A) 16%, rgba(255, 255, 255, 0.08)) !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+            overflow: hidden !important;
+            cursor: pointer !important;
+            box-sizing: border-box !important;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        border-color 0.22s ease !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
+            transform: translateY(-3px) !important;
+            border-color: color-mix(in srgb, var(--emenu-accent, #E8C56A) 42%, rgba(255, 255, 255, 0.2)) !important;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+            width: 100% !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            height: 136px !important;
+            min-height: 136px !important;
+            max-height: 136px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            border-radius: 17px 17px 0 0 !important;
+            background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 65%, #000 35%) !important;
+            order: 1 !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center center !important;
+            display: block !important;
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
+            transform: scale(1.06) !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+            padding: 10px 12px 12px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 5px !important;
+            background: var(--emenu-card2, var(--emenu-card-bg)) !important;
+            border-top: 1px solid color-mix(in srgb, var(--emenu-border) 60%, transparent) !important;
+            order: 2 !important;
+            height: auto !important;
+            min-height: 0 !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 4px !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
+            font-size: 0.88rem !important;
+            font-weight: 700 !important;
+            color: var(--emenu-text, #FFFFFF) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            line-height: 1.3 !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-desc {
+            display: none !important;
+        }
+
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price {
+            font-family: var(--font-en, 'Outfit', sans-serif) !important;
+            font-size: 0.86rem !important;
+            font-weight: 800 !important;
+            color: var(--emenu-price, #FBBF24) !important;
+        }
+
+        /* In grid mode, list-only actions are hidden */
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions .menu-card-add-list,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions .menu-card-size-pill,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions .menu-card-fav {
+            display: none !important;
+        }
+
+        /* ------------------------------------------------------------------
+           COMPACT MOBILE & HIGH-RES MEDIA ADAPTATIONS
+        ------------------------------------------------------------------ */
+        @media (max-width: 380px) {
+            body.emenu-layout .menu-grid.layout-vertical .menu-card {
+                height: 96px !important;
+                min-height: 96px !important;
+                max-height: 96px !important;
+            }
+            body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
+                width: 96px !important;
+                min-width: 96px !important;
+                max-width: 96px !important;
+                height: 96px !important;
+                min-height: 96px !important;
+                max-height: 96px !important;
+            }
+            body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+                padding: 8px 10px !important;
+                gap: 8px !important;
+            }
+            body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-title {
+                font-size: 0.92rem !important;
+            }
+            body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
+                font-size: 0.86rem !important;
+            }
+            body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+                height: 118px !important;
+                min-height: 118px !important;
+                max-height: 118px !important;
+            }
         }
 
         /* Theme Adapters */
@@ -1009,7 +1471,7 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=174"></script>
+    <script src="js/app.js?v=175"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

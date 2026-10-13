@@ -2077,6 +2077,20 @@ function createMenuCard(item, lang, strings) {
         '</button>';
 
     if (isEmenu) {
+        var sizeActionHtml = hasSizes
+            ? '<span class="menu-card-size-pill" title="' + (strings.chooseSize || 'Choose Size') + '">' +
+                '<i class="fa-solid fa-layer-group" aria-hidden="true"></i>' +
+                '<span class="menu-card-size-label">' + (lang === 'ku' ? 'سایزەکان' : (lang === 'ar' ? 'الأحجام' : 'Sizes')) + '</span>' +
+                '<i class="fa-solid fa-angle-left rtl-chevron" aria-hidden="true"></i>' +
+              '</span>'
+            : '<button class="menu-card-cart menu-card-add-list" data-item-id="' + item.id + '" aria-label="Add to Cart" type="button">' +
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">' +
+                    '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>' +
+                '</svg>' +
+              '</button>';
+
+        var descHtml = description ? '<p class="menu-card-foot-desc">' + description + '</p>' : '';
+
         card.innerHTML = `
             <div class="menu-card-img-wrapper">
                 <img src="${imageUrl}" alt="${name}" class="menu-card-img" loading="lazy"
@@ -2091,12 +2105,13 @@ function createMenuCard(item, lang, strings) {
             <div class="menu-card-foot">
                 <div class="menu-card-foot-text">
                     <span class="menu-card-foot-title">${name}</span>
+                    ${descHtml}
                     <span class="menu-card-foot-price">${priceText}</span>
                 </div>
-                ${hasSizes ? '' : `
                 <div class="menu-card-foot-actions">
                     ${favBtnHtml}
-                </div>`}
+                    ${sizeActionHtml}
+                </div>
             </div>
         `;
     } else {
@@ -2132,8 +2147,7 @@ function createMenuCard(item, lang, strings) {
     card.addEventListener('click', openDetail);
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); } });
 
-    const cartBtn = card.querySelector('.menu-card-cart');
-    if (cartBtn) {
+    card.querySelectorAll('.menu-card-cart').forEach((cartBtn) => {
         cartBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (hasSizes) {
@@ -2144,7 +2158,7 @@ function createMenuCard(item, lang, strings) {
             cartBtn.classList.add('added');
             setTimeout(() => cartBtn.classList.remove('added'), 600);
         });
-    }
+    });
 
     const favBtn = card.querySelector('.menu-card-fav');
     if (favBtn) {

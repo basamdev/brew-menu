@@ -7655,16 +7655,18 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card {
     display: flex !important;
     flex-direction: row !important;
     align-items: stretch !important;
-    min-height: 112px !important;
-    height: auto !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    max-height: 104px !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-    width: 118px !important;
-    min-width: 118px !important;
-    height: auto !important;
-    min-height: 112px !important;
-    border-radius: 22px 0 0 22px !important;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    max-height: 104px !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
@@ -7752,8 +7754,10 @@ body.emenu-layout .menu-grid.layout-vertical .category-heading {
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 150px !important;
-        min-width: 150px !important;
+        width: 104px !important;
+        min-width: 104px !important;
+        max-width: 104px !important;
+        height: 104px !important;
     }
 }
 
@@ -10226,9 +10230,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         font-size: 0.95rem !important;
     }
 
-    /* Alone item (e.g. one Pizza) fills the row — no empty half */
+    /* Alone item retains standard column width */
     body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
-        grid-column: 1 / -1 !important;
+        grid-column: auto !important;
     }
 
     body.emenu-layout .menu-card {
@@ -10244,7 +10248,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     }
 
     body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card .menu-card-img-wrapper {
-        height: 160px !important;
+        height: 136px !important;
     }
 
     body.emenu-layout .menu-card-foot {
@@ -10271,13 +10275,18 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card {
         grid-column: auto !important;
         width: 100% !important;
+        height: 104px !important;
+        min-height: 104px !important;
+        max-height: 104px !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 108px !important;
-        min-width: 108px !important;
-        min-height: 100px !important;
-        height: auto !important;
+        width: 104px !important;
+        min-width: 104px !important;
+        max-width: 104px !important;
+        height: 104px !important;
+        min-height: 104px !important;
+        max-height: 104px !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
@@ -10347,10 +10356,10 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-foot .menu-card-fav {
     display: inline-flex !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    border-radius: 12px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 11px !important;
     background: var(--emenu-action, rgba(255, 255, 255, 0.12)) !important;
     border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.22)) !important;
     color: var(--emenu-text, #F4FFF9) !important;
