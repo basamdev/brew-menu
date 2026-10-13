@@ -184,7 +184,7 @@ const i18n = {
         menuLoadRetry: 'دووبارە هەوڵبدەرەوە',
         menuConnectionHint: 'پەیوەندی ئینتەرنێت یان ڕێکخستنی Firebase بپشکنە.',
         noCategories: 'هیچ بەشێک نییە.',
-        pageTitle: 'ZAYED ALKHAIR | مێنوو',
+        pageTitle: 'بریو کافێ | مێنوو',
         dashboard: 'داشبۆرد',
         manageItems: 'بەڕێوەبردنی ئایتمەکان',
         manageCategories: 'بەڕێوەبردنی بەشەکان',
@@ -323,7 +323,7 @@ const i18n = {
         sold: 'دانە',
         itemsCount: ' ئایتم',
         unknown: 'نەناسراو',
-        siteName: 'ZAYED ALKHAIR',
+        siteName: 'بریو کافێ',
         addCategory: '+ زیادکردنی بەشی نوێ',
         categoryNameKu: 'ناوی بەش بە کوردی',
         categoryNameAr: 'ناوی بەش بە عەرەبی',
@@ -416,7 +416,7 @@ const i18n = {
         snapchatUrl: 'سنەپچات',
         facebookUrl: 'فەيسبۆک',
         cafeFacebook: 'فەيسبۆک',
-        cafeInfoTitle: 'ZAYED ALKHAIR',
+        cafeInfoTitle: 'بریو کافێ',
         linkCopied: 'بەستەر کۆپی کرا!',
         installTitle: 'زیادکردن بۆ سکرینی سەرەکی',
         installSubtitle: 'زیادکردنی مینیۆ کەمان بوو ناو سکرین وەکو ئەپلیکەیشن',
@@ -436,7 +436,7 @@ const i18n = {
         menuLoadRetry: 'إعادة المحاولة',
         menuConnectionHint: 'تحقق من الإنترنت أو إعدادات Firebase.',
         noCategories: 'لا توجد أقسام.',
-        pageTitle: 'ZAYED ALKHAIR | القائمة',
+        pageTitle: 'بریو کوفي | القائمة',
         dashboard: 'لوحة التحكم',
         manageItems: 'إدارة العناصر',
         manageCategories: 'إدارة الفئات',
@@ -575,7 +575,7 @@ const i18n = {
         sold: 'قطعة',
         itemsCount: ' عناصر',
         unknown: 'غير معروف',
-        siteName: 'ZAYED ALKHAIR',
+        siteName: 'بریو کوفي',
         addCategory: '+ إضافة فئة جديدة',
         categoryNameKu: 'اسم الفئة بالكردية',
         categoryNameAr: 'اسم الفئة بالعربية',
@@ -667,7 +667,7 @@ const i18n = {
         tiktokUrl: 'تيك توك',
         snapchatUrl: 'سناب شات',
         facebookUrl: 'فيسبوك',
-        cafeInfoTitle: 'ZAYED ALKHAIR',
+        cafeInfoTitle: 'بریو کوفي',
         linkCopied: 'تم نسخ الرابط!',
         installTitle: 'إضافة إلى الشاشة الرئيسية',
         installSubtitle: 'أضف قائمتنا إلى الشاشة الرئيسية كتطبيق',
@@ -677,7 +677,7 @@ const i18n = {
         installDontShow: 'لا تظهر مرة أخرى',
         installShowHelp: 'إضافة للشاشة الرئيسية',
         installNow: 'تثبيت الآن',
-        androidStep4: 'اضغط «Install» — يُثبت تطبيق ZAYED ALKHAIR',
+        androidStep4: 'اضغط «Install» — يُثبت تطبيق بریو کوفي',
     },
     en: {
         menuTitle: 'Our Menu',
@@ -688,7 +688,7 @@ const i18n = {
         menuLoadRetry: 'Try again',
         menuConnectionHint: 'Check internet or Firebase settings for this domain.',
         noCategories: 'No categories.',
-        pageTitle: 'ZAYED ALKHAIR | Menu',
+        pageTitle: 'BREW CAFE & REST | Menu',
         dashboard: 'Dashboard',
         manageItems: 'Manage Items',
         manageCategories: 'Manage Categories',
@@ -847,7 +847,7 @@ const i18n = {
         sold: 'sold',
         itemsCount: ' items',
         unknown: 'unknown',
-        siteName: 'ZAYED ALKHAIR',
+        siteName: 'BREW CAFE & REST',
         addCategory: '+ Add New Category',
         categoryNameKu: 'Category Name (Kurdish)',
         categoryNameAr: 'Category Name (Arabic)',
@@ -936,7 +936,7 @@ const i18n = {
         tiktokUrl: 'TikTok',
         snapchatUrl: 'Snapchat',
         facebookUrl: 'Facebook',
-        cafeInfoTitle: 'ZAYED ALKHAIR',
+        cafeInfoTitle: 'BREW CAFE & REST',
         linkCopied: 'Link copied!',
         installTitle: 'Add to Home Screen',
         installSubtitle: 'Add our menu to your home screen like an app',
@@ -949,11 +949,11 @@ const i18n = {
         installImagesMissing: 'Add tutorial images to images/install/',
         iosStep1: 'Tap Share (↗) at the bottom of Safari',
         iosStep2: 'Choose «Add to Home Screen»',
-        iosStep3: 'Tap «Add» — ZAYED ALKHAIR icon appears on your home screen',
+        iosStep3: 'Tap «Add» — BREW CAFE & REST icon appears on your home screen',
         androidStep1: 'Tap Menu (⋮) at the top of Chrome',
         androidStep2: 'Choose «Add to Home screen»',
         androidStep3: 'Choose «Install»',
-        androidStep4: 'Tap «Install» — ZAYED ALKHAIR is added to your phone',
+        androidStep4: 'Tap «Install» — BREW CAFE & REST is added to your phone',
     }
 };
 
@@ -2730,6 +2730,10 @@ function applyLanguageUI(lang) {
         setCategoryPillActive(targetCat);
     }
 
+    if (window.jumpHeroTitleToLang) {
+        window.jumpHeroTitleToLang(lang);
+    }
+
     if (_currentDetailItem) {
         openProductDetail(_currentDetailItem);
     }
@@ -3442,9 +3446,9 @@ function setupMenuThemePicker() {
 }
 
 var HERO_TYPE_PHRASES = [
-    { text: 'BREW COFFEE', dir: 'ltr', lang: 'en' },
-    { text: 'بريو كوفي', dir: 'rtl', lang: 'ar' },
-    { text: 'بروو كۆفی', dir: 'rtl', lang: 'ku' }
+    { text: 'BREW CAFE & REST', dir: 'ltr', lang: 'en' },
+    { text: 'بریو کوفي', dir: 'rtl', lang: 'ar' },
+    { text: 'بریو کافێ', dir: 'rtl', lang: 'ku' }
 ];
 
 function heroTypeChars(str) {
@@ -3485,22 +3489,47 @@ function initHeroTitleSequence() {
         if (phrase.lang) typedEl.setAttribute('lang', phrase.lang);
         else typedEl.removeAttribute('lang');
 
-        if (phrase.dir === 'rtl') {
+        if (phrase.lang === 'ku') {
             typewriter.classList.add('is-rtl-title');
             typewriter.classList.remove('is-ltr-title');
-            typewriter.style.fontFamily = '"Cairo", "Tajawal", sans-serif';
-            typedEl.style.fontFamily = '"Cairo", "Tajawal", sans-serif';
-            typewriter.style.letterSpacing = '0.02em';
-            typedEl.style.letterSpacing = '0.02em';
+            typewriter.style.fontFamily = 'var(--font-ku, "Noto Kufi Arabic", "Vazirmatn", "Cairo", sans-serif)';
+            typedEl.style.fontFamily = 'var(--font-ku, "Noto Kufi Arabic", "Vazirmatn", "Cairo", sans-serif)';
+            typewriter.style.letterSpacing = '0';
+            typedEl.style.letterSpacing = '0';
+        } else if (phrase.dir === 'rtl') {
+            typewriter.classList.add('is-rtl-title');
+            typewriter.classList.remove('is-ltr-title');
+            typewriter.style.fontFamily = 'var(--font-ar, "Cairo", "Tajawal", sans-serif)';
+            typedEl.style.fontFamily = 'var(--font-ar, "Cairo", "Tajawal", sans-serif)';
+            typewriter.style.letterSpacing = '0';
+            typedEl.style.letterSpacing = '0';
         } else {
             typewriter.classList.add('is-ltr-title');
             typewriter.classList.remove('is-rtl-title');
-            typewriter.style.fontFamily = '"Cinzel", "Playfair Display", serif';
-            typedEl.style.fontFamily = '"Cinzel", "Playfair Display", serif';
-            typewriter.style.letterSpacing = '0.08em';
-            typedEl.style.letterSpacing = '0.08em';
+            typewriter.style.fontFamily = 'var(--font-en, "Inter", "Poppins", sans-serif)';
+            typedEl.style.fontFamily = 'var(--font-en, "Inter", "Poppins", sans-serif)';
+            typewriter.style.letterSpacing = '0.04em';
+            typedEl.style.letterSpacing = '0.04em';
         }
     }
+
+    window.jumpHeroTitleToLang = function (lang) {
+        if (!Array.isArray(HERO_TYPE_PHRASES)) return;
+        var idx = -1;
+        for (var i = 0; i < HERO_TYPE_PHRASES.length; i++) {
+            if (HERO_TYPE_PHRASES[i].lang === lang) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx !== -1) {
+            phraseIndex = idx;
+            charIndex = 0;
+            isDeleting = false;
+            if (initHeroTitleSequence._timeout) clearTimeout(initHeroTitleSequence._timeout);
+            tick();
+        }
+    };
 
     function tick() {
         var phrase = HERO_TYPE_PHRASES[phraseIndex];
@@ -4593,8 +4622,8 @@ window.toLocaleDigits = toLocaleDigits;
 window.applyCafeSettingsToLocalStorage = applyCafeSettingsToLocalStorage;
 window.normalizeCafeBrandName = normalizeCafeBrandName;
 
-var DEFAULT_CAFE_BRAND_NAME = 'ZAYED ALKHAIR';
-var LEGACY_CAFE_BRAND_RE = /یاس|ياس|یاسمین|ياسمين|yasamin|yasmin|al[-\s]?sham|شام/i;
+var DEFAULT_CAFE_BRAND_NAME = 'BREW CAFE & REST';
+var LEGACY_CAFE_BRAND_RE = /یاس|ياس|یاسمین|ياسمين|yasamin|yasmin|al[-\s]?sham|شام|zayed|زايد|زاید/i;
 
 function normalizeCafeBrandName(name) {
     var n = String(name == null ? '' : name).trim();

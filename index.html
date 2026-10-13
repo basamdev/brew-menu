@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>BREW COFFEE</title>
-    <link rel="manifest" href="manifest.json?v=124">
-    <link rel="icon" type="image/png" href="images/Brew-logo.png?v=24">
-    <link rel="shortcut icon" type="image/png" href="images/Brew-logo.png?v=24">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/Brew-logo.png?v=24">
-    <meta name="application-name" content="BREW COFFEE">
-    <meta name="msapplication-TileColor" content="#442518">
+    <title>BREW CAFE & REST</title>
+    <link rel="manifest" href="manifest.json?v=125">
+    <link rel="icon" type="image/png" href="images/Brew-logo.png?v=25">
+    <link rel="shortcut icon" type="image/png" href="images/Brew-logo.png?v=25">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/Brew-logo.png?v=25">
+    <meta name="application-name" content="BREW CAFE & REST">
+    <meta name="msapplication-TileColor" content="#00D2FF">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="BREW COFFEE">
+    <meta name="apple-mobile-web-app-title" content="BREW CAFE & REST">
     <meta name="theme-color" content="#12100E">
     
     <!-- Google Fonts: Luxury Kurdish (Noto Kufi Arabic, Vazirmatn, Noto Sans Arabic) & Modern Latin (Outfit, Inter) -->
@@ -853,10 +853,10 @@
             <!-- Brand Group (Right side: Text on left, Logo on right) -->
             <div class="top-brand-group" id="indexLogoWrap" title="Double click for Admin">
                 <div class="top-title-typewriter" id="topTitleTypewriter" aria-live="polite">
-                    <span class="typewriter-text" id="typewriterText">BREW COFFEE</span><span class="typewriter-cursor">|</span>
+                    <span class="typewriter-text" id="typewriterText">BREW CAFE & REST</span><span class="typewriter-cursor">|</span>
                 </div>
                 <div class="top-logo-badge">
-                    <img src="images/Brew-logo.png?v=25" alt="Brew Coffee" class="top-logo-img" id="indexLogo"
+                    <img src="images/Brew-logo.png?v=25" alt="BREW CAFE & REST" class="top-logo-img" id="indexLogo"
                          onerror="this.onerror=null; this.src='images/zayed-logo.png?v=25';">
                 </div>
             </div>
@@ -919,21 +919,24 @@
                     label: 'کوردی',
                     flag: 'images/flag-kurdistan.svg',
                     menuBtn: 'مێنوو',
-                    poweredBy: 'دروست کراوە لەلایەن'
+                    poweredBy: 'دروست کراوە لەلایەن',
+                    title: 'بریو کافێ'
                 },
                 ar: {
                     dir: 'rtl',
                     label: 'العربية',
                     flag: 'images/flag-iraq.svg',
                     menuBtn: 'المنيو',
-                    poweredBy: 'التطوير بواسطة'
+                    poweredBy: 'التطوير بواسطة',
+                    title: 'بریو کوفي'
                 },
                 en: {
                     dir: 'ltr',
                     label: 'English',
                     flag: 'images/flag-uk.svg',
                     menuBtn: 'Menu',
-                    poweredBy: 'Powered by'
+                    poweredBy: 'Powered by',
+                    title: 'BREW CAFE & REST'
                 }
             };
 
@@ -984,6 +987,11 @@
                 // Update Menu CTA link
                 menuMainCta.href = 'menu.html?lang=' + encodeURIComponent(lang);
 
+                // Jump typewriter to active language for immediate testing
+                if (window.jumpIndexTypewriter) {
+                    window.jumpIndexTypewriter(lang);
+                }
+
                 // Update active class on dropdown options
                 langOptionBtns.forEach(function (btn) {
                     if (btn.getAttribute('data-lang') === lang) {
@@ -1030,14 +1038,14 @@
 
             // ----------------------------------------------------
             // Typewriter Animation for Title:
-            // "letters come in and come out, one time english, one time arabic, one time kurdish"
+            // English: BREW CAFE & REST | Kurdish: بریو کافێ | Arabic: بریو کوفي
             // Color: Electric Blue matching the logo
             // ----------------------------------------------------
             (function initTitleTypewriter() {
                 var words = [
-                    { text: 'BREW COFFEE', lang: 'en' },
-                    { text: 'بريو كوفي', lang: 'ar' },
-                    { text: 'بروو کۆفی', lang: 'ku' }
+                    { text: 'BREW CAFE & REST', lang: 'en' },
+                    { text: 'بریو کوفي', lang: 'ar' },
+                    { text: 'بریو کافێ', lang: 'ku' }
                 ];
                 var textEl = document.getElementById('typewriterText');
                 if (!textEl) return;
@@ -1049,6 +1057,21 @@
                 var deleteSpeed = 48;
                 var pauseEnd = 2000;
                 var pauseStart = 350;
+                var typeTimer = null;
+
+                window.jumpIndexTypewriter = function(lang) {
+                    var idx = -1;
+                    for (var i = 0; i < words.length; i++) {
+                        if (words[i].lang === lang) { idx = i; break; }
+                    }
+                    if (idx !== -1) {
+                        wordIdx = idx;
+                        charIdx = 0;
+                        isDeleting = false;
+                        if (typeTimer) clearTimeout(typeTimer);
+                        typeLoop();
+                    }
+                };
 
                 function typeLoop() {
                     var current = words[wordIdx];
@@ -1072,19 +1095,19 @@
                         if (charIdx <= 0) {
                             isDeleting = false;
                             wordIdx = (wordIdx + 1) % words.length;
-                            setTimeout(typeLoop, pauseStart);
+                            typeTimer = setTimeout(typeLoop, pauseStart);
                             return;
                         }
-                        setTimeout(typeLoop, deleteSpeed);
+                        typeTimer = setTimeout(typeLoop, deleteSpeed);
                     } else {
                         charIdx++;
                         textEl.textContent = chars.slice(0, charIdx).join('');
                         if (charIdx >= chars.length) {
                             isDeleting = true;
-                            setTimeout(typeLoop, pauseEnd);
+                            typeTimer = setTimeout(typeLoop, pauseEnd);
                             return;
                         }
-                        setTimeout(typeLoop, typingSpeed);
+                        typeTimer = setTimeout(typeLoop, typingSpeed);
                     }
                 }
 

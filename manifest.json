@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "ZAYED ALKHAIR",
-  "short_name": "ZAYED",
-  "description": "ZAYED ALKHAIR",
+  "name": "BREW CAFE & REST",
+  "short_name": "BREW",
+  "description": "BREW CAFE & REST",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#B8860B",
-  "theme_color": "#B8860B",
+  "background_color": "#060A12",
+  "theme_color": "#00D2FF",
   "orientation": "any",
   "icons": [
     {
