@@ -2643,7 +2643,13 @@ document.addEventListener('DOMContentLoaded', function () {
         window.applyMenuLayoutMode = applyLayout;
 
         var saved = 'grid';
-        try { saved = localStorage.getItem('menuLayoutMode') || 'grid'; } catch (e) {}
+        try {
+            if (!localStorage.getItem('menuLayoutGridV2Migrated')) {
+                localStorage.setItem('menuLayoutMode', 'grid');
+                localStorage.setItem('menuLayoutGridV2Migrated', '1');
+            }
+            saved = localStorage.getItem('menuLayoutMode') || 'grid';
+        } catch (e) {}
         applyLayout(saved === 'list' ? 'list' : 'grid');
 
         function toggleLayout(e) {

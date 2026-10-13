@@ -7647,7 +7647,9 @@ body.emenu-layout .category-heading::before {
    - Floating "+" button: circular light-blue button with dark "+" at bottom-left of image
    - Card foot: single horizontal row with Heart button on left & Title + Price on right
 ================================================================== */
+body.emenu-layout .menu-grid:not(.layout-vertical),
 body.emenu-layout .menu-grid.layout-horizontal,
+body.emenu-layout .menu-grid:not(.layout-vertical) .category-section,
 body.emenu-layout .menu-grid.layout-horizontal .category-section {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -7656,17 +7658,19 @@ body.emenu-layout .menu-grid.layout-horizontal .category-section {
     box-sizing: border-box !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
+    min-height: 255px !important;
     border-radius: 18px !important;
-    background: #18283B !important;
-    background: linear-gradient(180deg, rgba(27, 49, 75, 0.95) 0%, rgba(20, 36, 56, 0.98) 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: #142337 !important;
+    background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
+    border: 1px solid rgba(85, 145, 220, 0.24) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
     overflow: hidden !important;
     cursor: pointer !important;
     box-sizing: border-box !important;
@@ -7676,25 +7680,28 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card {
                 border-color 0.22s ease !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
     transform: translateY(-2px) !important;
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36) !important;
+    border-color: rgba(96, 165, 250, 0.45) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
     width: 100% !important;
-    height: 140px !important;
-    min-height: 140px !important;
-    max-height: 140px !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    max-height: 168px !important;
     position: relative !important;
     overflow: hidden !important;
     border-radius: 17px 17px 0 0 !important;
-    background: #111D2D !important;
+    background: #0E1724 !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
     width: 100% !important;
     height: 100% !important;
@@ -7704,124 +7711,158 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
     transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover .menu-card-img,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
     transform: scale(1.05) !important;
 }
 
-/* Floating Circular Light Blue "+" Button on Image (bottom-left) */
+/* Floating Circular Light Blue "+" Button on Image (lower-left corner) */
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
     display: inline-flex !important;
     position: absolute !important;
-    bottom: 9px !important;
-    left: 9px !important;
-    z-index: 5 !important;
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
+    bottom: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+    z-index: 6 !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
     border-radius: 50% !important;
-    background: #5B9CF6 !important;
+    background: #5097F5 !important;
     background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
     border: none !important;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 0 10px rgba(96, 165, 250, 0.25) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
     cursor: pointer !important;
     padding: 0 !important;
     margin: 0 !important;
-    color: #0F172A !important;
+    color: #0A192F !important;
     align-items: center !important;
     justify-content: center !important;
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
                 box-shadow 0.2s ease !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn svg,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
     width: 18px !important;
     height: 18px !important;
-    stroke: #0F172A !important;
+    stroke: #0A192F !important;
     stroke-width: 2.8 !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
     transform: scale(1.08) !important;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:active,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:active {
     transform: scale(0.92) !important;
 }
 
 /* Hide the list "+" button in grid view */
+body.emenu-layout .menu-grid:not(.layout-vertical) .list-add-btn,
 body.emenu-layout .menu-grid.layout-horizontal .list-add-btn {
     display: none !important;
 }
 
 /* Card Foot: horizontal row with Heart on left & Title+Price on right */
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
     width: 100% !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 10px 12px 12px !important;
+    padding: 10px 12px 14px !important;
     gap: 8px !important;
     box-sizing: border-box !important;
-    min-height: 52px !important;
+    min-height: 82px !important;
+    background: transparent !important;
+    border-top: none !important;
 }
 
 /* In RTL: Title & Price on right, Heart on left */
+html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
 html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
     flex-direction: row !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    gap: 2px !important;
-    text-align: right !important;
+    gap: 3px !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 
-html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
-html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
-    text-align: left !important;
+html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
+html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    text-align: right !important;
+    align-items: flex-start !important;
 }
 
+html[dir="ltr"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
+html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+html[dir="ltr"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    text-align: left !important;
+    align-items: flex-start !important;
+}
+
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-title,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-title,
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-title,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
-    font-size: 0.94rem !important;
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+    font-size: 0.98rem !important;
     font-weight: 700 !important;
     color: #FFFFFF !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    line-height: 1.25 !important;
+    line-height: 1.3 !important;
     letter-spacing: -0.01em !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-desc,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-desc,
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-desc,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-desc {
     display: none !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-price,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-price,
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-price,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price,
+body.emenu-layout .menu-grid:not(.layout-vertical) .card-price-range,
 body.emenu-layout .menu-grid.layout-horizontal .card-price-range,
+body.emenu-layout .menu-grid:not(.layout-vertical) .card-price-single,
 body.emenu-layout .menu-grid.layout-horizontal .card-price-single {
     font-family: var(--font-en, 'Outfit', sans-serif) !important;
-    font-size: 0.92rem !important;
+    font-size: 0.95rem !important;
     font-weight: 700 !important;
     color: #F59E0B !important;
-    line-height: 1.2 !important;
+    line-height: 1.25 !important;
     white-space: nowrap !important;
     letter-spacing: 0.01em !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-actions,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-actions,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
     flex-shrink: 0 !important;
     display: flex !important;
@@ -7832,15 +7873,16 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
     padding: 0 !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    border-radius: 11px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 12px !important;
     background: rgba(255, 255, 255, 0.06) !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     color: #FFFFFF !important;
@@ -7853,11 +7895,14 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
                 color 0.2s ease !important;
 }
 
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav svg,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav svg {
-    width: 18px !important;
-    height: 18px !important;
+    width: 19px !important;
+    height: 19px !important;
     stroke: currentColor !important;
     stroke-width: 2 !important;
+    fill: none !important;
+}
     fill: none !important;
 }
 
@@ -8879,133 +8924,161 @@ body.emenu-layout .menu-layout {
     padding: 0 14px 56px !important;
 }
 
-body.emenu-layout .menu-grid,
+body.emenu-layout .menu-grid:not(.layout-vertical),
 body.emenu-layout .menu-grid.layout-horizontal {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 12px !important;
 }
 
-body.emenu-layout .menu-card {
-    background: #163528 !important;
-    border: none !important;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card {
+    background: #142337 !important;
+    background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
+    border: 1px solid rgba(85, 145, 220, 0.24) !important;
     border-radius: 18px !important;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22) !important;
-    overflow: hidden;
-}
-
-body.emenu-layout .menu-card:hover {
-    transform: translateY(-3px) !important;
-    border-color: transparent !important;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.emenu-layout .menu-card-img-wrapper {
-    position: relative !important;
-    height: 140px !important;
-    border-radius: 18px 18px 0 0 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
     overflow: hidden !important;
-    background: #10281C !important;
+    min-height: 255px !important;
 }
 
-body.emenu-layout .menu-card-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
+    transform: translateY(-2px) !important;
+    border-color: rgba(96, 165, 250, 0.45) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
+}
+
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+    position: relative !important;
+    height: 168px !important;
+    min-height: 168px !important;
+    max-height: 168px !important;
+    border-radius: 17px 17px 0 0 !important;
+    overflow: hidden !important;
+    background: #0E1724 !important;
+}
+
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
 }
 
 body.emenu-layout .menu-card-price-badge {
     display: none !important;
 }
 
-body.emenu-layout .menu-card-add,
-body.emenu-layout .menu-card-foot .menu-card-cart.menu-card-add,
-body.emenu-layout .menu-card-img-wrapper .menu-card-cart {
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
     position: absolute !important;
     left: 10px !important;
     bottom: 10px !important;
     right: auto !important;
     top: auto !important;
-    width: 34px !important;
-    height: 34px !important;
+    width: 40px !important;
+    height: 40px !important;
     border-radius: 50% !important;
-    background: #3ECF8E !important;
+    background: #5097F5 !important;
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
     border: none !important;
-    color: #0B2A1C !important;
+    color: #0A192F !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 14px rgba(62, 207, 142, 0.45) !important;
-    z-index: 3;
-    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
+    z-index: 6 !important;
+    cursor: pointer !important;
 }
 
-body.emenu-layout .menu-card-add:hover,
-body.emenu-layout .menu-card-add.added {
-    background: #5EE0A8 !important;
-    color: #0B2A1C !important;
-    transform: scale(1.06);
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
+    transform: scale(1.08) !important;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
 }
 
-body.emenu-layout .menu-card-foot {
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
     display: flex !important;
     flex-direction: row !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
-    padding: 11px 13px 13px !important;
-    background: var(--emenu-card-bg, #4A271B) !important;
+    padding: 10px 12px 14px !important;
+    min-height: 82px !important;
+    background: transparent !important;
     border-top: none !important;
-    direction: rtl;
 }
 
-body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot {
-    background: #4A271B !important;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
 }
 
-body.emenu-layout .menu-card-foot-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    flex: 1;
-    text-align: right;
+html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    text-align: right !important;
+    align-items: flex-start !important;
 }
 
-body.emenu-layout .menu-card-foot-title {
-    font-size: 0.95rem !important;
+html[dir="ltr"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+    text-align: left !important;
+    align-items: flex-start !important;
+}
+
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-title,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+    font-size: 0.98rem !important;
     font-weight: 700 !important;
     color: #FFFFFF !important;
     line-height: 1.3 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
-body.emenu-layout .menu-card-foot-price {
-    font-size: 0.94rem !important;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-price,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price {
+    font-size: 0.95rem !important;
     font-weight: 700 !important;
-    color: #FAF0E6 !important;
-    letter-spacing: 0.02em;
-    font-family: var(--font-en), -apple-system, sans-serif !important;
+    color: #F59E0B !important;
+    letter-spacing: 0.01em !important;
+    font-family: var(--font-en, 'Outfit', sans-serif) !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
 }
 
-body.emenu-layout .menu-card-foot-actions {
-    flex-shrink: 0;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-actions,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
+    flex-shrink: 0 !important;
 }
 
-body.emenu-layout .menu-card-foot .menu-card-fav {
-    width: 34px !important;
-    height: 34px !important;
-    border-radius: 10px !important;
-    background: var(--emenu-action, rgba(255, 255, 255, 0.12)) !important;
-    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.2)) !important;
-    color: var(--emenu-text, #F4FFF9) !important;
-    box-shadow: none !important;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot .menu-card-fav,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot .menu-card-fav {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    border-radius: 12px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
-body.emenu-layout .menu-card-foot .menu-card-fav.is-fav,
-body.emenu-layout .menu-card-foot .menu-card-fav:hover {
-    color: var(--emenu-accent, #F2C659) !important;
-    background: color-mix(in srgb, var(--emenu-accent, #F2C659) 16%, transparent) !important;
-    border-color: color-mix(in srgb, var(--emenu-accent, #F2C659) 45%, transparent) !important;
+body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot .menu-card-fav.is-fav,
+body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot .menu-card-fav.is-fav {
+    color: #EF4444 !important;
+    background: rgba(239, 68, 68, 0.16) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
 }
 
 body.emenu-layout .category-heading {
@@ -9836,24 +9909,24 @@ body.emenu-layout .category-btn.active .cat-svg {
     color: var(--emenu-accent) !important;
 }
 
-/* Cards: elevated layer above page bg */
-body.emenu-layout .menu-card {
+/* Cards: elevated layer above page bg (list view) */
+body.emenu-layout .menu-grid.layout-vertical .menu-card {
     background: linear-gradient(180deg, var(--emenu-card-bg) 0%, var(--emenu-card2) 100%) !important;
     border: 1px solid var(--emenu-border) !important;
     box-shadow: 0 10px 24px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
-body.emenu-layout .menu-card-foot {
+body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
     background: color-mix(in srgb, var(--emenu-card2) 82%, #000 18%) !important;
     border-top: 1px solid var(--emenu-border) !important;
 }
 
-body.emenu-layout .menu-card-img-wrapper {
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
     background: var(--emenu-card2) !important;
 }
 
-body.emenu-layout .menu-card-add,
-body.emenu-layout .menu-card-img-wrapper .menu-card-cart {
+body.emenu-layout .menu-grid.layout-vertical .menu-card-add,
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .menu-card-cart {
     background: var(--emenu-accent) !important;
     color: #0a1a12 !important;
 }
@@ -9947,8 +10020,8 @@ body.emenu-layout .menu-layout {
     padding-right: 14px !important;
 }
 
-/* Items: lighter green than buttons/categories — clear separation */
-body.emenu-layout .menu-card {
+/* Items: (list view) */
+body.emenu-layout .menu-grid.layout-vertical .menu-card {
     background: var(--emenu-card-bg) !important;
     border: 1px solid color-mix(in srgb, var(--emenu-card2) 70%, #fff 8%) !important;
     border-radius: 18px !important;
@@ -9956,13 +10029,13 @@ body.emenu-layout .menu-card {
     overflow: hidden !important;
 }
 
-body.emenu-layout .menu-card-img-wrapper {
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
     background: color-mix(in srgb, var(--emenu-card-bg) 70%, #000 30%) !important;
     border-radius: 16px 16px 0 0 !important;
     overflow: hidden !important;
 }
 
-body.emenu-layout .menu-card-img {
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
@@ -9970,8 +10043,8 @@ body.emenu-layout .menu-card-img {
     display: block !important;
 }
 
-/* Card text frame: lighter than page + buttons (reference look) */
-body.emenu-layout .menu-card-foot {
+/* Card text frame: (list view) */
+body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
     background: var(--emenu-card2) !important;
     border-top: 1px solid color-mix(in srgb, var(--emenu-card-bg) 60%, transparent) !important;
 }
@@ -10598,12 +10671,13 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-width: 100% !important;
         width: 100% !important;
         margin: 0 auto !important;
-        padding: 0 12px max(48px, env(safe-area-inset-bottom, 0px)) !important;
+        padding: 0 10px max(56px, env(safe-area-inset-bottom, 0px)) !important;
         box-sizing: border-box !important;
     }
 
     /* Sections own the 2-col grid; outer menu-grid stacks sections */
     body.emenu-layout .menu-grid,
+    body.emenu-layout .menu-grid:not(.layout-vertical),
     body.emenu-layout .menu-grid.layout-horizontal {
         display: flex !important;
         flex-direction: column !important;
@@ -10630,40 +10704,6 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         font-size: 0.95rem !important;
     }
 
-    /* Menu Sheet & Layout - Centered Luxury Container */
-    body.emenu-layout .menu-layout {
-        width: 100% !important;
-        max-width: 600px !important;
-        margin: 0 auto !important;
-        padding: 0 12px max(52px, env(safe-area-inset-bottom, 0px)) !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Horizontal Grid (2-column tiles) */
-    body.emenu-layout .menu-grid.layout-horizontal,
-    body.emenu-layout .menu-grid.layout-horizontal .category-section {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
-        grid-column: auto !important;
-        max-width: 100% !important;
-    }
-
-    /* Horizontal Grid (2-column tiles) */
-    body.emenu-layout .menu-grid.layout-horizontal,
-    body.emenu-layout .menu-grid.layout-horizontal .category-section {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
     body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
         grid-column: auto !important;
         max-width: 100% !important;
@@ -10671,18 +10711,26 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
 
     /* ==================================================================
        EXACT 2-COLUMN LUXURY GRID LAYOUT (MATCHING SCREENSHOT)
+       - Exactly 2 large cards per row (each occupying half available screen width)
+       - Image ~65% of card height (height: 168px, total card min-height: 255px)
+       - Large circular blue (+) button over lower-left corner of each image
+       - Heart-shaped favorite button in bottom information section
+       - Rounded corners (18px), subtle blue border, dark navy background
+       - Gold price (#F59E0B) and bold white title below each image
        ================================================================== */
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card {
         display: flex !important;
         flex-direction: column !important;
         width: 100% !important;
+        min-height: 255px !important;
         border-radius: 18px !important;
-        background: #18283B !important;
-        background: linear-gradient(180deg, rgba(27, 49, 75, 0.95) 0%, rgba(20, 36, 56, 0.98) 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: #142337 !important;
+        background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
+        border: 1px solid rgba(85, 145, 220, 0.24) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.28) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
         overflow: hidden !important;
         cursor: pointer !important;
         box-sizing: border-box !important;
@@ -10692,25 +10740,28 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
                     border-color 0.22s ease !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
         transform: translateY(-2px) !important;
-        border-color: rgba(255, 255, 255, 0.18) !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36) !important;
+        border-color: rgba(96, 165, 250, 0.45) !important;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
         width: 100% !important;
-        height: 140px !important;
-        min-height: 140px !important;
-        max-height: 140px !important;
+        height: 168px !important;
+        min-height: 168px !important;
+        max-height: 168px !important;
         position: relative !important;
         overflow: hidden !important;
         border-radius: 17px 17px 0 0 !important;
-        background: #111D2D !important;
+        background: #0E1724 !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
         width: 100% !important;
         height: 100% !important;
@@ -10720,124 +10771,158 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover .menu-card-img,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
         transform: scale(1.05) !important;
     }
 
-    /* Floating Circular Light Blue "+" Button on Image (bottom-left) */
+    /* Floating Circular Light Blue "+" Button on Image (lower-left corner) */
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
         display: inline-flex !important;
         position: absolute !important;
-        bottom: 9px !important;
-        left: 9px !important;
-        z-index: 5 !important;
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        min-height: 38px !important;
+        bottom: 10px !important;
+        left: 10px !important;
+        right: auto !important;
+        z-index: 6 !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
         border-radius: 50% !important;
-        background: #5B9CF6 !important;
+        background: #5097F5 !important;
         background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
         border: none !important;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35), 0 0 10px rgba(96, 165, 250, 0.25) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
         cursor: pointer !important;
         padding: 0 !important;
         margin: 0 !important;
-        color: #0F172A !important;
+        color: #0A192F !important;
         align-items: center !important;
         justify-content: center !important;
         transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
                     box-shadow 0.2s ease !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn svg,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
         width: 18px !important;
         height: 18px !important;
-        stroke: #0F172A !important;
+        stroke: #0A192F !important;
         stroke-width: 2.8 !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
         transform: scale(1.08) !important;
-        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.6) !important;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:active,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:active {
         transform: scale(0.92) !important;
     }
 
     /* Hide the list "+" button in grid view */
+    body.emenu-layout .menu-grid:not(.layout-vertical) .list-add-btn,
     body.emenu-layout .menu-grid.layout-horizontal .list-add-btn {
         display: none !important;
     }
 
     /* Card Foot: horizontal row with Heart on left & Title+Price on right */
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
         width: 100% !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: space-between !important;
-        padding: 10px 12px 12px !important;
+        padding: 10px 12px 14px !important;
         gap: 8px !important;
         box-sizing: border-box !important;
-        min-height: 52px !important;
+        min-height: 82px !important;
+        background: transparent !important;
+        border-top: none !important;
     }
 
     /* In RTL: Title & Price on right, Heart on left */
+    html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
     html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
         flex-direction: row !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
         flex: 1 1 auto !important;
         min-width: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         justify-content: center !important;
-        gap: 2px !important;
-        text-align: right !important;
+        gap: 3px !important;
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
-    html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
-        text-align: left !important;
+    html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
+    html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+    html[dir="rtl"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+    html[dir="rtl"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+        text-align: right !important;
+        align-items: flex-start !important;
     }
 
+    html[dir="ltr"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-content,
+    html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-content,
+    html[dir="ltr"] body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-text,
+    html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+        text-align: left !important;
+        align-items: flex-start !important;
+    }
+
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-title,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-title,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-title,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
-        font-size: 0.94rem !important;
+        font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+        font-size: 0.98rem !important;
         font-weight: 700 !important;
         color: #FFFFFF !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        line-height: 1.25 !important;
+        line-height: 1.3 !important;
         letter-spacing: -0.01em !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-desc,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-desc,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-desc,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-desc {
         display: none !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-price,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-price,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-price,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .card-price-range,
     body.emenu-layout .menu-grid.layout-horizontal .card-price-range,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .card-price-single,
     body.emenu-layout .menu-grid.layout-horizontal .card-price-single {
         font-family: var(--font-en, 'Outfit', sans-serif) !important;
-        font-size: 0.92rem !important;
+        font-size: 0.95rem !important;
         font-weight: 700 !important;
         color: #F59E0B !important;
-        line-height: 1.2 !important;
+        line-height: 1.25 !important;
         white-space: nowrap !important;
         letter-spacing: 0.01em !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-actions,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-actions,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
         flex-shrink: 0 !important;
         display: flex !important;
@@ -10848,15 +10933,16 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         padding: 0 !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        border-radius: 11px !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 12px !important;
         background: rgba(255, 255, 255, 0.06) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
         color: #FFFFFF !important;
@@ -10869,31 +10955,90 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
                     color 0.2s ease !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav svg,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav svg {
-        width: 18px !important;
-        height: 18px !important;
+        width: 19px !important;
+        height: 19px !important;
         stroke: currentColor !important;
         stroke-width: 2 !important;
         fill: none !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav:hover,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:hover {
         transform: scale(1.08) !important;
         background: rgba(255, 255, 255, 0.12) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav:active,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav:active {
         transform: scale(0.92) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav.is-fav,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav {
         color: #EF4444 !important;
         background: rgba(239, 68, 68, 0.15) !important;
         border-color: rgba(239, 68, 68, 0.35) !important;
     }
 
+    body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav.is-fav svg,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav.is-fav svg {
         fill: #EF4444 !important;
+    }
+
+    @media (max-width: 380px) {
+        body.emenu-layout .menu-layout {
+            padding: 0 8px max(50px, env(safe-area-inset-bottom, 0px)) !important;
+        }
+        body.emenu-layout .category-section {
+            gap: 8px !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card {
+            min-height: 236px !important;
+            border-radius: 16px !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+            height: 152px !important;
+            min-height: 152px !important;
+            max-height: 152px !important;
+            border-radius: 15px 15px 0 0 !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
+            bottom: 8px !important;
+            left: 8px !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+            padding: 8px 10px 12px !important;
+            min-height: 74px !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-title,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-title,
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-title,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
+            font-size: 0.92rem !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-price,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-price,
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-price,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price {
+            font-size: 0.88rem !important;
+        }
+        body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav,
+        body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
+            width: 34px !important;
+            height: 34px !important;
+            min-width: 34px !important;
+            min-height: 34px !important;
+        }
     }
 
     /* ==================================================================
