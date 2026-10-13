@@ -1771,8 +1771,8 @@ function createSectionLayoutButton() {
 function wrapCategoryHeadingWithLayout(headingEl) {
     var row = document.createElement('div');
     row.className = 'category-heading-row';
-    row.appendChild(headingEl);
     row.appendChild(createSectionLayoutButton());
+    row.appendChild(headingEl);
     return row;
 }
 
@@ -2047,25 +2047,24 @@ function createMenuCard(item, lang, strings) {
     var sizeBadgeHtml = '';
     var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
     var priceText = '';
-    var currStr = (lang === 'en') ? ' IQD' : ' د.ع';
     if (hasSizes) {
         var validPrices = item.sizes.map(function(s) { return Number(s.price) || 0; }).filter(function(p) { return p > 0; });
         if (validPrices.length > 0) {
             var minP = Math.min.apply(null, validPrices);
             var maxP = Math.max.apply(null, validPrices);
             if (minP !== maxP) {
-                // Displays range with currency e.g. "7,000 - 5,000 د.ع"
+                // Screenshot 1: In RTL displays "6,000 - 2,000" / in LTR "2,000 - 6,000"
                 var rangeStr = (lang === 'en')
                     ? (minP.toLocaleString() + ' - ' + maxP.toLocaleString())
                     : (maxP.toLocaleString() + ' - ' + minP.toLocaleString());
-                priceText = '<span class="card-price-range">' + rangeStr + currStr + '</span>';
+                priceText = '<span class="card-price-range">' + rangeStr + '</span>';
             } else {
-                priceText = '<span class="card-price-range">' + minP.toLocaleString() + currStr + '</span>';
+                priceText = '<span class="card-price-range">' + minP.toLocaleString() + '</span>';
             }
         }
     }
     if (!priceText) {
-        priceText = '<span class="card-price-single">' + (item.price ? Number(item.price).toLocaleString() : '0') + currStr + '</span>';
+        priceText = '<span class="card-price-single">' + (item.price ? Number(item.price).toLocaleString() : '0') + (isEmenu ? '' : ' IQD') + '</span>';
     }
 
     const isFav = MENU_FEATURES.isFav(item.id);
@@ -2082,20 +2081,22 @@ function createMenuCard(item, lang, strings) {
             <div class="menu-card-img-wrapper">
                 <img src="${imageUrl}" alt="${name}" class="menu-card-img" loading="lazy"
                      onerror="this.onerror=null;this.src='${fallbackImage}';">
+                ${hasSizes ? '' : `
                 <button class="menu-card-cart menu-card-add" data-item-id="${item.id}" aria-label="Add to Cart" type="button">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                </button>
+                </button>`}
             </div>
             <div class="menu-card-foot">
                 <div class="menu-card-foot-text">
                     <span class="menu-card-foot-title">${name}</span>
                     <span class="menu-card-foot-price">${priceText}</span>
                 </div>
+                ${hasSizes ? '' : `
                 <div class="menu-card-foot-actions">
                     ${favBtnHtml}
-                </div>
+                </div>`}
             </div>
         `;
     } else {
@@ -2131,7 +2132,8 @@ function createMenuCard(item, lang, strings) {
     card.addEventListener('click', openDetail);
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); } });
 
-    card.querySelectorAll('.menu-card-cart').forEach((cartBtn) => {
+    const cartBtn = card.querySelector('.menu-card-cart');
+    if (cartBtn) {
         cartBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (hasSizes) {
@@ -2142,7 +2144,7 @@ function createMenuCard(item, lang, strings) {
             cartBtn.classList.add('added');
             setTimeout(() => cartBtn.classList.remove('added'), 600);
         });
-    });
+    }
 
     const favBtn = card.querySelector('.menu-card-fav');
     if (favBtn) {
