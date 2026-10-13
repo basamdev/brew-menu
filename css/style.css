@@ -133,7 +133,7 @@ body.light-mode .logo-splash {
 
     --font-display: "Playfair Display", "Cinzel", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, serif;
     --font-body: "Inter", "Poppins", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-arabic: "Tajawal", "Cairo", "IBM Plex Sans Arabic", sans-serif;
+    --font-arabic: 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', 'Cairo', 'Tajawal', sans-serif;
 
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
@@ -7726,8 +7726,8 @@ body.emenu-layout .header-title-stack .menu-hero-typewriter.is-ltr-title {
 }
 
 body.emenu-layout .header-title-stack .menu-hero-typewriter.is-rtl-title {
-    font-family: "Cairo", "Tajawal", sans-serif !important;
-    letter-spacing: 0.04em;
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+    letter-spacing: 0 !important;
 }
 
 body.emenu-layout .header-title-stack .menu-hero-cursor {
@@ -10419,7 +10419,7 @@ body.menu-expired .menu-expired-overlay {
     width: min(440px, 100%);
     text-align: center;
     color: #F4EFE8;
-    font-family: "Cairo", "Tajawal", sans-serif;
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif);
 }
 
 .menu-expired-brand {

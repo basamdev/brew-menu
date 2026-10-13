@@ -17,10 +17,9 @@
     <meta name="apple-mobile-web-app-title" content="BREW CAFE & REST">
     <meta name="theme-color" content="#1A4632">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=188">
+    <link rel="stylesheet" href="css/style.css?v=189">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -99,11 +98,88 @@
         }
 
         /* ------------------------------------------------------------------
-           LUXURY SMART SERVE BOTTOM BRANDING BAR (COMPACT & DISCREET)
+           LUXURY NATIVE KURDISH TYPOGRAPHY (FULL SORANI OPENTYPE SUPPORT)
         ------------------------------------------------------------------ */
         :root {
-            --font-ku: 'Tajawal', 'Cairo', sans-serif;
-            --font-ar: 'Tajawal', 'Cairo', sans-serif;
+            /* Full native Kurdish Sorani OpenType typography stack */
+            --font-ku: 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', 'Rabar', 'Unikurd', 'Rudaw', 'Segoe UI', Tahoma, sans-serif;
+            --font-ar: 'Noto Sans Arabic', 'Noto Kufi Arabic', 'Vazirmatn', 'Cairo', 'Tajawal', sans-serif;
+            --font-en: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Enforce native Kurdish typography & preserve all cursive ligatures */
+        html[lang="ku"],
+        body[data-lang="ku"],
+        body.is-lang-ku {
+            font-family: var(--font-ku) !important;
+        }
+
+        /* Target all Kurdish text while protecting FontAwesome icons and English branding */
+        html[lang="ku"] *:not(.fa):not(.fas):not(.far):not(.fab):not([class*="fa-"]):not(.smart-serve-name),
+        body[data-lang="ku"] *:not(.fa):not(.fas):not(.far):not(.fab):not([class*="fa-"]):not(.smart-serve-name),
+        body.is-lang-ku *:not(.fa):not(.fas):not(.far):not(.fab):not([class*="fa-"]):not(.smart-serve-name) {
+            font-family: var(--font-ku);
+            letter-spacing: 0 !important;
+        }
+
+        /* Specific high-priority selectors to ensure Kurdish font applies to all menu titles, cards, and modal elements */
+        html[lang="ku"] .menu-hero-typewriter,
+        body[data-lang="ku"] .menu-hero-typewriter,
+        body.is-lang-ku .menu-hero-typewriter,
+        html[lang="ku"] .category-heading,
+        body[data-lang="ku"] .category-heading,
+        body.is-lang-ku .category-heading,
+        html[lang="ku"] .active-category-title,
+        body[data-lang="ku"] .active-category-title,
+        body.is-lang-ku .active-category-title,
+        html[lang="ku"] .menu-card-title,
+        body[data-lang="ku"] .menu-card-title,
+        body.is-lang-ku .menu-card-title,
+        html[lang="ku"] .menu-card-desc,
+        body[data-lang="ku"] .menu-card-desc,
+        body.is-lang-ku .menu-card-desc,
+        html[lang="ku"] .category-pill-name,
+        body[data-lang="ku"] .category-pill-name,
+        body.is-lang-ku .category-pill-name,
+        html[lang="ku"] .menu-powered-label,
+        body[data-lang="ku"] .menu-powered-label,
+        body.is-lang-ku .menu-powered-label,
+        html[lang="ku"] .cafe-info-title,
+        body[data-lang="ku"] .cafe-info-title,
+        body.is-lang-ku .cafe-info-title,
+        html[lang="ku"] .cart-panel,
+        body[data-lang="ku"] .cart-panel,
+        body.is-lang-ku .cart-panel,
+        html[lang="ku"] .cart-title,
+        body[data-lang="ku"] .cart-title,
+        body.is-lang-ku .cart-title {
+            font-family: var(--font-ku) !important;
+            letter-spacing: 0 !important;
+        }
+
+        /* Protect Font Awesome icon fonts from any override */
+        html[lang="ku"] .fa,
+        html[lang="ku"] .fas,
+        html[lang="ku"] .far,
+        html[lang="ku"] .fab,
+        html[lang="ku"] [class*="fa-"],
+        body[data-lang="ku"] .fa,
+        body[data-lang="ku"] .fas,
+        body[data-lang="ku"] .far,
+        body[data-lang="ku"] .fab,
+        body[data-lang="ku"] [class*="fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", fontawesome !important;
+        }
+
+        /* Ensure English brand/numbers keep modern Latin typography */
+        html[lang="ku"] .smart-serve-name,
+        body[data-lang="ku"] .smart-serve-name,
+        body.is-lang-ku .smart-serve-name,
+        html[lang="ku"] .detail-price-currency,
+        body[data-lang="ku"] .detail-price-currency,
+        html[lang="ku"] .cart-total-value,
+        body[data-lang="ku"] .cart-total-value {
+            font-family: var(--font-en) !important;
         }
 
         .menu-powered-bar {
@@ -193,7 +269,7 @@
             transform: scale(0.97);
         }
 
-        /* Label Text - Compact & Delicate with Native Font Support */
+        /* Label Text - Compact & Delicate with Native Kurdish Font Support */
         .menu-powered-label {
             font-size: 0.68rem;
             font-weight: 600;
@@ -205,8 +281,10 @@
         }
 
         body[dir="rtl"] .menu-powered-label,
-        html[dir="rtl"] .menu-powered-label {
-            font-family: 'Tajawal', 'Cairo', sans-serif !important;
+        html[dir="rtl"] .menu-powered-label,
+        body[data-lang="ku"] .menu-powered-label,
+        body.is-lang-ku .menu-powered-label {
+            font-family: var(--font-ku) !important;
             font-size: 0.72rem;
             letter-spacing: 0 !important;
             font-weight: 700;
@@ -294,6 +372,15 @@
     </style>
 </head>
 <body class="menu-page emenu-layout" data-menu-theme="mocha">
+<script>
+(function() {
+    var l = localStorage.getItem('selectedLang') || 'ku';
+    document.documentElement.lang = l;
+    document.documentElement.dir = (l === 'ar' || l === 'ku') ? 'rtl' : 'ltr';
+    document.body.setAttribute('data-lang', l);
+    document.body.classList.add('is-lang-' + l);
+})();
+</script>
 <script src="js/menu-license.js?v=2"></script>
 <div id="menuExpiredOverlay" class="menu-expired-overlay" hidden role="alertdialog" aria-modal="true" aria-labelledby="menuExpiredTitle" aria-hidden="true">
     <div class="menu-expired-card">
@@ -896,7 +983,7 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=170"></script>
+    <script src="js/app.js?v=171"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

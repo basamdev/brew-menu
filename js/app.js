@@ -2702,9 +2702,22 @@ function setActiveLanguage(lang) {
     });
 
     document.documentElement.dir = (lang === 'ar' || lang === 'ku') ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    if (document.body) {
+        document.body.setAttribute('data-lang', lang);
+        document.body.classList.remove('is-lang-ku', 'is-lang-ar', 'is-lang-en');
+        document.body.classList.add('is-lang-' + lang);
+    }
 }
 
 function applyLanguageUI(lang) {
+    document.documentElement.dir = (lang === 'ar' || lang === 'ku') ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    if (document.body) {
+        document.body.setAttribute('data-lang', lang);
+        document.body.classList.remove('is-lang-ku', 'is-lang-ar', 'is-lang-en');
+        document.body.classList.add('is-lang-' + lang);
+    }
     var strings = i18n[lang] || i18n.en;
     document.title = strings.pageTitle;
 
@@ -3495,8 +3508,8 @@ function initHeroTitleSequence() {
         if (phrase.lang === 'ku') {
             typewriter.classList.add('is-rtl-title');
             typewriter.classList.remove('is-ltr-title');
-            typewriter.style.fontFamily = 'var(--font-ku, "Noto Kufi Arabic", "Vazirmatn", "Cairo", sans-serif)';
-            typedEl.style.fontFamily = 'var(--font-ku, "Noto Kufi Arabic", "Vazirmatn", "Cairo", sans-serif)';
+            typewriter.style.fontFamily = 'var(--font-ku, "Vazirmatn", "Noto Sans Arabic", "Noto Kufi Arabic", sans-serif)';
+            typedEl.style.fontFamily = 'var(--font-ku, "Vazirmatn", "Noto Sans Arabic", "Noto Kufi Arabic", sans-serif)';
             typewriter.style.letterSpacing = '0';
             typedEl.style.letterSpacing = '0';
         } else if (phrase.dir === 'rtl') {
