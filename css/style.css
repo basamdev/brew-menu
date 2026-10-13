@@ -7748,12 +7748,7 @@ body.emenu-layout .menu-grid.layout-vertical .category-heading {
 
 @media (min-width: 768px) {
     body.emenu-layout .menu-grid.layout-horizontal {
-        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 150px !important;
-        min-width: 150px !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
 
@@ -10226,144 +10221,408 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         font-size: 0.95rem !important;
     }
 
-    /* Alone item (e.g. one Pizza) fills the row — no empty half */
-    body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
-        grid-column: 1 / -1 !important;
-    }
-
-    body.emenu-layout .menu-card {
+    /* Menu Sheet & Layout - Centered Luxury Container */
+    body.emenu-layout .menu-layout {
         width: 100% !important;
-        min-width: 0 !important;
+        max-width: 600px !important;
+        margin: 0 auto !important;
+        padding: 0 12px max(52px, env(safe-area-inset-bottom, 0px)) !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Horizontal Grid (2-column tiles) */
+    body.emenu-layout .menu-grid.layout-horizontal,
+    body.emenu-layout .menu-grid.layout-horizontal .category-section {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card {
+        grid-column: auto !important;
         max-width: 100% !important;
-        border-radius: 16px !important;
     }
 
-    body.emenu-layout .menu-card-img-wrapper {
-        height: 128px !important;
-        border-radius: 16px 16px 0 0 !important;
-    }
-
-    body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card .menu-card-img-wrapper {
-        height: 160px !important;
-    }
-
-    body.emenu-layout .menu-card-foot {
-        padding: 8px 10px !important;
-    }
-
-    body.emenu-layout .menu-card-foot-title {
-        font-size: 0.72rem !important;
-    }
-
-    /* List layout: full-width stacked rows */
-    body.emenu-layout .menu-grid.layout-vertical {
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card {
         display: flex !important;
         flex-direction: column !important;
-        gap: 10px !important;
+        width: 100% !important;
+        border-radius: 16px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #1B314B) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+        box-sizing: border-box !important;
+        transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    border-color 0.22s ease !important;
     }
 
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
+        width: 100% !important;
+        height: 124px !important;
+        min-height: 124px !important;
+        max-height: 124px !important;
+        position: relative !important;
+        overflow: hidden !important;
+        border-radius: 15px 15px 0 0 !important;
+        background: #14253B !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        display: block !important;
+        transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover .menu-card-img {
+        transform: scale(1.06) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot {
+        padding: 8px 10px 10px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: transparent !important;
+        border: none !important;
+        min-height: 52px !important;
+        box-sizing: border-box !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 3px !important;
+        min-width: 0 !important;
+        text-align: right !important;
+    }
+
+    html[dir="ltr"] body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-text {
+        text-align: left !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
+        font-size: 0.90rem !important;
+        font-weight: 700 !important;
+        color: var(--emenu-text, #FFFFFF) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.25 !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-price,
+    body.emenu-layout .menu-grid.layout-horizontal .card-price-range,
+    body.emenu-layout .menu-grid.layout-horizontal .card-price-single {
+        font-family: var(--font-en, 'Outfit', sans-serif) !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        color: #F59E0B !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        border-radius: 11px !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav svg {
+        width: 18px !important;
+        height: 18px !important;
+        stroke: currentColor !important;
+        stroke-width: 2 !important;
+        fill: none !important;
+    }
+
+    /* ==================================================================
+       COMPACT MODERN LUXURY VERTICAL LIST CARDS
+       - Card height: 104px (100px - 110px range)
+       - Square image: 90x90px (border-radius 13px)
+       - Sleek glassmorphism dark card & subtle 1px border
+       - Clean gold price (#F59E0B / #EAB308)
+       - "+" button with accent gradient & soft glowing border
+       - Heart favorite neatly aligned
+       - Clean 12px list gap
+    ================================================================== */
+    body.emenu-layout .menu-grid.layout-vertical,
     body.emenu-layout .menu-grid.layout-vertical .category-section {
         display: flex !important;
         flex-direction: column !important;
-        gap: 10px !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card {
-        grid-column: auto !important;
+        gap: 12px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
 
+    body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card,
+    body.emenu-layout .menu-grid.layout-vertical .menu-card {
+        grid-column: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 104px !important;
+        min-height: 104px !important;
+        max-height: 104px !important;
+        padding: 7px 9px !important;
+        border-radius: 16px !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #1B314B) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        cursor: pointer !important;
+        transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    border-color 0.22s ease !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
+        transform: translateY(-2px) !important;
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+    }
+
+    /* Square Food/Drink Image (90x90px) */
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 108px !important;
-        min-width: 108px !important;
-        min-height: 100px !important;
-        height: auto !important;
+        position: relative !important;
+        width: 90px !important;
+        min-width: 90px !important;
+        max-width: 90px !important;
+        height: 90px !important;
+        min-height: 90px !important;
+        max-height: 90px !important;
+        border-radius: 13px !important;
+        overflow: hidden !important;
+        background: #14253B !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
     }
 
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        display: block !important;
+        transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card:hover .menu-card-img {
+        transform: scale(1.06) !important;
+    }
+
+    /* Sleek "+" Action Button */
+    body.emenu-layout .menu-card-add,
+    body.emenu-layout .menu-card-cart {
+        position: absolute !important;
+        bottom: 5px !important;
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45), 0 0 12px rgba(96, 165, 250, 0.3) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        cursor: pointer !important;
+        z-index: 3 !important;
+        color: #FFFFFF !important;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.2s ease !important;
+    }
+
+    html[dir="rtl"] body.emenu-layout .menu-card-add,
+    html[dir="rtl"] body.emenu-layout .menu-card-cart {
+        left: 5px !important;
+        right: auto !important;
+    }
+
+    html[dir="ltr"] body.emenu-layout .menu-card-add,
+    html[dir="ltr"] body.emenu-layout .menu-card-cart {
+        right: 5px !important;
+        left: auto !important;
+    }
+
+    body.emenu-layout .menu-card-add svg,
+    body.emenu-layout .menu-card-cart svg {
+        width: 16px !important;
+        height: 16px !important;
+        stroke: #FFFFFF !important;
+        stroke-width: 2.8 !important;
+    }
+
+    body.emenu-layout .menu-card-add:hover,
+    body.emenu-layout .menu-card-cart:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.5) !important;
+    }
+
+    body.emenu-layout .menu-card-add:active,
+    body.emenu-layout .menu-card-cart:active {
+        transform: scale(0.92) !important;
+    }
+
+    /* Stacked Details Beside Image */
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
-        padding: 12px 14px !important;
-        min-height: 100px !important;
-        gap: 10px !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-title {
-        font-size: 0.98rem !important;
-        font-weight: 800 !important;
-        line-height: 1.3 !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
-        font-size: 0.9rem !important;
-        font-weight: 700 !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot .menu-card-fav {
-        width: 40px !important;
-        height: 40px !important;
-        min-width: 40px !important;
-    }
-
-    body.emenu-layout .menu-section-head {
-        padding: 4px 12px 8px !important;
-    }
-}
-
-@media (max-width: 380px) {
-    body.emenu-layout .category-section {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-width: 0 !important;
+        height: 100% !important;
+        padding: 0 4px 0 12px !important;
+        background: transparent !important;
+        border: none !important;
+        box-sizing: border-box !important;
         gap: 8px !important;
     }
 
-    body.emenu-layout .menu-card-img-wrapper {
-        height: 112px !important;
+    html[dir="rtl"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
+        padding: 0 12px 0 4px !important;
     }
 
-    body.emenu-layout .category-section:not(:has(> .menu-card ~ .menu-card)) > .menu-card .menu-card-img-wrapper {
-        height: 140px !important;
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        min-width: 0 !important;
+        gap: 3px !important;
+        text-align: right !important;
     }
 
-    body.emenu-layout .top-sticky-wrapper .sticky-actions .action-bar-btn,
-    body.emenu-layout .top-sticky-wrapper .sticky-actions .menu-fab.action-bar-btn {
-        height: 40px !important;
+    html[dir="ltr"] body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-text {
+        text-align: left !important;
     }
-}
 
-/* List layout: larger title/price + visible fav (cascade override) */
-body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-title {
-    font-size: 1.08rem !important;
-    font-weight: 800 !important;
-    line-height: 1.3 !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
-    font-size: 0.98rem !important;
-    font-weight: 700 !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .menu-card-foot .menu-card-fav {
-    display: inline-flex !important;
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    border-radius: 12px !important;
-    background: var(--emenu-action, rgba(255, 255, 255, 0.12)) !important;
-    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.22)) !important;
-    color: var(--emenu-text, #F4FFF9) !important;
-    opacity: 1 !important;
-}
-
-@media (max-width: 640px) {
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-title {
-        font-size: 0.98rem !important;
+        font-size: 1.02rem !important;
+        font-weight: 700 !important;
+        color: var(--emenu-text, #FFFFFF) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.25 !important;
+        letter-spacing: -0.01em !important;
     }
 
-    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price {
-        font-size: 0.9rem !important;
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-desc {
+        display: block !important;
+        font-size: 0.74rem !important;
+        color: var(--emenu-muted, rgba(255, 255, 255, 0.6)) !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
+    }
+
+    /* Gold Accent Price Tag */
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-price,
+    body.emenu-layout .menu-grid.layout-vertical .card-price-range,
+    body.emenu-layout .menu-grid.layout-vertical .card-price-single {
+        font-family: var(--font-en, 'Outfit', sans-serif) !important;
+        font-size: 0.95rem !important;
+        font-weight: 700 !important;
+        color: #F59E0B !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        letter-spacing: 0.01em !important;
+    }
+
+    /* Favorite Heart Button in List View */
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 12px !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    background 0.2s ease,
+                    border-color 0.2s ease,
+                    color 0.2s ease !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav svg {
+        width: 19px !important;
+        height: 19px !important;
+        stroke: currentColor !important;
+        stroke-width: 2 !important;
+        fill: none !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:hover {
+        transform: scale(1.08) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-color: rgba(255, 255, 255, 0.22) !important;
+        color: #FFFFFF !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:active {
+        transform: scale(0.92) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav.is-fav {
+        color: #EF4444 !important;
+        background: rgba(239, 68, 68, 0.15) !important;
+        border-color: rgba(239, 68, 68, 0.35) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-fav.is-fav svg {
+        fill: #EF4444 !important;
     }
 }
 
