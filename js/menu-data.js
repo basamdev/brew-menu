@@ -1,4 +1,4 @@
-﻿// js/menu-data.js - Optimized shared data layer
+// js/menu-data.js - Optimized shared data layer
 // Uses onSnapshot as the primary source with a get() timeout fallback.
 // Caches items and categories in memory so filtering is instant and
 // menu.html / admin.html only read Firestore once per page load.
@@ -127,8 +127,10 @@
 
     function sortCategoriesList(list) {
         list.sort(function (a, b) {
-            var ao = a && a.data && a.data.order != null ? Number(a.data.order) : NaN;
-            var bo = b && b.data && b.data.order != null ? Number(b.data.order) : NaN;
+            var da = (a && a.data) ? a.data : a;
+            var db_ = (b && b.data) ? b.data : b;
+            var ao = (da && da.order != null && da.order !== '') ? Number(da.order) : NaN;
+            var bo = (db_ && db_.order != null && db_.order !== '') ? Number(db_.order) : NaN;
             if (!isNaN(ao) && !isNaN(bo) && ao !== bo) return ao - bo;
             if (!isNaN(ao) && isNaN(bo)) return -1;
             if (isNaN(ao) && !isNaN(bo)) return 1;

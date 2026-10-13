@@ -1,4 +1,4 @@
-﻿// Admin.js — Shawarma Admin Panel
+// Admin.js — Shawarma Admin Panel
 
 var USE_LOCAL_API = false;
 var API_BASE = 'api';
@@ -1222,7 +1222,7 @@ function showFirestoreApiDisabledAlert() {
     if (window._firestoreApiDisabledAlerted) return;
     window._firestoreApiDisabledAlerted = true;
     var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
-    var projectId = (window.firebaseConfig && window.firebaseConfig.projectId) || 'zayed-menu-skytower';
+    var projectId = (window.firebaseConfig && window.firebaseConfig.projectId) || 'brew-coffee-1cd84';
     var url = 'https://console.developers.google.com/apis/api/firestore.googleapis.com/overview?project=' + encodeURIComponent(projectId);
     alert('⚠️ ' + (S.errorPrefix || 'Error:') + '\n\nCloud Firestore API is disabled for this project.\n\nPlease enable it here:\n' + url + '\n\nAfter enabling, wait a few minutes and refresh this page.');
 }
@@ -1937,7 +1937,8 @@ function getCategoryLabel(categoryId, lang, catMap) {
 }
 
 function loadManageItems() {
-    var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var S = i18n[lang] || i18n.en;
     itemsActiveCategory = 'all';
     var adminContent = document.getElementById('adminContent');
     adminContent.innerHTML =
@@ -1970,6 +1971,30 @@ function loadManageItems() {
                             '<input type="text" id="itemImageURL" placeholder="' + (S.imageUrlOrUpload || 'Paste image URL or upload above') + '">' +
                             '<img id="itemImagePreview" class="admin-img-preview" style="display:none;margin-top:8px;max-height:120px;max-width:100%;width:auto;height:auto;border-radius:8px;object-fit:contain;"></div>' +
                         '<div class="form-group"><label>' + S.price + '</label><input type="text" inputmode="decimal" id="itemPrice" autocomplete="off"></div>' +
+                        '<div class="form-group admin-sizes-box">' +
+                            '<div class="admin-sizes-header">' +
+                                '<label class="admin-sizes-label">' +
+                                    '<span class="admin-sizes-icon">🥤</span>' +
+                                    '<span>' + (lang === 'ku' ? 'قەبارە و نرخەکان (وەک خواردنەوەکان)' : (lang === 'ar' ? 'الأحجام والأسعار (مثل المشروبات)' : 'Sizes & Prices (e.g. Drinks)')) + '</span>' +
+                                '</label>' +
+                                '<div class="admin-sizes-btn-group">' +
+                                    '<button type="button" class="btn-secondary btn-sm" id="btnPresetDrinkSizes" title="Add Small, Medium, Big">' +
+                                        '⚡ ' + (lang === 'ku' ? 'بچووک / ناوەند / گەورە' : (lang === 'ar' ? 'صغير / متوسط / كبير' : 'Small / Medium / Big')) +
+                                    '</button>' +
+                                    '<button type="button" class="btn-primary btn-sm" id="btnAddSizeRow">' +
+                                        '+ ' + (lang === 'ku' ? 'قەبارە' : (lang === 'ar' ? 'حجم' : 'Add Size')) +
+                                    '</button>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div id="itemSizesList" class="item-sizes-list"></div>' +
+                            '<small class="admin-sizes-hint">' +
+                                (lang === 'ku'
+                                    ? 'بۆ خواردنەوە یان خواردن: دەتوانیت چەند قەبارەیەک دیاری بکەیت (بچووک، ناوەند، گەورە) لەگەڵ نرخی هەر قەبارەیەک.'
+                                    : (lang === 'ar'
+                                        ? 'للمشروبات أو الأطعمة: يمكنك تحديد أحجام متعددة (صغير، متوسط، كبير) مع سعر كل حجم.'
+                                        : 'For drinks or food: Add multiple sizes (Small, Medium, Big) with individual prices.')) +
+                            '</small>' +
+                        '</div>' +
                          '<div class="form-group"><label>' + S.category + '</label>' +
                              '<div class="admin-inline-field">' +
                                  '<select id="itemCategory">' +
@@ -2607,32 +2632,491 @@ function loadCategoryFilter() {
     refreshCategoryFilterOptions();
 }
 
+/* ========================================================
+   ADMIN REORDERING (BUTTONS & LONG-TOUCH / DRAG) + TOASTS
+   ======================================================== */
+var _currentAdminItems = [];
+var _currentAdminCategories = [];
+
+function showAdminToast(msg) {
+    var toast = document.getElementById('adminToastEl');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'adminToastEl';
+        toast.className = 'admin-toast';
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(function () {
+        toast.classList.remove('show');
+    }, 2400);
+}
+
+function updateRowOrderNumbers(tbodyEl) {
+    if (!tbodyEl) return;
+    var rows = tbodyEl.querySelectorAll('.admin-row');
+    rows.forEach(function (r, idx) {
+        var num = r.querySelector('.admin-order-num');
+        if (num) num.textContent = String(idx + 1);
+        var upBtn = r.querySelector('.move-item-up, .move-cat-up');
+        if (upBtn) upBtn.disabled = (idx === 0);
+        var downBtn = r.querySelector('.move-item-down, .move-cat-down');
+        if (downBtn) downBtn.disabled = (idx === rows.length - 1);
+    });
+}
+
+function enableTouchAndDragReorder(tbodyEl, onReorderEnd) {
+    if (!tbodyEl) return;
+    if (tbodyEl._dragCleanup) {
+        tbodyEl._dragCleanup();
+    }
+
+    var draggedRow = null;
+    var startY = 0;
+    var startX = 0;
+    var isDragging = false;
+    var longPressTimer = null;
+    var scrollInterval = null;
+
+    function stopAutoScroll() {
+        if (scrollInterval) {
+            clearInterval(scrollInterval);
+            scrollInterval = null;
+        }
+    }
+
+    function checkAutoScroll(clientY) {
+        var edge = 80;
+        var h = window.innerHeight;
+        var step = 0;
+        if (clientY < edge) {
+            step = -Math.max(6, Math.round((edge - clientY) / 3));
+        } else if (clientY > h - edge) {
+            step = Math.max(6, Math.round((clientY - (h - edge)) / 3));
+        }
+
+        if (step !== 0) {
+            if (!scrollInterval) {
+                scrollInterval = setInterval(function () {
+                    window.scrollBy(0, step);
+                }, 20);
+            }
+        } else {
+            stopAutoScroll();
+        }
+    }
+
+    function startDrag(row) {
+        if (!row || isDragging) return;
+        isDragging = true;
+        draggedRow = row;
+        document.body.classList.add('admin-reordering-active');
+        row.classList.add('is-dragging');
+        if (navigator.vibrate) {
+            try { navigator.vibrate(35); } catch (e) {}
+        }
+    }
+
+    function moveDrag(clientX, clientY) {
+        if (!isDragging || !draggedRow) return;
+        checkAutoScroll(clientY);
+
+        var rows = Array.prototype.slice.call(tbodyEl.children).filter(function (r) {
+            return r !== draggedRow && r.classList.contains('admin-row');
+        });
+
+        for (var i = 0; i < rows.length; i++) {
+            var r = rows[i];
+            var rect = r.getBoundingClientRect();
+            if (clientY >= rect.top && clientY <= rect.bottom) {
+                var mid = rect.top + rect.height / 2;
+                if (clientY < mid) {
+                    tbodyEl.insertBefore(draggedRow, r);
+                } else {
+                    tbodyEl.insertBefore(draggedRow, r.nextSibling);
+                }
+                updateRowOrderNumbers(tbodyEl);
+                break;
+            }
+        }
+    }
+
+    function endDrag() {
+        clearTimeout(longPressTimer);
+        stopAutoScroll();
+        if (isDragging && draggedRow) {
+            draggedRow.classList.remove('is-dragging');
+            document.body.classList.remove('admin-reordering-active');
+            updateRowOrderNumbers(tbodyEl);
+            var newIds = Array.prototype.slice.call(tbodyEl.querySelectorAll('.admin-row')).map(function (r) {
+                return r.getAttribute('data-id');
+            }).filter(Boolean);
+            if (typeof onReorderEnd === 'function') {
+                onReorderEnd(newIds);
+            }
+        }
+        isDragging = false;
+        draggedRow = null;
+    }
+
+    function onPointerDown(e) {
+        if (e.target.closest('button, input, select, textarea, a, .btn-reorder')) return;
+        var grip = e.target.closest('.admin-drag-grip');
+        var row = e.target.closest('.admin-row');
+        if (!row) return;
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        if (grip) {
+            e.preventDefault();
+            startDrag(row);
+        } else if (e.pointerType === 'touch') {
+            longPressTimer = setTimeout(function () {
+                startDrag(row);
+            }, 230);
+        }
+    }
+
+    function onPointerMove(e) {
+        if (longPressTimer && !isDragging) {
+            var dx = Math.abs(e.clientX - startX);
+            var dy = Math.abs(e.clientY - startY);
+            if (dx > 10 || dy > 10) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        }
+
+        if (isDragging) {
+            e.preventDefault();
+            moveDrag(e.clientX, e.clientY);
+        }
+    }
+
+    function onPointerUp(e) {
+        endDrag();
+    }
+
+    function onPointerCancel(e) {
+        endDrag();
+    }
+
+    tbodyEl.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerCancel);
+
+    tbodyEl._dragCleanup = function () {
+        clearTimeout(longPressTimer);
+        stopAutoScroll();
+        tbodyEl.removeEventListener('pointerdown', onPointerDown);
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerCancel);
+    };
+}
+
+/* ========================================================
+   ITEM SIZES & PRICES BUILDER (SMALL, MEDIUM, BIG, ETC.)
+   ======================================================== */
+function createAdminSizeRow(data) {
+    data = data || {};
+    var row = document.createElement('div');
+    row.className = 'item-size-row';
+    var pVal = (data.price !== undefined && data.price !== null) ? data.price : '';
+
+    row.innerHTML =
+        '<div class="item-size-inputs">' +
+            '<div class="item-size-field">' +
+                '<span class="item-size-sublabel">Kurdish</span>' +
+                '<input type="text" class="size-name-ku" placeholder="بچووک / گەورە" value="' + escapeHtmlAttr(data.name_ku || '') + '">' +
+            '</div>' +
+            '<div class="item-size-field">' +
+                '<span class="item-size-sublabel">Arabic</span>' +
+                '<input type="text" class="size-name-ar" placeholder="صغير / كبير" value="' + escapeHtmlAttr(data.name_ar || '') + '">' +
+            '</div>' +
+            '<div class="item-size-field">' +
+                '<span class="item-size-sublabel">English</span>' +
+                '<input type="text" class="size-name-en" placeholder="Small / Big" value="' + escapeHtmlAttr(data.name_en || '') + '">' +
+            '</div>' +
+            '<div class="item-size-field">' +
+                '<span class="item-size-sublabel">Price (IQD)</span>' +
+                '<input type="text" inputmode="decimal" class="size-price" placeholder="2500" value="' + escapeHtmlAttr(pVal !== '' ? String(pVal) : '') + '">' +
+            '</div>' +
+        '</div>' +
+        '<button type="button" class="btn-remove-size" title="Remove" aria-label="Remove">✕</button>';
+
+    var removeBtn = row.querySelector('.btn-remove-size');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+            row.remove();
+        });
+    }
+
+    var priceInp = row.querySelector('.size-price');
+    if (priceInp) {
+        priceInp.addEventListener('input', function () {
+            var mainPrice = document.getElementById('itemPrice');
+            if (mainPrice && (!mainPrice.value || mainPrice.value === '0')) {
+                mainPrice.value = this.value;
+            }
+        });
+    }
+
+    return row;
+}
+
+function collectAdminItemSizes() {
+    var list = document.getElementById('itemSizesList');
+    if (!list) return [];
+    var rows = list.querySelectorAll('.item-size-row');
+    var sizes = [];
+    rows.forEach(function (row) {
+        var ku = (row.querySelector('.size-name-ku') || {}).value || '';
+        var ar = (row.querySelector('.size-name-ar') || {}).value || '';
+        var en = (row.querySelector('.size-name-en') || {}).value || '';
+        var p = (row.querySelector('.size-price') || {}).value || '';
+        ku = ku.trim(); ar = ar.trim(); en = en.trim(); p = p.trim().replace(',', '.');
+        if (!ku && !ar && !en && !p) return;
+        var pNum = parseFloat(p);
+        sizes.push({
+            name_ku: ku || ar || en || 'قەبارە',
+            name_ar: ar || ku || en || 'حجم',
+            name_en: en || ku || ar || 'Size',
+            price: isNaN(pNum) ? 0 : pNum
+        });
+    });
+    return sizes;
+}
+
+function populateAdminItemSizes(sizes) {
+    var list = document.getElementById('itemSizesList');
+    if (!list) return;
+    list.innerHTML = '';
+    if (Array.isArray(sizes) && sizes.length > 0) {
+        sizes.forEach(function (sz) {
+            list.appendChild(createAdminSizeRow(sz));
+        });
+    }
+}
+
+/* ========================================================
+   REORDER CATEGORIES & ITEMS LOGIC
+   ======================================================== */
+function persistCategoryOrder(catList) {
+    if (!catList || !catList.length) return;
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var toastMsg = (lang === 'ku') ? 'ڕیزبەندی بەشەکان سەرکەوتووانە نوێکرایەوە' : ((lang === 'ar') ? 'تم تحديث ترتيب الفئات بنجاح' : 'Categories order updated successfully');
+
+    catList.forEach(function (c, idx) {
+        if (!c) return;
+        c.data = c.data || {};
+        c.data.order = idx;
+    });
+
+    _currentAdminCategories = catList;
+    renderCategoriesTable(catList);
+    showAdminToast(toastMsg);
+
+    safeSetItem('cachedCategories', JSON.stringify(catList));
+    if (typeof MenuData !== 'undefined' && MenuData.setCategories) {
+        MenuData.setCategories(catList);
+    }
+
+    if (window.db && typeof writeBatch === 'function') {
+        try {
+            var batch = writeBatch(db);
+            catList.forEach(function (c, idx) {
+                if (!c || !c.id || c.virtual) return;
+                var ref = doc(db, 'categories', String(c.id));
+                batch.set(ref, { order: idx, updated_at: serverTimestamp() }, { merge: true });
+            });
+            batch.commit().then(function () {
+                console.log('[categories] Order batch committed to Firestore');
+            }).catch(function (err) {
+                console.warn('[categories] Batch error:', err);
+            });
+        } catch (e) {
+            console.warn('[categories] writeBatch exception:', e);
+        }
+    }
+}
+
+function moveCategoryByStep(catId, step) {
+    if (!_currentAdminCategories || !_currentAdminCategories.length) return;
+    var idx = -1;
+    for (var i = 0; i < _currentAdminCategories.length; i++) {
+        if (_currentAdminCategories[i] && String(_currentAdminCategories[i].id) === String(catId)) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx === -1) return;
+    var targetIdx = idx + step;
+    if (targetIdx < 0 || targetIdx >= _currentAdminCategories.length) return;
+    var temp = _currentAdminCategories[idx];
+    _currentAdminCategories[idx] = _currentAdminCategories[targetIdx];
+    _currentAdminCategories[targetIdx] = temp;
+    persistCategoryOrder(_currentAdminCategories);
+}
+
+function reorderCategoriesByIds(newIds) {
+    if (!_currentAdminCategories || !_currentAdminCategories.length || !newIds) return;
+    var map = {};
+    _currentAdminCategories.forEach(function (c) { if (c && c.id) map[String(c.id)] = c; });
+    var reordered = [];
+    newIds.forEach(function (id) {
+        if (map[String(id)]) {
+            reordered.push(map[String(id)]);
+            delete map[String(id)];
+        }
+    });
+    Object.keys(map).forEach(function (id) { reordered.push(map[id]); });
+    _currentAdminCategories = reordered;
+    persistCategoryOrder(_currentAdminCategories);
+}
+
+function persistItemOrder(itemList) {
+    if (!itemList || !itemList.length) return;
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var toastMsg = (lang === 'ku') ? 'ڕیزبەندی ئایتمەکان سەرکەوتووانە نوێکرایەوە' : ((lang === 'ar') ? 'تم تحديث ترتيب المنتجات بنجاح' : 'Items order updated successfully');
+
+    itemList.forEach(function (docObj, idx) {
+        if (!docObj) return;
+        if (typeof docObj.data === 'function') {
+            var currentData = docObj.data() || {};
+            currentData.order = idx;
+            docObj.data = function () { return currentData; };
+        } else if (docObj.data) {
+            docObj.data.order = idx;
+        } else {
+            docObj.order = idx;
+        }
+    });
+
+    var idToIdx = {};
+    itemList.forEach(function (it, idx) { if (it && it.id) idToIdx[it.id] = idx; });
+    _itemsSnapDocs.forEach(function (d) {
+        if (d && d.id && idToIdx[d.id] !== undefined) {
+            var dataObj = typeof d.data === 'function' ? d.data() : (d.data || d);
+            dataObj.order = idToIdx[d.id];
+            if (typeof d.data === 'function') {
+                d.data = function () { return dataObj; };
+            }
+        }
+    });
+
+    renderItemsList(itemList);
+    showAdminToast(toastMsg);
+
+    var flat = _itemsSnapDocs.map(function (doc) {
+        var data = typeof doc.data === 'function' ? doc.data() : (doc.data || doc);
+        return Object.assign({ id: doc.id }, data);
+    });
+    writeCachedMenuItemsFlat(flat);
+    if (typeof MenuData !== 'undefined' && MenuData.setItems) {
+        MenuData.setItems(flat);
+    }
+
+    if (window.db && typeof writeBatch === 'function') {
+        try {
+            var batch = writeBatch(db);
+            itemList.forEach(function (it, idx) {
+                if (!it || !it.id) return;
+                var ref = doc(db, 'menuItems', String(it.id));
+                batch.set(ref, { order: idx, updated_at: serverTimestamp() }, { merge: true });
+            });
+            batch.commit().then(function () {
+                console.log('[items] Order batch committed to Firestore');
+            }).catch(function (err) {
+                console.warn('[items] Batch error:', err);
+            });
+        } catch (e) {
+            console.warn('[items] writeBatch exception:', e);
+        }
+    }
+}
+
+function moveItemByStep(itemId, step) {
+    if (!_currentAdminItems || !_currentAdminItems.length) return;
+    var idx = -1;
+    for (var i = 0; i < _currentAdminItems.length; i++) {
+        if (_currentAdminItems[i] && String(_currentAdminItems[i].id) === String(itemId)) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx === -1) return;
+    var targetIdx = idx + step;
+    if (targetIdx < 0 || targetIdx >= _currentAdminItems.length) return;
+    var temp = _currentAdminItems[idx];
+    _currentAdminItems[idx] = _currentAdminItems[targetIdx];
+    _currentAdminItems[targetIdx] = temp;
+    persistItemOrder(_currentAdminItems);
+}
+
+function reorderItemsByIds(newIds) {
+    if (!_currentAdminItems || !_currentAdminItems.length || !newIds) return;
+    var map = {};
+    _currentAdminItems.forEach(function (it) { if (it && it.id) map[String(it.id)] = it; });
+    var reordered = [];
+    newIds.forEach(function (id) {
+        if (map[String(id)]) {
+            reordered.push(map[String(id)]);
+            delete map[String(id)];
+        }
+    });
+    Object.keys(map).forEach(function (id) { reordered.push(map[id]); });
+    _currentAdminItems = reordered;
+    persistItemOrder(_currentAdminItems);
+}
+
 function renderItemsList(items) {
     var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
     var list = document.getElementById('itemsList');
     if (!list) return;
+    _currentAdminItems = items || [];
     if (items.length === 0) {
         list.innerHTML = '<p>' + S.noItemsFound + '</p>';
         return;
     }
 
     var lang = localStorage.getItem('selectedLang') || 'ku';
+    var sortColLabel = (lang === 'ku') ? 'ڕیزبەندی' : ((lang === 'ar') ? 'الترتيب' : 'Order');
 
     function paintRows(catMap) {
-        var html = '<div class="table-responsive"><table class="admin-table admin-table--items"><thead><tr><th>Image</th><th>Name</th><th>' + S.category + '</th><th>' + (S.group || 'Group') + '</th><th>' + S.price + '</th><th>' + S.available + '</th><th>Actions</th></tr></thead><tbody>';
-        items.forEach(function (doc) {
+        var html = '<div class="table-responsive"><table class="admin-table admin-table--items"><thead><tr><th class="admin-th-sort">' + escapeHtmlText(sortColLabel) + '</th><th>Image</th><th>Name</th><th>' + S.category + '</th><th>' + (S.group || 'Group') + '</th><th>' + S.price + '</th><th>' + S.available + '</th><th>Actions</th></tr></thead><tbody>';
+        items.forEach(function (doc, idx) {
             var item = doc.data();
             var name = item['name_' + lang] || item.name_ku || item.name_ar || item.name_en || S.unnamed;
             var img = item.image || 'https://placehold.co/50x50?text=No+Image';
             var avail = item.available ? '<span style="color:#2E7D32;">' + S.yes + '</span>' : '<span style="color:#C62828;">' + S.no + '</span>';
             var catName = getCategoryLabel(item.category, lang, catMap);
             var groupName = item.group_ku || item.group_ar || item.group_en || '';
-            html += '<tr class="admin-row">' +
+            var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
+            var priceDisplay = hasSizes
+                ? '<span class="admin-sizes-badge">🥤 ' + item.sizes.length + ' ' + (lang === 'ku' ? 'قەبارە' : (lang === 'ar' ? 'أحجام' : 'sizes')) + '</span><br><small style="color:var(--text-muted);">' + (item.price || 0) + ' IQD</small>'
+                : ((item.price || 0) + ' IQD');
+
+            html += '<tr class="admin-row" data-id="' + escapeHtmlAttr(doc.id) + '">' +
+                '<td class="admin-sort-col" data-label="' + escapeHtmlAttr(sortColLabel) + '">' +
+                    '<div class="admin-sort-cell">' +
+                        '<span class="admin-drag-grip" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
+                        '<span class="admin-order-num">' + (idx + 1) + '</span>' +
+                        '<div class="admin-reorder-btns">' +
+                            '<button type="button" class="btn-reorder move-item-up" data-id="' + escapeHtmlAttr(doc.id) + '" ' + (idx === 0 ? 'disabled' : '') + ' title="Move Up">▲</button>' +
+                            '<button type="button" class="btn-reorder move-item-down" data-id="' + escapeHtmlAttr(doc.id) + '" ' + (idx === items.length - 1 ? 'disabled' : '') + ' title="Move Down">▼</button>' +
+                        '</div>' +
+                    '</div>' +
+                '</td>' +
                 '<td data-label="' + escapeHtmlAttr(S.image || 'Image') + '"><img src="' + img + '" alt="' + escapeHtmlAttr(name) + '" width="48" height="48"></td>' +
                 '<td data-label="' + escapeHtmlAttr(S.name || 'Name') + '">' + escapeHtmlText(name) + '</td>' +
                 '<td data-label="' + escapeHtmlAttr(S.category || 'Category') + '">' + escapeHtmlText(catName) + '</td>' +
                 '<td data-label="' + escapeHtmlAttr(S.group || 'Group') + '">' + escapeHtmlText(groupName) + '</td>' +
-                '<td data-label="' + escapeHtmlAttr(S.price || 'Price') + '">' + (item.price || 0) + ' IQD</td>' +
+                '<td data-label="' + escapeHtmlAttr(S.price || 'Price') + '">' + priceDisplay + '</td>' +
                 '<td data-label="' + escapeHtmlAttr(S.available || 'Available') + '">' + avail + '</td>' +
                 '<td data-label="' + escapeHtmlAttr(S.actions || 'Actions') + '" class="admin-row-actions"><button type="button" class="btn-primary btn-sm edit-item" data-id="' + doc.id + '">' + S.edit + '</button>' +
                 '<button type="button" class="btn-danger btn-sm delete-item" data-id="' + doc.id + '">' + S.delete + '</button></td>' +
@@ -2641,7 +3125,28 @@ function renderItemsList(items) {
         html += '</tbody></table></div>';
         list.innerHTML = html;
 
+        var tbodyEl = list.querySelector('tbody');
+        if (tbodyEl) {
+            enableTouchAndDragReorder(tbodyEl, function (newIds) {
+                reorderItemsByIds(newIds);
+            });
+        }
+
         function handleButtonClick(e) {
+            var upBtn = e.target.closest('.move-item-up');
+            if (upBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                moveItemByStep(upBtn.getAttribute('data-id'), -1);
+                return;
+            }
+            var downBtn = e.target.closest('.move-item-down');
+            if (downBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                moveItemByStep(downBtn.getAttribute('data-id'), 1);
+                return;
+            }
             var editBtn = e.target.closest('.edit-item');
             if (editBtn) {
                 e.preventDefault();
@@ -2700,6 +3205,7 @@ function wireItemEvents() {
             document.getElementById('modalTitle').textContent = S.addNewItem;
             document.getElementById('itemForm').reset();
             document.getElementById('itemId').value = '';
+            populateAdminItemSizes([]);
             document.getElementById('itemAvailable').checked = true;
             var pr = document.getElementById('itemImagePreview');
             if (pr) pr.style.display = 'none';
@@ -2801,6 +3307,40 @@ function wireItemEvents() {
         quickForm.addEventListener('submit', function (e) {
             e.preventDefault();
             saveQuickCategory();
+        });
+    }
+
+    var btnAddSize = document.getElementById('btnAddSizeRow');
+    if (btnAddSize) {
+        btnAddSize.addEventListener('click', function () {
+            var list = document.getElementById('itemSizesList');
+            if (list) {
+                list.appendChild(createAdminSizeRow({ name_ku: '', name_ar: '', name_en: '', price: '' }));
+                var lastRow = list.lastElementChild;
+                if (lastRow) {
+                    var inp = lastRow.querySelector('.size-name-ku');
+                    if (inp) inp.focus();
+                }
+            }
+        });
+    }
+
+    var btnPresetSizes = document.getElementById('btnPresetDrinkSizes');
+    if (btnPresetSizes) {
+        btnPresetSizes.addEventListener('click', function () {
+            var list = document.getElementById('itemSizesList');
+            if (list) {
+                var baseP = parseFloat((document.getElementById('itemPrice') || {}).value || 0);
+                var presets = [
+                    { name_ku: 'بچووک', name_ar: 'صغير', name_en: 'Small', price: baseP > 0 ? baseP : '' },
+                    { name_ku: 'ناوەند', name_ar: 'متوسط', name_en: 'Medium', price: baseP > 0 ? baseP + 500 : '' },
+                    { name_ku: 'گەورە', name_ar: 'كبير', name_en: 'Big', price: baseP > 0 ? baseP + 1000 : '' }
+                ];
+                list.innerHTML = '';
+                presets.forEach(function (sz) {
+                    list.appendChild(createAdminSizeRow(sz));
+                });
+            }
         });
     }
 }
@@ -3026,7 +3566,13 @@ function saveItem() {
     var price = priceEl.value.trim().replace(',', '.');
     var category = categoryEl.value.trim();
 
-    if (!nameKu || !nameAr || !nameEn || !price) {
+    var itemSizes = collectAdminItemSizes();
+    if ((!price || isNaN(parseFloat(price))) && itemSizes.length > 0 && itemSizes[0].price != null) {
+        price = String(itemSizes[0].price);
+        priceEl.value = price;
+    }
+
+    if (!nameKu || !nameAr || !nameEn || (!price && itemSizes.length === 0)) {
         alert(S.fillAll);
         return;
     }
@@ -3086,12 +3632,14 @@ function saveItem() {
 
     var itemId = document.getElementById('itemId').value;
     var now = new Date().toISOString();
+    var parsedPrice = parseFloat(price) || (itemSizes.length > 0 ? (itemSizes[0].price || 0) : 0);
       var plainData = {
           name_ku: nameKu, name_ar: nameAr, name_en: nameEn,
           description_ku: document.getElementById('itemDescKu').value.trim(),
           description_ar: document.getElementById('itemDescAr').value.trim(),
           description_en: document.getElementById('itemDescEn').value.trim(),
-          price: parseFloat(price) || 0,
+          price: parsedPrice,
+          sizes: itemSizes,
           category: category,
           group_ku: (document.getElementById('itemGroupKu') || {}).value || '',
           group_ar: (document.getElementById('itemGroupAr') || {}).value || '',
@@ -3192,7 +3740,11 @@ function editItem(itemId) {
             document.getElementById('itemImageURL').value = item.image;
             var pr = document.getElementById('itemImagePreview');
             if (pr) { pr.src = item.image; pr.style.display = 'block'; }
+        } else {
+            var pr = document.getElementById('itemImagePreview');
+            if (pr) { pr.style.display = 'none'; }
         }
+        populateAdminItemSizes(item.sizes || []);
         document.getElementById('modalTitle').textContent = S.editItem;
         var saveBtn = document.getElementById('saveItemBtn');
         if (saveBtn) {
@@ -3335,6 +3887,7 @@ function renderCategoriesTable(categories) {
     var list = document.getElementById('categoriesList');
     if (!list) return;
     var lang = localStorage.getItem('selectedLang') || 'ku';
+    var sortColLabel = (lang === 'ku') ? 'ڕیزبەندی' : ((lang === 'ar') ? 'الترتيب' : 'Order');
 
     if (!categories || !categories.length) {
         list.innerHTML = '<p style="color:var(--text-muted);padding:8px 2px;">' + S.noCategories + '</p>';
@@ -3360,9 +3913,11 @@ function renderCategoriesTable(categories) {
         console.warn('[admin categories] sort failed, using original order:', sortErr);
     }
 
-    var html = '<div class="table-responsive"><table class="admin-table admin-table--categories"><thead><tr><th>' + (S.image || 'Image') + '</th><th>' + (S.name || 'Name') + '</th><th>' + (S.actions || 'Actions') + '</th></tr></thead><tbody>';
+    _currentAdminCategories = categories;
+
+    var html = '<div class="table-responsive"><table class="admin-table admin-table--categories"><thead><tr><th class="admin-th-sort">' + escapeHtmlText(sortColLabel) + '</th><th>' + (S.image || 'Image') + '</th><th>' + (S.name || 'Name') + '</th><th>' + (S.actions || 'Actions') + '</th></tr></thead><tbody>';
     try {
-        categories.forEach(function (c) {
+        categories.forEach(function (c, idx) {
             try {
                 var cat = (c && c.data) || {};
                 var name = cat['name_' + lang] || cat.name_ku || cat.name_ar || cat.name_en || (c && c.id) || S.unnamed;
@@ -3372,7 +3927,17 @@ function renderCategoriesTable(categories) {
                 if (!c.virtual) {
                     actions += '<button type="button" class="btn-danger btn-sm delete-category" data-id="' + escapeHtmlAttr(c.id) + '">' + S.delete + '</button>';
                 }
-                html += '<tr class="admin-row">' +
+                html += '<tr class="admin-row" data-id="' + escapeHtmlAttr(c.id) + '">' +
+                    '<td class="admin-sort-col" data-label="' + escapeHtmlAttr(sortColLabel) + '">' +
+                        '<div class="admin-sort-cell">' +
+                            '<span class="admin-drag-grip" title="Drag to reorder" aria-label="Drag to reorder">⋮⋮</span>' +
+                            '<span class="admin-order-num">' + (idx + 1) + '</span>' +
+                            '<div class="admin-reorder-btns">' +
+                                '<button type="button" class="btn-reorder move-cat-up" data-id="' + escapeHtmlAttr(c.id) + '" ' + (idx === 0 ? 'disabled' : '') + ' title="Move Up">▲</button>' +
+                                '<button type="button" class="btn-reorder move-cat-down" data-id="' + escapeHtmlAttr(c.id) + '" ' + (idx === categories.length - 1 ? 'disabled' : '') + ' title="Move Down">▼</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>' +
                     '<td data-label="' + escapeHtmlAttr(S.image || 'Image') + '"><img src="' + escapeHtmlAttr(img) + '" alt="" width="48" height="48" style="border-radius:8px;object-fit:cover;" onerror="this.src=\'https://placehold.co/50x50?text=Error\'"></td>' +
                     '<td data-label="' + escapeHtmlAttr(S.name || 'Name') + '">' + escapeHtmlText(name) + virtualBadge + '</td>' +
                     '<td data-label="' + escapeHtmlAttr(S.actions || 'Actions') + '" class="admin-row-actions">' + actions + '</td>' +
@@ -3387,8 +3952,29 @@ function renderCategoriesTable(categories) {
     html += '</tbody></table></div>';
     list.innerHTML = html;
 
+    var tbodyEl = list.querySelector('tbody');
+    if (tbodyEl) {
+        enableTouchAndDragReorder(tbodyEl, function (newIds) {
+            reorderCategoriesByIds(newIds);
+        });
+    }
+
     try {
         function handleCategoryClick(e) {
+            var upBtn = e.target.closest('.move-cat-up');
+            if (upBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                moveCategoryByStep(upBtn.getAttribute('data-id'), -1);
+                return;
+            }
+            var downBtn = e.target.closest('.move-cat-down');
+            if (downBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                moveCategoryByStep(downBtn.getAttribute('data-id'), 1);
+                return;
+            }
             var editBtn = e.target.closest('.edit-category');
             if (editBtn) {
                 editCategory(editBtn.getAttribute('data-id'));
@@ -5672,7 +6258,7 @@ function loadSettings() {
                         if (err) {
                             var msg = (err && err.message ? String(err.message) : String(err)).toLowerCase();
                             if (msg.indexOf('permission') !== -1 || msg.indexOf('insufficient') !== -1 || msg.indexOf('denied') !== -1) {
-                                alert('⚠️ Settings saved locally only.\n\nFirestore WRITE was DENIED. Fix:\n1) In Firebase Console → project zayed-menu-skytower → Firestore → Rules tab, paste the rules and click PUBLISH.\n2) Make sure you are logged in as admin.\n\n(' + (err && err.message ? err.message : err) + ')');
+                                alert('⚠️ Settings saved locally only.\n\nFirestore WRITE was DENIED. Fix:\n1) In Firebase Console → project brew-coffee-1cd84 → Firestore → Rules tab, paste the rules and click PUBLISH.\n2) Make sure you are logged in as admin.\n\n(' + (err && err.message ? err.message : err) + ')');
                             } else {
                                 alert('⚠️ ' + S.settingsSaved + '\n\nCloud sync failed: ' + (err && err.message ? err.message : err) + '\n\nChanges saved locally only.');
                             }

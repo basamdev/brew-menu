@@ -63,7 +63,7 @@
 ## 📂 FILE STRUCTURE
 
 ```
-shawarma-demeshq-menu/
+brew-coffee/
 ├── index.html          (Landing page - Ludon Cafe style)
 ├── menu.html           (Customer QR menu)
 ├── login.html          (Admin login)
@@ -85,7 +85,7 @@ shawarma-demeshq-menu/
 
 ### 1. Firebase Setup
 1. Go to Firebase Console: https://console.firebase.google.com
-2. Select project: `zayed-menu-skytower`
+2. Select project: `brew-coffee-1cd84`
 3. Go to **Authentication** → Enable **Email/Password**
 4. Go to **Firestore Database** → Create database → Start in **test mode** (for development)
 
@@ -108,9 +108,9 @@ shawarma-demeshq-menu/
 3. Use Firebase Console Firestore to add items manually
 
 ### 4. Deploy Locally (XAMPP)
-1. Place folder in `C:\xampp\htdocs\shawarma-demeshq-menu`
+1. Place folder in `C:\xampp\htdocs\brew-coffee`
 2. Start XAMPP Apache
-3. Open: `http://localhost/shawarma-demeshq-menu/`
+3. Open: `http://localhost/brew-coffee/`
 
 ### 5. Deploy to Netlify/Vercel
 1. Push to GitHub repository
@@ -181,4 +181,4 @@ Add options in `admin.html` within the item modal form.
 ## 📞 SUPPORT
 
 Firebase Console: https://console.firebase.google.com
-Project ID: `zayed-menu-skytower`
+Project ID: `brew-coffee-1cd84`

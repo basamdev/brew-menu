@@ -1,16 +1,16 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ZAYED ALKHAIR - Admin Panel</title>
     <link rel="manifest" href="manifest.json?v=119">
-    <link rel="icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="shortcut icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=17">
+    <link rel="icon" type="image/png" href="images/zayed-logo.png?v=20">
+    <link rel="shortcut icon" type="image/png" href="images/zayed-logo.png?v=20">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=20">
     <meta name="application-name" content="ZAYED ALKHAIR">
     <meta name="msapplication-TileColor" content="#B8860B">
-    <meta name="msapplication-TileImage" content="assets/icon-512.png?v=17">
+    <meta name="msapplication-TileImage" content="assets/icon-512.png?v=20">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/admin.css?v=125">
+    <link rel="stylesheet" href="css/admin.css?v=126">
     <script>
         (function () {
             try {
@@ -38,7 +38,7 @@
         <div class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
                 <a class="sidebar-brand" href="menu.html" id="adminBrandLogo" title="Open menu" aria-label="ZAYED ALKHAIR logo">
-                    <img src="images/zayed-logo.png?v=16" alt="ZAYED ALKHAIR" class="sidebar-brand-icon" onerror="fallbackLogo(this)">
+                    <img src="images/zayed-logo.png?v=20" alt="BREW COFFEE" class="sidebar-brand-icon" onerror="fallbackLogo(this)">
                     <span class="sidebar-brand-text">ZAYED ALKHAIR</span>
                 </a>
                 <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
@@ -88,19 +88,29 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
       import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
       import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, setDoc, writeBatch, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+      import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyAaRgvO5EDrr7vU8MoW8UGVO45c9h1UAqI",
-        authDomain: "zayed-menu-skytower.firebaseapp.com",
-        projectId: "zayed-menu-skytower",
-        storageBucket: "zayed-menu-skytower.firebasestorage.app",
-        messagingSenderId: "1041176038213",
-        appId: "1:1041176038213:web:2d920a41161e5f81d70c2c"
+        apiKey: "AIzaSyCRPdqIjA-S-VwBNt-8FEDDvkkfKfjSK8s",
+        authDomain: "brew-coffee-1cd84.firebaseapp.com",
+        projectId: "brew-coffee-1cd84",
+        storageBucket: "brew-coffee-1cd84.firebasestorage.app",
+        messagingSenderId: "96919307440",
+        appId: "1:96919307440:web:2450c01c4a1bd604e66775",
+        measurementId: "G-X0D6048HLC"
       };
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
+
+      if (typeof isSupported === 'function') {
+        isSupported().then(function(supported) {
+          if (supported) {
+            window.analytics = getAnalytics(app);
+          }
+        }).catch(function() {});
+      }
 
       window.firebaseApp = app;
       window.auth = auth;
@@ -132,7 +142,7 @@
     <script src="js/menu-data.js?v=130"></script>
     <script src="js/app.js?v=164"></script>
     <script src="js/local-api.js?v=120"></script>
-    <script src="js/admin.js?v=138"></script>
+    <script src="js/admin.js?v=140"></script>
     <script>
         (function () {
             var brand = document.getElementById('adminBrandLogo');

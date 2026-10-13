@@ -1,241 +1,1014 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ZAYED ALKHAIR</title>
-    <link rel="manifest" href="manifest.json?v=119">
-    <link rel="icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="shortcut icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=17">
-    <meta name="application-name" content="ZAYED ALKHAIR">
-    <meta name="msapplication-TileColor" content="#B8860B">
-    <meta name="msapplication-TileImage" content="assets/icon-512.png?v=17">
+    <title>BREW COFFEE</title>
+    <link rel="manifest" href="manifest.json?v=124">
+    <link rel="icon" type="image/png" href="images/Brew-logo.png?v=24">
+    <link rel="shortcut icon" type="image/png" href="images/Brew-logo.png?v=24">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/Brew-logo.png?v=24">
+    <meta name="application-name" content="BREW COFFEE">
+    <meta name="msapplication-TileColor" content="#442518">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ZAYED ALKHAIR">
-    <meta name="theme-color" content="#B8860B">
-    <style>html,body{background:#0A0A0B!important;}</style>
+    <meta name="apple-mobile-web-app-title" content="BREW COFFEE">
+    <meta name="theme-color" content="#12100E">
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=170">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <style>
-        :lang(en) {
-            font-family: var(--font-body);
-        }
-        :lang(ar), :lang(ku) {
-            font-family: var(--font-arabic);
+        :root {
+            --font-ar: 'Cairo', 'Tajawal', sans-serif;
+            --font-en: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Playfair Display', 'Cinzel', serif;
+            
+            /* Brew Coffee Signature Palette (Matching Brew Logo) */
+            --brew-cyan: #00F5D4;
+            --brew-blue: #00D2FF;
+            --brew-royal: #0077FE;
+            --brew-neon: #00F0FF;
+            --brew-glow: rgba(0, 210, 255, 0.55);
+            --brew-dark-bg: rgba(9, 13, 20, 0.9);
+            --brew-dark-hover: rgba(14, 20, 32, 0.96);
+            --brew-text: #E6F9FF;
+            
+            /* Neon Electric Blue/Cyan (Matching Logo) */
+            --neon-blue: #00F0FF;
+            --neon-blue-glow: rgba(0, 240, 255, 0.65);
+            
+            --bg-dark: #0D0C0B;
+            --text-white: #FFFFFF;
         }
 
-        /* Keep index dark — never inherit menu light theme */
-        body.index-page,
-        body.index-page.light-mode {
-            background: #0A0A0B !important;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
-        body.index-page .logo-splash,
-        body.index-page.light-mode .logo-splash {
-            background: #0A0A0B !important;
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-family: var(--font-ar);
+            user-select: none;
+            -webkit-user-select: none;
         }
-        body.index-page .bg-video,
-        body.index-page.light-mode .bg-video {
-            opacity: 1 !important;
-            filter: brightness(0.6) contrast(1.1) !important;
-            background: #0A0A0B;
+
+        body[data-lang="en"] {
+            font-family: var(--font-en);
         }
-        body.index-page .bg-overlay,
-        body.index-page.light-mode .bg-overlay {
+
+        /* ----------------------------------------------------
+           FULLSCREEN AUTHENTIC CAFE VIDEO BACKGROUND
+        ---------------------------------------------------- */
+        .landing-bg-container {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            background: #0D0C0B;
+        }
+
+        .landing-bg-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            opacity: 1;
+            filter: brightness(0.65) contrast(1.12);
+        }
+
+        .landing-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                circle at 50% 40%,
+                rgba(13, 12, 11, 0.25) 0%,
+                rgba(13, 12, 11, 0.6) 70%,
+                rgba(13, 12, 11, 0.94) 100%
+            );
+        }
+
+        .landing-overlay-gradient {
+            position: absolute;
+            inset: 0;
             background: linear-gradient(
                 180deg,
-                rgba(10,10,11,0.55) 0%,
-                rgba(10,10,11,0.25) 40%,
-                rgba(10,10,11,0.6) 100%
-            ) !important;
+                rgba(13, 12, 11, 0.75) 0%,
+                rgba(13, 12, 11, 0.15) 25%,
+                rgba(13, 12, 11, 0.3) 65%,
+                rgba(13, 12, 11, 0.92) 95%,
+                #0D0C0B 100%
+            );
         }
 
-        /* New circular logo (text already on image) + red shadow */
-        body.index-page .logo-splash img {
-            width: clamp(120px, 30vw, 165px);
-            height: clamp(120px, 30vw, 165px);
-            max-width: none;
-            border-radius: 50%;
-            object-fit: contain;
-            border: none;
-            background: transparent;
-            padding: 0;
-            filter: drop-shadow(0 12px 28px rgba(184,134,11,0.55));
-            box-shadow: none;
+        /* ----------------------------------------------------
+           APP WRAPPER & SAFE AREAS
+        ---------------------------------------------------- */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            padding: max(16px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
         }
-        body.index-page .logo-float-wrap {
-            width: clamp(145px, 32vw, 195px);
-            height: clamp(145px, 32vw, 195px);
-            border-radius: 50%;
-            padding: 0;
-            background: transparent;
-            box-shadow: none;
-            overflow: visible;
-            line-height: 0;
+
+        /* ----------------------------------------------------
+           TOP HEADER: LANGUAGE BUTTON (LEFT) & BRAND (RIGHT: TEXT + LOGO)
+           LOCKED DIRECTION: NEVER FLIPS ON LANGUAGE CHANGE
+        ---------------------------------------------------- */
+        .top-header,
+        html[dir="rtl"] .top-header,
+        html[dir="ltr"] .top-header,
+        body[data-lang] .top-header {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: row !important;
+            align-items: center;
+            justify-content: space-between;
+            direction: ltr !important; /* FIXED: NEVER FLIPS ON LANGUAGE SWITCH */
+            gap: 10px;
+            padding: 4px 2px;
         }
-        body.index-page .hero .logo {
-            width: 100% !important;
-            height: 100% !important;
-            max-width: none;
+
+        /* Brand Group: Text on left, Logo on right */
+        .top-brand-group,
+        html[dir="rtl"] .top-brand-group,
+        html[dir="ltr"] .top-brand-group,
+        body[data-lang] .top-brand-group {
+            display: inline-flex;
+            flex-direction: row !important;
+            align-items: center;
+            direction: ltr !important; /* FIXED: TEXT LEFT, LOGO RIGHT */
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .top-logo-badge {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
             border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            box-shadow: 0 0 14px var(--neon-blue-glow), 0 3px 10px rgba(0, 0, 0, 0.7);
+            border: 1.5px solid rgba(0, 240, 255, 0.55);
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+        }
+
+        .top-brand-group:hover .top-logo-badge {
+            transform: scale(1.06);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.85), 0 4px 14px rgba(0, 0, 0, 0.8);
+        }
+
+        .top-logo-img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
-            border: none;
-            background: transparent;
-            filter: drop-shadow(0 14px 32px rgba(184,134,11,0.55));
-            box-shadow: none;
-            transition: transform 0.3s ease, filter 0.3s ease;
+            border-radius: 50%;
             display: block;
         }
-        body.index-page .hero .logo:hover {
+
+        /* Animated Title beside Logo */
+        .top-title-typewriter {
+            display: inline-flex;
+            align-items: center;
+            line-height: 1.2;
+            min-height: 24px;
+        }
+
+        .typewriter-text {
+            font-size: clamp(1.02rem, 3.8vw, 1.25rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #00F5D4 0%, #00D2FF 40%, #0077FE 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.65));
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            min-height: 1.3em;
+            display: inline-block;
+            transition: all 0.15s ease;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 18px var(--neon-blue-glow);
+            animation: cursorBlink 0.8s infinite ease-in-out;
+            margin-inline-start: 2px;
+            vertical-align: middle;
+            line-height: 1;
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* ----------------------------------------------------
+           LIVE MOVING LIGHT BORDER (BREW LOGO THEME)
+           Continuously traces the line shape / perimeter contour of buttons
+        ---------------------------------------------------- */
+        .live-light-btn {
+            position: relative !important;
+            isolation: isolate;
+            overflow: hidden !important;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 210, 255, 0.22);
+            transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.24s ease;
+        }
+
+        /* Continuous rotating light beam around the line shape */
+        .live-light-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 620px;
+            height: 620px;
+            transform: translate(-50%, -50%) rotate(0deg);
+            background: conic-gradient(
+                from 0deg,
+                rgba(0, 210, 255, 0.14) 0deg,
+                rgba(0, 210, 255, 0.14) 230deg,
+                rgba(0, 245, 212, 0.35) 275deg,
+                #00F5D4 315deg,
+                #00D2FF 342deg,
+                #FFFFFF 356deg,
+                #0077FE 359deg,
+                rgba(0, 210, 255, 0.14) 360deg
+            );
+            animation: liveLightRotate 3s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Inner masking surface leaving a razor-sharp 1.6px live border line track */
+        .live-light-btn::after {
+            content: '';
+            position: absolute;
+            inset: 1.6px;
+            border-radius: inherit;
+            background: linear-gradient(155deg, rgba(12, 19, 32, 0.94) 0%, rgba(6, 10, 18, 0.97) 100%);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            box-shadow: inset 0 1px 1.5px rgba(0, 240, 255, 0.28), inset 0 -1px 1.5px rgba(0, 0, 0, 0.7);
+            z-index: 2;
+            pointer-events: none;
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* All child content stays crisp and interactive above the mask */
+        .live-light-btn > * {
+            position: relative;
+            z-index: 3;
+        }
+
+        .live-light-btn:hover {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75), 0 0 28px rgba(0, 210, 255, 0.55);
+        }
+
+        .live-light-btn:hover::after {
+            background: linear-gradient(155deg, rgba(16, 26, 44, 0.95) 0%, rgba(8, 14, 24, 0.98) 100%);
+            box-shadow: inset 0 1px 2px rgba(0, 240, 255, 0.45), inset 0 -1px 2px rgba(0, 0, 0, 0.85);
+        }
+
+        .live-light-btn:hover::before {
+            animation-duration: 1.8s; /* Light speeds up dynamically on hover */
+        }
+
+        @keyframes liveLightRotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Language Button Pill (Brew Logo Theme) */
+        .lang-dropdown-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .lang-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 14px;
+            padding: 7px 14px;
+            color: #E6F9FF;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .lang-trigger-btn::before {
+            animation-duration: 2.8s;
+        }
+
+        .lang-trigger-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .lang-trigger-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .lang-globe-icon-svg {
+            width: 19px;
+            height: 19px;
+            display: block;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 6px rgba(0, 210, 255, 0.8));
+        }
+
+        .lang-trigger-text {
+            color: #E6F9FF;
+            letter-spacing: 0.02em;
+            line-height: 1;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+
+        .lang-chevron-triangle {
+            font-size: 0.65rem;
+            color: #00D2FF;
+            line-height: 1;
+            transition: transform 0.2s ease;
+            text-shadow: 0 0 8px rgba(0, 210, 255, 0.85);
+        }
+
+        .lang-dropdown-wrapper.open .lang-chevron-triangle {
+            transform: rotate(180deg);
+        }
+
+        /* Floating Language Menu (Brew Obsidian & Neon Cyan Theme) */
+        .lang-popover-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0 !important;
+            right: auto !important;
+            min-width: 165px;
+            background: rgba(8, 14, 24, 0.96);
+            border: 1px solid rgba(0, 210, 255, 0.35);
+            border-radius: 14px;
+            padding: 6px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 210, 255, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-6px) scale(0.96);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 100;
+        }
+
+        .lang-dropdown-wrapper.open .lang-popover-menu {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .lang-option-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #E6F9FF;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: inherit;
+        }
+
+        .lang-option-btn:hover {
+            background: rgba(0, 210, 255, 0.14);
+            color: #00F5D4;
+        }
+
+        .lang-option-btn.active {
+            background: linear-gradient(135deg, rgba(0, 210, 255, 0.24) 0%, rgba(0, 119, 254, 0.3) 100%);
+            font-weight: 700;
+            color: #FFFFFF;
+            border: 1px solid rgba(0, 240, 255, 0.45);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
+        }
+
+        .lang-opt-check {
+            font-size: 0.85rem;
+            color: #00F5D4;
+            text-shadow: 0 0 8px #00F5D4;
+            opacity: 0;
+        }
+
+        .lang-option-btn.active .lang-opt-check {
+            opacity: 1;
+        }
+
+        /* ----------------------------------------------------
+           CENTER VIEW (CLEAN ATMOSPHERIC CAFE AMBIANCE)
+        ---------------------------------------------------- */
+        .center-spacer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ----------------------------------------------------
+           BOTTOM CONTROLS (BREW LOGO THEME WITH LIVE LIGHT BORDER)
+        ---------------------------------------------------- */
+        .bottom-dock {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 4px;
+        }
+
+        /* Primary "Menu" Button with Live Moving Light */
+        .menu-main-cta {
+            width: 100%;
+            max-width: 380px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .menu-main-cta::before {
+            animation-duration: 3.2s;
+        }
+
+        .menu-main-cta:hover {
+            transform: translateY(-2px);
+        }
+
+        .menu-main-cta:active {
+            transform: translateY(1px) scale(0.985);
+        }
+
+        #menuBtnLabel {
+            background: linear-gradient(135deg, #00F5D4 0%, #00D2FF 45%, #FFFFFF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.7));
+            font-family: inherit;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            display: inline-block;
+        }
+
+        /* Quick Action Row: Location & Instagram Squircles with Live Moving Light */
+        .quick-actions-row {
+            display: flex;
+            flex-direction: row !important;
+            direction: ltr !important;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            width: 100%;
+        }
+
+        .action-squircle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .action-squircle-btn::before {
+            animation-duration: 2.5s;
+        }
+
+        .action-squircle-btn:hover {
+            transform: translateY(-2px) scale(1.06);
+        }
+
+        .action-squircle-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
+        .action-squircle-btn svg {
+            width: 25px;
+            height: 25px;
+            filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.85));
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .action-squircle-btn:hover svg {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 14px rgba(0, 240, 255, 1));
+        }
+
+        /* ----------------------------------------------------
+           POWERED BY (TOP) & SMART SERVE LOGO + NAME (BOTTOM)
+        ---------------------------------------------------- */
+        .powered-by-section {
+            display: inline-flex;
+            flex-direction: column !important;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            user-select: none;
+        }
+
+        .powered-by-section:hover {
             transform: scale(1.03);
-            filter: drop-shadow(0 18px 40px rgba(184,134,11,0.65));
-            box-shadow: none;
-        }
-        @media (max-width: 480px) {
-            body.index-page .logo-splash img {
-                width: 115px;
-                height: 115px;
-            }
-            body.index-page .logo-float-wrap {
-                width: 132px;
-                height: 132px;
-            }
         }
 
-        /* Restored typewriter title under logo */
-        body.index-page .cafe-name,
-        body.index-page.light-mode .cafe-name {
-            position: static !important;
-            width: auto !important;
-            height: auto !important;
-            overflow: visible !important;
-            clip: auto !important;
-            font-family: "Cairo", "Tajawal", var(--font-arabic), sans-serif !important;
-            letter-spacing: 0 !important;
-            font-size: clamp(1.35rem, 4.8vw, 2rem);
+        .powered-by-text {
+            font-size: 0.76rem;
+            color: #A3A3A3;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            line-height: 1;
+            text-align: center;
+            transition: color 0.2s ease;
+        }
+
+        body[data-lang="ku"] .powered-by-text,
+        body[data-lang="ar"] .powered-by-text {
+            font-family: var(--font-ar);
+            letter-spacing: 0;
+            font-size: 0.8rem;
+        }
+
+        .powered-by-brand-row {
+            display: inline-flex;
+            flex-direction: row !important;
+            direction: ltr !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .smart-serve-emblem-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 50%;
+            background: #000000;
+            box-shadow: 0 0 10px rgba(0, 195, 255, 0.45), 0 0 16px rgba(168, 85, 247, 0.35);
+            overflow: hidden;
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            flex-shrink: 0;
+        }
+
+        .smart-serve-emblem-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .smart-serve-name {
+            font-family: var(--font-en);
+            font-size: 0.88rem;
             font-weight: 700;
-            line-height: 1.35;
-            text-transform: none;
-            color: #FFFFFF !important;
-            text-shadow: 0 2px 16px rgba(0,0,0,0.55);
-            margin-top: 0.5rem;
-        }
-        body.index-page .cafe-name .menu-hero-typewriter,
-        body.index-page .cafe-name .menu-hero-typed,
-        body.index-page #heroTitleTyped {
-            font-family: inherit !important;
-            letter-spacing: 0 !important;
-            color: #FFFFFF !important;
-            font-size: inherit;
-            text-shadow: 0 2px 16px rgba(0,0,0,0.55);
-            white-space: normal;
-        }
-        body.index-page .cafe-name .menu-hero-typewriter[dir="ltr"],
-        body.index-page .cafe-name .menu-hero-typed[dir="ltr"] {
-            font-family: "Playfair Display", "Cinzel", serif !important;
-            letter-spacing: 0.04em !important;
-        }
-        body.index-page .cafe-name .menu-hero-cursor {
-            background: #FFFFFF !important;
-            box-shadow: 0 0 8px rgba(255,255,255,0.45);
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, #00F5D4 0%, #00C6FF 45%, #A855F7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
         }
 
-        body.index-page .logo-splash-dots span {
-            background: #B8860B !important;
+        /* Mobile Layout Adjustments */
+        @media (max-width: 400px) {
+            .top-logo-badge {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+            }
+            .typewriter-text {
+                font-size: 0.98rem;
+            }
+            .lang-trigger-btn {
+                padding: 6px 11px;
+                font-size: 0.88rem;
+            }
         }
 
-        /* Language buttons — Zayed logo dark teal green */
-        body.index-page {
-            --zayed-green: #064A42;
-            --zayed-green-deep: #033830;
-            --zayed-green-soft: #0A5C52;
-            --zayed-gold: #C4A35A;
-        }
-
-        body.index-page .lang-group .lang-btn,
-        body.index-page .hero .lang-btn {
-            font-family: inherit;
-            background: linear-gradient(160deg, var(--zayed-green-soft) 0%, var(--zayed-green) 55%, var(--zayed-green-deep) 100%) !important;
-            color: #F7FFF9 !important;
-            border: 1.5px solid color-mix(in srgb, var(--zayed-gold) 55%, transparent) !important;
-            box-shadow: 0 8px 22px rgba(3, 56, 48, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
-        }
-
-        body.index-page .hero .lang-btn:hover {
-            background: linear-gradient(160deg, #0D6B5F 0%, var(--zayed-green-soft) 50%, var(--zayed-green) 100%) !important;
-            color: #FFFFFF !important;
-            border-color: var(--zayed-gold) !important;
-            box-shadow: 0 10px 28px rgba(6, 74, 66, 0.55), 0 0 0 1px rgba(196, 163, 90, 0.25) !important;
-            transform: translateY(-3px);
-        }
-
-        body.index-page .hero .lang-btn.active {
-            background: linear-gradient(160deg, #0E6F62 0%, #075248 100%) !important;
-            color: #FFFFFF !important;
-            border-color: var(--zayed-gold) !important;
-            box-shadow: 0 6px 24px rgba(6, 74, 66, 0.55), 0 0 0 2px rgba(196, 163, 90, 0.35) !important;
-            font-weight: 700;
-        }
-
-        body.index-page .lang-sep {
-            color: color-mix(in srgb, var(--zayed-gold) 70%, #fff) !important;
-            opacity: 0.7;
-            font-family: inherit;
+        @media (max-height: 640px) {
+            .menu-main-cta {
+                height: 48px;
+                font-size: 1.15rem;
+            }
+            .action-squircle-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .smart-serve-emblem-wrap {
+                width: 44px;
+                height: 44px;
+            }
         }
     </style>
 </head>
-<body class="index-page has-video-bg">
+<body class="index-page">
 
+    <!-- Fullscreen Authentic Cafe Video Background -->
+    <div class="landing-bg-container">
+        <video class="landing-bg-video" id="landingBgVideo" autoplay muted loop playsinline preload="auto" poster="images/tt.jpg">
+            <source src="images/zayed-video.MP4?v=3" type="video/mp4">
+        </video>
+        <div class="landing-overlay"></div>
+        <div class="landing-overlay-gradient"></div>
+    </div>
 
-    <video class="bg-video" autoplay muted loop playsinline>
-        <source src="images/zayed-video.MP4?v=3" type="video/mp4">
-    </video>
-    <div class="bg-overlay"></div>
-
-    <section class="hero">
-        <div class="hero-center">
-<div class="logo-float-wrap">
-                 <img src="images/zayed-logo.png?v=16" alt="ZAYED ALKHAIR" class="logo" id="indexLogo"
-                     onerror="this.onerror=null; this.src='images/zayed-logo.png?v=16';">
-               </div>
-               <h1 class="cafe-name">
-                 <span class="menu-hero-typewriter" id="heroTypewriter" aria-live="polite">
-                     <span class="menu-hero-typed" id="heroTitleTyped" dir="ltr" lang="en">ZAYED ALKHAIR</span><span class="menu-hero-cursor" id="heroTitleCursor" aria-hidden="true"></span>
-                 </span>
-               </h1>
-
-            <div class="lang-group">
-                <button class="lang-btn" data-lang="ku" onclick="openMenu('ku')">
-                    <span class="lang-flag"><img src="images/flag-kurdistan.svg" alt="" class="lang-flag-img" width="22" height="15"></span>
-                    <span>کوردی</span>
+    <!-- Main Viewport Content -->
+    <main class="app-container">
+        
+        <!-- TOP HEADER: Language Button (Left) & Brand (Right: Text + Logo) -->
+        <header class="top-header">
+            <!-- Language Button (Left side) with Live Moving Light -->
+            <div class="lang-dropdown-wrapper" id="langDropdownWrapper">
+                <button type="button" class="lang-trigger-btn live-light-btn" id="langTriggerBtn" aria-haspopup="true" aria-expanded="false" title="Change Language">
+                    <!-- Globe SVG in Brew Cyan & Neon Blue -->
+                    <svg class="lang-globe-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9.5" fill="rgba(0, 210, 255, 0.22)" stroke="#00D2FF" stroke-width="1.3"/>
+                        <path d="M7 6.5C8 5.5 10 5 11 6c1.2 1.2.5 3-1 3.5-1.5.5-2 1.5-1.5 3 .5 1.5 2 2 1 3.5-.7 1-2 1.5-3 1-.8-.5-1.5-1.5-1.5-2.5 0-3 1-6 2-8z" fill="#00F5D4"/>
+                        <path d="M14 6c1.5 0 3 1 3 2.5 0 1-1 2-2 2s-1.5 1.5-1 3c.5 1.2 2 1.5 2.5 3 .3.8 0 2-1 2.5-1.5.7-3 0-3.5-1.5-.5-1.5 0-3-1-4-.7-.7-.8-2 0-3 1-1.2 1-3 2-4.5z" fill="#00F5D4"/>
+                    </svg>
+                    <span class="lang-trigger-text" id="currentLangLabel">English</span>
+                    <span class="lang-chevron-triangle" aria-hidden="true">▼</span>
                 </button>
-                <span class="lang-sep">|</span>
-                <button class="lang-btn" data-lang="ar" onclick="openMenu('ar')">
-                    <span class="lang-flag">🇮🇶</span>
-                    <span>العربية</span>
-                </button>
-                <span class="lang-sep">|</span>
-                <button class="lang-btn" data-lang="en" onclick="openMenu('en')">
-                    <span class="lang-flag">🇬🇧</span>
-                    <span>English</span>
-                </button>
+
+                <!-- Floating Language Selector Menu -->
+                <div class="lang-popover-menu" id="langPopoverMenu" role="menu">
+                    <!-- Kurdish -->
+                    <button type="button" class="lang-option-btn" data-lang="ku" role="menuitem">
+                        <span>کوردی</span>
+                        <span class="lang-opt-check">✓</span>
+                    </button>
+                    <!-- Arabic -->
+                    <button type="button" class="lang-option-btn" data-lang="ar" role="menuitem">
+                        <span>العربية</span>
+                        <span class="lang-opt-check">✓</span>
+                    </button>
+                    <!-- English -->
+                    <button type="button" class="lang-option-btn" data-lang="en" role="menuitem">
+                        <span>English</span>
+                        <span class="lang-opt-check">✓</span>
+                    </button>
+                </div>
             </div>
-        </div>
-    </section>
 
-    <script src="js/app.js?v=155"></script>
+            <!-- Brand Group (Right side: Text on left, Logo on right) -->
+            <div class="top-brand-group" id="indexLogoWrap" title="Double click for Admin">
+                <div class="top-title-typewriter" id="topTitleTypewriter" aria-live="polite">
+                    <span class="typewriter-text" id="typewriterText">BREW COFFEE</span><span class="typewriter-cursor">|</span>
+                </div>
+                <div class="top-logo-badge">
+                    <img src="images/Brew-logo.png?v=25" alt="Brew Coffee" class="top-logo-img" id="indexLogo"
+                         onerror="this.onerror=null; this.src='images/zayed-logo.png?v=25';">
+                </div>
+            </div>
+        </header>
+
+        <!-- CENTER VIEW (SPACIOUS CINEMATIC VIEW) -->
+        <div class="center-spacer"></div>
+
+        <!-- BOTTOM CONTROLS DOCK (BREW THEME WITH LIVE LIGHT BORDER) -->
+        <section class="bottom-dock">
+            <!-- Primary "Menu" Button with Live Moving Light -->
+            <a href="menu.html" class="menu-main-cta live-light-btn" id="menuMainCta" aria-label="Open Menu">
+                <span id="menuBtnLabel">Menu</span>
+            </a>
+
+            <!-- Quick Action Row: Location & Instagram Squircles with Live Moving Light -->
+            <div class="quick-actions-row">
+                <!-- Location (Google Maps) -->
+                <a href="#" target="_blank" rel="noopener" class="action-squircle-btn live-light-btn btn-location" id="cafeLocationBtn" aria-label="Location" title="Location">
+                    <!-- Pin Icon in Brew Electric Cyan -->
+                    <svg viewBox="0 0 24 24" fill="#00D2FF" aria-hidden="true">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </a>
+                <!-- Instagram -->
+                <a href="#" target="_blank" rel="noopener" class="action-squircle-btn live-light-btn btn-instagram" id="cafeInstagramBtn" aria-label="Instagram" title="Instagram">
+                    <!-- Instagram Camera Icon in Brew Electric Cyan -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#00D2FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Powered by on top, Logo + Smart Serve on bottom -->
+            <div class="powered-by-section" id="poweredBySection">
+                <span class="powered-by-text" id="poweredByLabel">Powered by</span>
+                <div class="powered-by-brand-row">
+                    <div class="smart-serve-emblem-wrap" title="Smart Serve">
+                        <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="smart-serve-emblem-img">
+                    </div>
+                    <span class="smart-serve-name">Smart Serve</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Core App Logic & Settings -->
+    <script src="js/app.js?v=156"></script>
     <script>
         (function () {
-            document.body.classList.remove('light-mode');
-            var logo = document.getElementById('indexLogo');
-            // Single → menu.html | Double → admin.html
-            setupLogoClickActions(logo, function () {
-                window.location.href = 'menu.html';
-            }, 'admin.html');
+            'use strict';
+
+            // Translations Dictionary
+            var I18N = {
+                ku: {
+                    dir: 'rtl',
+                    label: 'کوردی',
+                    menuBtn: 'مێنوو',
+                    poweredBy: 'دروست کراوە لەلایەن'
+                },
+                ar: {
+                    dir: 'rtl',
+                    label: 'العربية',
+                    menuBtn: 'المنيو',
+                    poweredBy: 'التطوير بواسطة'
+                },
+                en: {
+                    dir: 'ltr',
+                    label: 'English',
+                    menuBtn: 'Menu',
+                    poweredBy: 'Powered by'
+                }
+            };
+
+            // Read current language or fallback to English or Kurdish
+            var currentLang = localStorage.getItem('selectedLang') || 'en';
+            if (!I18N[currentLang]) currentLang = 'en';
+
+            // DOM Elements
+            var htmlEl = document.documentElement;
+            var bodyEl = document.body;
+            var currentLangLabel = document.getElementById('currentLangLabel');
+            var menuBtnLabel = document.getElementById('menuBtnLabel');
+            var menuMainCta = document.getElementById('menuMainCta');
+            var poweredByLabel = document.getElementById('poweredByLabel');
+
+            var langWrapper = document.getElementById('langDropdownWrapper');
+            var langTriggerBtn = document.getElementById('langTriggerBtn');
+            var langOptionBtns = document.querySelectorAll('.lang-option-btn');
+
+            var locationBtn = document.getElementById('cafeLocationBtn');
+            var instagramBtn = document.getElementById('cafeInstagramBtn');
+            var indexLogoWrap = document.getElementById('indexLogoWrap');
+            var indexLogo = document.getElementById('indexLogo');
+
+            // Apply selected language
+            function applyLanguage(lang) {
+                if (!I18N[lang]) lang = 'en';
+                currentLang = lang;
+                try { localStorage.setItem('selectedLang', lang); } catch (e) {}
+
+                var data = I18N[lang];
+                htmlEl.setAttribute('lang', lang);
+                htmlEl.setAttribute('dir', data.dir);
+                bodyEl.setAttribute('data-lang', lang);
+
+                // Update UI text
+                currentLangLabel.textContent = data.label;
+                menuBtnLabel.textContent = data.menuBtn;
+                if (poweredByLabel) {
+                    poweredByLabel.textContent = data.poweredBy;
+                }
+
+                // Update Menu CTA link
+                menuMainCta.href = 'menu.html?lang=' + encodeURIComponent(lang);
+
+                // Update active class on dropdown options
+                langOptionBtns.forEach(function (btn) {
+                    if (btn.getAttribute('data-lang') === lang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            // Language Dropdown Toggle
+            function toggleLangMenu(e) {
+                if (e) e.stopPropagation();
+                var isOpen = langWrapper.classList.toggle('open');
+                langTriggerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            }
+
+            function closeLangMenu() {
+                langWrapper.classList.remove('open');
+                langTriggerBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            langTriggerBtn.addEventListener('click', toggleLangMenu);
+
+            langOptionBtns.forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var selected = btn.getAttribute('data-lang');
+                    applyLanguage(selected);
+                    closeLangMenu();
+                });
+            });
+
+            // Close dropdown on outside click or escape key
+            document.addEventListener('click', function (e) {
+                if (!langWrapper.contains(e.target)) {
+                    closeLangMenu();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeLangMenu();
+            });
+
+            // ----------------------------------------------------
+            // Typewriter Animation for Title:
+            // "letters come in and come out, one time english, one time arabic, one time kurdish"
+            // Color: Electric Blue matching the logo
+            // ----------------------------------------------------
+            (function initTitleTypewriter() {
+                var words = [
+                    { text: 'BREW COFFEE', isAr: false },
+                    { text: 'بريو كوفي', isAr: true },
+                    { text: 'بروو كۆفی', isAr: true }
+                ];
+                var textEl = document.getElementById('typewriterText');
+                if (!textEl) return;
+
+                var wordIdx = 0;
+                var charIdx = 0;
+                var isDeleting = false;
+                var typingSpeed = 95;
+                var deleteSpeed = 48;
+                var pauseEnd = 2000;
+                var pauseStart = 350;
+
+                function typeLoop() {
+                    var current = words[wordIdx];
+                    var fullText = current.text;
+
+                    if (isDeleting) {
+                        charIdx--;
+                        textEl.textContent = fullText.substring(0, charIdx);
+                        if (charIdx <= 0) {
+                            isDeleting = false;
+                            wordIdx = (wordIdx + 1) % words.length;
+                            setTimeout(typeLoop, pauseStart);
+                            return;
+                        }
+                        setTimeout(typeLoop, deleteSpeed);
+                    } else {
+                        charIdx++;
+                        textEl.textContent = fullText.substring(0, charIdx);
+                        if (current.isAr) {
+                            textEl.style.fontFamily = "var(--font-ar)";
+                            textEl.style.letterSpacing = "0";
+                        } else {
+                            textEl.style.fontFamily = "var(--font-en)";
+                            textEl.style.letterSpacing = "0.04em";
+                        }
+                        if (charIdx >= fullText.length) {
+                            isDeleting = true;
+                            setTimeout(typeLoop, pauseEnd);
+                            return;
+                        }
+                        setTimeout(typeLoop, typingSpeed);
+                    }
+                }
+
+                typeLoop();
+            })();
+
+            // Wire Location & Instagram links
+            function setupQuickLinks() {
+                var info = typeof getCafeInfo === 'function' ? getCafeInfo() : {};
+                
+                // Location URL
+                var locUrl = (info && info.locationUrl) || localStorage.getItem('cafeLocationUrl') || 'https://maps.app.goo.gl/mmi5iv7mnGKxKZoq9?g_st=ic';
+                if (locationBtn) {
+                    locationBtn.href = locUrl;
+                }
+
+                // Instagram URL
+                var instaHandle = (info && info.instagram) || localStorage.getItem('cafeInstagram') || '';
+                var instaUrl = 'https://instagram.com/brew_coffee';
+                if (instaHandle) {
+                    if (typeof normalizeSocialUrl === 'function') {
+                        instaUrl = normalizeSocialUrl(instaHandle, 'instagram');
+                    } else if (instaHandle.indexOf('http') === 0) {
+                        instaUrl = instaHandle;
+                    } else {
+                        instaUrl = 'https://instagram.com/' + instaHandle.replace(/^@/, '');
+                    }
+                }
+                if (instagramBtn) {
+                    instagramBtn.href = instaUrl;
+                }
+            }
+
+            // Logo Click Actions: Single click opens menu, Double click opens admin
+            function setupLogoActions(targetEl) {
+                if (!targetEl) return;
+                if (typeof setupLogoClickActions === 'function') {
+                    setupLogoClickActions(targetEl, function () {
+                        window.location.href = 'menu.html?lang=' + encodeURIComponent(currentLang);
+                    }, 'admin.html');
+                } else {
+                    var clicks = 0;
+                    var timer = null;
+                    targetEl.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        clicks++;
+                        if (clicks === 1) {
+                            timer = setTimeout(function () {
+                                clicks = 0;
+                                window.location.href = 'menu.html?lang=' + encodeURIComponent(currentLang);
+                            }, 320);
+                        } else if (clicks === 2) {
+                            clearTimeout(timer);
+                            clicks = 0;
+                            window.location.href = 'admin.html';
+                        }
+                    });
+                }
+            }
+
+            setupLogoActions(indexLogoWrap);
+            if (indexLogo && indexLogo !== indexLogoWrap) {
+                setupLogoActions(indexLogo);
+            }
+
+            // Initialize
+            applyLanguage(currentLang);
+            setupQuickLinks();
+
         })();
     </script>
 </body>

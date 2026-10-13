@@ -1,20 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ZAYED ALKHAIR</title>
+    <title>BREW COFFEE</title>
     <link rel="manifest" href="manifest.json?v=119">
-    <link rel="icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="shortcut icon" type="image/png" href="images/zayed-logo.png?v=17">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=17">
-    <meta name="application-name" content="ZAYED ALKHAIR">
-    <meta name="msapplication-TileColor" content="#B8860B">
-    <meta name="msapplication-TileImage" content="assets/icon-512.png?v=17">
+    <link rel="icon" type="image/png" href="images/Brew-logo.png?v=25">
+    <link rel="shortcut icon" type="image/png" href="images/Brew-logo.png?v=25">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/Brew-logo.png?v=25">
+    <meta name="application-name" content="BREW COFFEE">
+    <meta name="msapplication-TileColor" content="#00D2FF">
+    <meta name="msapplication-TileImage" content="images/Brew-logo.png?v=25">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ZAYED ALKHAIR">
+    <meta name="apple-mobile-web-app-title" content="BREW COFFEE">
     <meta name="theme-color" content="#1A4632">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -198,11 +198,11 @@
         <!-- Logo and Title Centered -->
         <div class="header-brand">
             <div class="header-logo-ring">
-                <img src="images/zayed-logo.png?v=16" alt="ZAYED ALKHAIR" class="header-logo" id="headerLogo">
+                <img src="images/Brew-logo.png?v=25" alt="BREW COFFEE" class="header-logo" id="headerLogo">
             </div>
-            <div class="header-title-stack" id="appTitle" aria-label="ZAYED ALKHAIR and زيد الخير">
+            <div class="header-title-stack" id="appTitle" aria-label="BREW COFFEE">
                 <span class="menu-hero-typewriter typewriter-title" id="heroTypewriter" aria-live="polite">
-                    <span class="menu-hero-typed" id="heroTitleTyped" dir="ltr" lang="en">ZAYED ALKHAIR</span><span class="menu-hero-cursor" id="heroTitleCursor" aria-hidden="true"></span>
+                    <span class="menu-hero-typed" id="heroTitleTyped" dir="ltr" lang="en">BREW COFFEE</span><span class="menu-hero-cursor" id="heroTitleCursor" aria-hidden="true"></span>
                 </span>
             </div>
         </div>
@@ -389,6 +389,13 @@
                 <span class="detail-category" id="detailCategory"></span>
                 <h2 class="detail-title" id="detailTitle"></h2>
                 <p class="detail-desc" id="detailDesc"></p>
+                <div class="detail-sizes-wrap" id="detailSizesWrap" style="display:none;">
+                    <div class="detail-sizes-title">
+                        <span>🥤</span>
+                        <span id="detailSizesTitleText">قەبارە / الحجم / Size</span>
+                    </div>
+                    <div class="detail-sizes-list" id="detailSizesList"></div>
+                </div>
                 <div class="detail-footer">
                     <div>
                         <span class="detail-price" id="detailPrice"></span>
@@ -472,7 +479,7 @@
 
             <div class="cafe-info-head">
                 <div class="cafe-info-logo-wrap">
-                    <img src="images/zayed-logo.png?v=16" alt="ZAYED ALKHAIR" class="cafe-info-logo" onerror="this.style.display='none'">
+                    <img src="images/zayed-logo.png?v=20" alt="BREW COFFEE" class="cafe-info-logo" onerror="this.style.display='none'">
                 </div>
                 <h2 class="cafe-info-title" id="cafeInfoTitle">ZAYED ALKHAIR</h2>
                 <div class="cafe-status-badge is-open" id="cafeStatusBadge">
@@ -548,19 +555,29 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
       import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
       import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, setDoc, writeBatch, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+      import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js";
 
       const firebaseConfig = {
-        apiKey: "AIzaSyAaRgvO5EDrr7vU8MoW8UGVO45c9h1UAqI",
-        authDomain: "zayed-menu-skytower.firebaseapp.com",
-        projectId: "zayed-menu-skytower",
-        storageBucket: "zayed-menu-skytower.firebasestorage.app",
-        messagingSenderId: "1041176038213",
-        appId: "1:1041176038213:web:2d920a41161e5f81d70c2c"
+        apiKey: "AIzaSyCRPdqIjA-S-VwBNt-8FEDDvkkfKfjSK8s",
+        authDomain: "brew-coffee-1cd84.firebaseapp.com",
+        projectId: "brew-coffee-1cd84",
+        storageBucket: "brew-coffee-1cd84.firebasestorage.app",
+        messagingSenderId: "96919307440",
+        appId: "1:96919307440:web:2450c01c4a1bd604e66775",
+        measurementId: "G-X0D6048HLC"
       };
 
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const db = getFirestore(app);
+
+      if (typeof isSupported === 'function') {
+        isSupported().then(function(supported) {
+          if (supported) {
+            window.analytics = getAnalytics(app);
+          }
+        }).catch(function() {});
+      }
 
       window.firebaseApp = app;
       window.auth = auth;
@@ -586,8 +603,8 @@
       window.Timestamp = Timestamp;
     </script>
     <script src="js/firebase.js?v=126"></script>
-    <script src="js/menu-data.js?v=130"></script>
-    <script src="js/app.js?v=169"></script>
+    <script src="js/menu-data.js?v=131"></script>
+    <script src="js/app.js?v=170"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

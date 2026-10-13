@@ -1,5 +1,6 @@
 firebase-debug.log
 .vercel
+.kilo
 .vscode
 .cursor
 .venv

@@ -2453,6 +2453,113 @@ body.light-mode .detail-backdrop {
     position: relative;
 }
 
+/* Detail Sizes Selection (Drinks / Multi-size Items) */
+.detail-sizes-wrap {
+    margin: 10px 0 16px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+}
+
+.detail-sizes-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    margin-bottom: 10px;
+    user-select: none;
+}
+
+.detail-sizes-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.detail-size-btn {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    color: var(--color-text-primary);
+}
+
+.detail-size-btn:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    transform: translateY(-2px);
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.detail-size-btn.active {
+    border-color: var(--color-gold) !important;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%) !important;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.28), 0 0 0 1px var(--color-gold);
+    transform: translateY(-2px);
+}
+
+.detail-size-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.detail-size-btn.active .detail-size-name {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+.detail-size-price {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-gold);
+    margin-top: 4px;
+}
+
+.detail-size-btn.active .detail-size-price {
+    color: color-mix(in srgb, var(--color-gold) 90%, #fff);
+    font-weight: 700;
+}
+
+.card-size-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    background: rgba(212, 175, 55, 0.14);
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 999px;
+    color: var(--color-gold);
+    margin-inline-start: 6px;
+    vertical-align: middle;
+}
+
+@keyframes pricePulse {
+    0% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.08); filter: brightness(1.3); color: #fff; }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.price-pulse {
+    animation: pricePulse 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .detail-footer {
     display: flex;
     align-items: center;

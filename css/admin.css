@@ -3869,3 +3869,280 @@ body.admin-modal-open {
         box-shadow: 0 8px 24px rgba(0,0,0,0.35);
     }
 }
+
+/* ========================================================
+   REORDER / SORT CONTROLS & DRAG/TOUCH REORDERING
+   ======================================================== */
+.admin-table th.admin-th-sort,
+.admin-table td.admin-sort-col {
+    width: 130px;
+    min-width: 120px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.admin-sort-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.admin-reorder-btns {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 2px 4px;
+}
+
+.btn-reorder {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.btn-reorder:hover:not(:disabled) {
+    background: var(--gold);
+    color: #000;
+    transform: scale(1.15);
+}
+
+.btn-reorder:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.admin-order-num {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gold);
+    min-width: 18px;
+    text-align: center;
+}
+
+.admin-drag-grip {
+    cursor: grab;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 8px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    touch-action: none;
+    font-size: 0.95rem;
+    letter-spacing: -2px;
+    transition: all 0.2s ease;
+}
+
+.admin-drag-grip:hover,
+.admin-drag-grip:active {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(var(--gold-rgb), 0.12);
+}
+
+body.admin-reordering-active {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.admin-row.is-dragging {
+    background: rgba(var(--gold-rgb), 0.15) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 2px var(--gold);
+    transform: scale(1.015);
+    opacity: 0.95;
+    z-index: 100;
+    position: relative;
+    cursor: grabbing !important;
+}
+
+/* ========================================================
+   ITEM SIZES & PRICES BUILDER (DRINKS & MULTI-SIZED ITEMS)
+   ======================================================== */
+.admin-sizes-box {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(var(--gold-rgb), 0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 14px;
+}
+
+.admin-sizes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.admin-sizes-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.admin-sizes-btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.admin-sizes-btn-group button {
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.admin-sizes-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.item-sizes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.item-size-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 8px 10px;
+    animation: fadeInRow 0.2s ease;
+}
+
+@keyframes fadeInRow {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.item-size-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 120px;
+    gap: 6px;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .item-size-inputs {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.item-size-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.item-size-sublabel {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.item-size-row input {
+    margin: 0 !important;
+    padding: 6px 10px !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    color: var(--text-primary) !important;
+}
+
+.item-size-row input:focus {
+    border-color: var(--gold) !important;
+    outline: none;
+}
+
+.btn-remove-size {
+    background: rgba(198, 40, 40, 0.15);
+    color: #EF5350;
+    border: 1px solid rgba(198, 40, 40, 0.3);
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    margin-top: 14px;
+}
+
+.btn-remove-size:hover {
+    background: #C62828;
+    color: #fff;
+}
+
+.admin-sizes-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: rgba(var(--gold-rgb), 0.15);
+    border: 1px solid rgba(var(--gold-rgb), 0.3);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.admin-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #1A1A1E, #2A2A30);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 99999;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.admin-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+

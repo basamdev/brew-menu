@@ -1025,11 +1025,58 @@ function normalizeMenuItemEntry(item) {
     return item;
 }
 
+function getItemSortOrder(item) {
+    if (!item) return 999999;
+    var d = (item.data && typeof item.data === 'object') ? item.data : item;
+    var ord = d.order != null ? d.order : item.order;
+    if (ord != null && ord !== '') {
+        var n = Number(ord);
+        if (!isNaN(n)) return n;
+    }
+    return 999999;
+}
+
+function sortMenuItemsList(list) {
+    if (!Array.isArray(list)) return [];
+    return list.slice().sort(function (a, b) {
+        var ao = getItemSortOrder(a);
+        var bo = getItemSortOrder(b);
+        if (ao !== bo) return ao - bo;
+        var idA = String((a && a.id) || '').toLowerCase();
+        var idB = String((b && b.id) || '').toLowerCase();
+        return idA.localeCompare(idB);
+    });
+}
+
+function getCategorySortOrder(cat) {
+    if (!cat) return 999999;
+    var d = (cat.data && typeof cat.data === 'object') ? cat.data : cat;
+    var ord = d.order != null ? d.order : cat.order;
+    if (ord != null && ord !== '') {
+        var n = Number(ord);
+        if (!isNaN(n)) return n;
+    }
+    return 999999;
+}
+
+function sortCategoriesList(list) {
+    if (!Array.isArray(list)) return [];
+    return list.slice().sort(function (a, b) {
+        var ao = getCategorySortOrder(a);
+        var bo = getCategorySortOrder(b);
+        if (ao !== bo) return ao - bo;
+        var idA = String((a && a.id) || '').toLowerCase();
+        var idB = String((b && b.id) || '').toLowerCase();
+        return idA.localeCompare(idB);
+    });
+}
+
 function normalizeMenuItemsList(items) {
     if (!Array.isArray(items)) return [];
-    return items.map(normalizeMenuItemEntry).filter(function (item) {
+    var list = items.map(normalizeMenuItemEntry).filter(function (item) {
         return item && item.category && item.category.toLowerCase().trim() !== 'water';
     });
+    return sortMenuItemsList(list);
 }
 
 function waitForFirebaseDb(maxMs) {
@@ -1089,7 +1136,7 @@ function showFirestoreApiDisabledAlert() {
     window._firestoreApiDisabledAlerted = true;
     var lang = localStorage.getItem('selectedLang') || 'ku';
     var strings = i18n[lang] || i18n.en;
-    var projectId = (window.firebaseConfig && window.firebaseConfig.projectId) || 'zayed-menu-skytower';
+    var projectId = (window.firebaseConfig && window.firebaseConfig.projectId) || 'brew-coffee-1cd84';
     var url = 'https://console.developers.google.com/apis/api/firestore.googleapis.com/overview?project=' + encodeURIComponent(projectId);
     alert('⚠️ ' + (strings.errorPrefix || 'Error:') + '\n\nCloud Firestore API is disabled for this project.\n\nPlease enable it here:\n' + url + '\n\nAfter enabling, wait a few minutes and refresh this page.');
 }
@@ -1254,14 +1301,7 @@ async function loadCategoriesFromFirebase() {
         catSnap.forEach(doc => {
             categories.push({ id: doc.id, data: doc.data() });
         });
-        categories.sort(function (a, b) {
-            var ao = a.data && a.data.order != null ? Number(a.data.order) : NaN;
-            var bo = b.data && b.data.order != null ? Number(b.data.order) : NaN;
-            if (!isNaN(ao) && !isNaN(bo) && ao !== bo) return ao - bo;
-            if (!isNaN(ao) && isNaN(bo)) return -1;
-            if (isNaN(ao) && !isNaN(bo)) return 1;
-            return String(a.id || '').localeCompare(String(b.id || ''));
-        });
+        sortCategoriesList(categories);
         const sig = categories.map(function (c) { return c.id; }).join('|');
         const prev = localStorage.getItem('cachedCategoriesSig') || '';
         safeSetItem('cachedCategories', JSON.stringify(categories));
@@ -1582,6 +1622,9 @@ function renderCategories(items, options) {
             console.error('Error parsing cached categories:', e);
         }
     }
+    if ((!categories || !categories.length) && window.MenuData && typeof window.MenuData.getCategories === 'function') {
+        categories = (window.MenuData.getCategories() || []).slice();
+    }
     var seenCat = {};
     categories = categories.filter(function (c) {
         if (!c || !c.id) return false;
@@ -1590,22 +1633,16 @@ function renderCategories(items, options) {
         seenCat[lower] = true;
         return true;
     });
-    categories.sort(function (a, b) {
-        var ao = (a.data && a.data.order) != null ? Number(a.data.order) : null;
-        var bo = (b.data && b.data.order) != null ? Number(b.data.order) : null;
-        if (ao != null && bo != null) return ao - bo;
-        if (ao != null) return -1;
-        if (bo != null) return 1;
-        return 0;
-    });
+    categories = sortCategoriesList(categories);
     let html = '';
     categories.forEach(cat => {
-        var name = cat.data['name_' + lang] || cat.data.name_en || strings.unnamed;
+        var catData = (cat.data && typeof cat.data === 'object') ? cat.data : cat;
+        var name = catData['name_' + lang] || catData.name_en || catData.name_ku || catData.name_ar || strings.unnamed;
         var safeName = String(name).replace(/"/g, '&quot;');
         var icon;
-        if (cat.data.image) {
+        if (catData.image) {
             icon =
-                '<img class="cat-icon" src="' + cat.data.image + '" alt="' + safeName + '" ' +
+                '<img class="cat-icon" src="' + catData.image + '" alt="' + safeName + '" ' +
                 'onerror="var f=this.nextElementSibling;this.remove();if(f){f.hidden=false;f.classList.add(\'is-visible\');}">' +
                 '<svg class="cat-icon cat-icon-fallback" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/></svg>';
         } else {
@@ -2004,9 +2041,24 @@ function createMenuCard(item, lang, strings) {
     }
 
     const isEmenu = document.body.classList.contains('emenu-layout');
-    const priceText = isEmenu
-        ? (item.price ? item.price.toLocaleString() : '0') + ' د.ع'
-        : (item.price ? item.price.toLocaleString() : '0') + ' IQD';
+    var sizeBadgeHtml = '';
+    var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
+    var priceText = '';
+    if (hasSizes) {
+        var validPrices = item.sizes.map(function(s) { return Number(s.price) || 0; }).filter(function(p) { return p > 0; });
+        var minP = validPrices.length ? Math.min.apply(null, validPrices) : (item.price || 0);
+        var fromWord = lang === 'ku' ? 'لە ' : (lang === 'ar' ? 'من ' : 'From ');
+        var countWord = lang === 'ku' ? (item.sizes.length + ' قەبارە') : (lang === 'ar' ? (item.sizes.length + ' أحجام') : (item.sizes.length + ' sizes'));
+        sizeBadgeHtml = '<span class="card-size-chip">🥤 ' + countWord + '</span>';
+        if (minP && isFinite(minP) && minP > 0) {
+            priceText = fromWord + minP.toLocaleString() + (isEmenu ? ' د.ع' : ' IQD');
+        }
+    }
+    if (!priceText) {
+        priceText = isEmenu
+            ? (item.price ? item.price.toLocaleString() : '0') + ' د.ع'
+            : (item.price ? item.price.toLocaleString() : '0') + ' IQD';
+    }
 
     const isFav = MENU_FEATURES.isFav(item.id);
     const favLabel = isFav ? (strings.removeFromFavorites || 'Remove from favorites') : (strings.addToFavorites || 'Add to favorites');
@@ -2030,7 +2082,7 @@ function createMenuCard(item, lang, strings) {
             </div>
             <div class="menu-card-foot">
                 <div class="menu-card-foot-text">
-                    <span class="menu-card-foot-title">${name}</span>
+                    <span class="menu-card-foot-title">${name}${sizeBadgeHtml}</span>
                     <span class="menu-card-foot-price">${priceText}</span>
                 </div>
                 <div class="menu-card-foot-actions">
@@ -2046,12 +2098,11 @@ function createMenuCard(item, lang, strings) {
                 <div class="menu-card-badge">${categoryName}</div>
             </div>
             <div class="menu-card-body">
-                <h2 class="menu-card-title">${name}</h2>
+                <h2 class="menu-card-title">${name}${sizeBadgeHtml}</h2>
                 ${description ? `<p class="menu-card-desc">${description}</p>` : '<p class="menu-card-desc" style="opacity:0">—</p>'}
                 <div class="menu-card-footer">
                     <div class="price-tag">
-                        ${item.price ? item.price.toLocaleString() : '0'}
-                        <span class="price-currency">IQD</span>
+                        ${priceText}
                     </div>
                     <div class="menu-card-foot-actions">
                         ${favBtnHtml}
@@ -2132,7 +2183,7 @@ function renderMenuItems(items) {
         return;
     }
 
-     const availableItems = items.filter(item => item.available !== false);
+     const availableItems = sortMenuItemsList(items.filter(item => item.available !== false));
 
      // Grouped "All" view: render items inside category sections
      if (_activeCategory === ALL_CATEGORY_ID && availableItems.length > 0) {
@@ -2140,17 +2191,21 @@ function renderMenuItems(items) {
           let categoryOrder = [];
           const categoryExactMap = {};
           try {
-              const cachedCats = JSON.parse(localStorage.getItem('cachedCategories') || '[]');
-              cachedCats.sort(function (a, b) {
-                  var ao = (a.data && a.data.order) != null ? Number(a.data.order) : null;
-                  var bo = (b.data && b.data.order) != null ? Number(b.data.order) : null;
-                  if (ao != null && bo != null) return ao - bo;
-                  if (ao != null) return -1;
-                  if (bo != null) return 1;
-                  return 0;
-              });
-              cachedCats.forEach(function (c) {
-                  if (c.id) {
+              var allCats = [];
+              if (window.MenuData && typeof window.MenuData.getCategories === 'function') {
+                  allCats = (window.MenuData.getCategories() || []).slice();
+              }
+              var cachedCats = JSON.parse(localStorage.getItem('cachedCategories') || '[]');
+              if (Array.isArray(cachedCats)) {
+                  cachedCats.forEach(function (cc) {
+                      if (cc && cc.id && !allCats.some(function (x) { return x && x.id === cc.id; })) {
+                          allCats.push(cc);
+                      }
+                  });
+              }
+              allCats = sortCategoriesList(allCats);
+              allCats.forEach(function (c) {
+                  if (c && c.id) {
                       categoryExactMap[c.id] = c.id;
                       if (categoryOrder.indexOf(c.id) === -1) categoryOrder.push(c.id);
                   }
@@ -2186,7 +2241,8 @@ function renderMenuItems(items) {
 
             const itemsByGroup = {};
             const ungrouped = [];
-            groups[catId].forEach(item => {
+            const sortedGroupItems = sortMenuItemsList(groups[catId]);
+            sortedGroupItems.forEach(item => {
                 const g = (item.group_ku || item.group_ar || item.group_en || item.group || '').trim();
                 if (!g) {
                     ungrouped.push(item);
@@ -2203,10 +2259,10 @@ function renderMenuItems(items) {
                 groupHeading.className = 'group-heading';
                 groupHeading.textContent = g;
                 section.appendChild(groupHeading);
-                itemsByGroup[g].forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
+                sortMenuItemsList(itemsByGroup[g]).forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
             });
 
-            ungrouped.forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
+            sortMenuItemsList(ungrouped).forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
 
             container.appendChild(section);
         });
@@ -2229,7 +2285,8 @@ function renderMenuItems(items) {
 
         const itemsByGroup = {};
         const ungrouped = [];
-        availableItems.forEach(item => {
+        const sortedFlatItems = sortMenuItemsList(availableItems);
+        sortedFlatItems.forEach(item => {
             const g = (item.group_ku || item.group_ar || item.group_en || item.group || '').trim();
             if (!g) {
                 ungrouped.push(item);
@@ -2246,10 +2303,10 @@ function renderMenuItems(items) {
             groupHeading.className = 'group-heading';
             groupHeading.textContent = g;
             section.appendChild(groupHeading);
-            itemsByGroup[g].forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
+            sortMenuItemsList(itemsByGroup[g]).forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
         });
 
-        ungrouped.forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
+        sortMenuItemsList(ungrouped).forEach(item => section.appendChild(createMenuCard(item, lang, strings)));
 
         container.appendChild(section);
     }
@@ -2354,6 +2411,54 @@ function openProductDetail(item) {
     const priceEl = document.getElementById('detailPrice');
     if (priceEl) priceEl.textContent = item.price ? item.price.toLocaleString() : '0';
 
+    // Sizes handling (e.g. Small, Medium, Big for drinks)
+    var sizesWrap = document.getElementById('detailSizesWrap');
+    var sizesList = document.getElementById('detailSizesList');
+    var sizesTitleText = document.getElementById('detailSizesTitleText');
+    if (sizesTitleText) {
+        var sizesLabel = (lang === 'ku') ? 'قەبارە هەڵبژێرە:' : ((lang === 'ar') ? 'اختر الحجم:' : 'Select Size:');
+        sizesTitleText.textContent = sizesLabel;
+    }
+
+    if (sizesWrap && sizesList) {
+        sizesList.innerHTML = '';
+        if (item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
+            sizesWrap.style.display = 'block';
+            var selectedSize = item.sizes[0];
+            window._selectedDetailSize = selectedSize;
+            if (priceEl && selectedSize.price) {
+                priceEl.textContent = Number(selectedSize.price).toLocaleString();
+            }
+
+            item.sizes.forEach(function (sz, idx) {
+                var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || ('Size ' + (idx + 1));
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'detail-size-btn' + (idx === 0 ? ' active' : '');
+                btn.setAttribute('data-idx', idx);
+                btn.innerHTML =
+                    '<span class="detail-size-name">' + String(szName || 'Size') + '</span>' +
+                    '<span class="detail-size-price">' + Number(sz.price || 0).toLocaleString() + ' IQD</span>';
+
+                btn.addEventListener('click', function () {
+                    sizesList.querySelectorAll('.detail-size-btn').forEach(function (b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    window._selectedDetailSize = sz;
+                    if (priceEl && sz.price) {
+                        priceEl.textContent = Number(sz.price).toLocaleString();
+                        priceEl.classList.remove('price-pulse');
+                        void priceEl.offsetWidth;
+                        priceEl.classList.add('price-pulse');
+                    }
+                });
+                sizesList.appendChild(btn);
+            });
+        } else {
+            sizesWrap.style.display = 'none';
+            window._selectedDetailSize = null;
+        }
+    }
+
     // Video button
     const videoBtn = document.getElementById('videoPlayBtn');
     if (videoBtn) {
@@ -2386,6 +2491,7 @@ function closeProductDetail() {
         unlockPageScroll();
     }
     _currentDetailItem = null;
+    window._selectedDetailSize = null;
 }
 
 /* ========================================
@@ -2617,11 +2723,11 @@ function applyLanguageUI(lang) {
 
     if (cachedMenuItems.length > 0) {
         renderCategories(cachedMenuItems, { forceRebuild: true, autoSelect: false });
-        if (_activeCategory) {
-            switchCategory(_activeCategory, { silent: true });
-        } else {
-            autoSelectCategoryAfterRender();
-        }
+        var targetCat = _activeCategory || ALL_CATEGORY_ID;
+        renderMenuItems(filterItemsByCategory(cachedMenuItems, targetCat));
+        renderMenuCardsWithFeatures();
+        if (window._observeCategorySections) window._observeCategorySections();
+        setCategoryPillActive(targetCat);
     }
 
     if (_currentDetailItem) {
@@ -3336,8 +3442,9 @@ function setupMenuThemePicker() {
 }
 
 var HERO_TYPE_PHRASES = [
-    { text: 'ZAYED ALKHAIR', dir: 'ltr', lang: 'en' },
-    { text: 'زيد الخير', dir: 'rtl', lang: 'ar' }
+    { text: 'BREW COFFEE', dir: 'ltr', lang: 'en' },
+    { text: 'بريو كوفي', dir: 'rtl', lang: 'ar' },
+    { text: 'بروو كۆفی', dir: 'rtl', lang: 'ku' }
 ];
 
 function heroTypeChars(str) {

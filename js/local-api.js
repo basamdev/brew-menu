@@ -57,7 +57,7 @@ function apiRequest(endpoint, options) {
     }).catch(function(err) {
         var msg = (err && err.message) ? err.message : 'Network Error';
         if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1 || msg.indexOf('Network Error') !== -1) {
-            console.error('[API] Network error for:', url, '| origin:', window.location.origin, '| Make sure you are using http://localhost/shawarma-demeshq-menu/ not 127.0.0.1:5501');
+            console.error('[API] Network error for:', url, '| origin:', window.location.origin, '| Make sure you are using http://localhost/brew-coffee/ not 127.0.0.1:5501');
         }
         throw err;
     });

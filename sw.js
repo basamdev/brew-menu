@@ -1,15 +1,18 @@
-const CACHE_NAME = 'zayed-v125';
+const CACHE_NAME = 'zayed-v133';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js',
-    'https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js'
+    'https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js',
+    'https://www.gstatic.com/firebasejs/12.17.0/firebase-analytics.js'
 ];
-// Relative paths — the app is served from a subfolder (e.g. /shawarma-demeshq-menu/),
+// Relative paths — the app is served from a subfolder (e.g. /brew-coffee/),
 // so root-absolute paths like '/index.html' would 404 and break install.
 const STATIC_ASSETS = [
     './manifest.json',
     './images/zayed-logo.png',
+    './images/Brew-logo.png',
+    './images/smart-serve-logo.png',
     './assets/icon-192.png',
     './assets/icon-512.png',
     './assets/icon-512-maskable.png',
