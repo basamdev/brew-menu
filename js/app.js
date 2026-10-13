@@ -2049,12 +2049,15 @@ function createMenuCard(item, lang, strings) {
     var priceText = '';
     if (hasSizes) {
         var validPrices = item.sizes.map(function(s) { return Number(s.price) || 0; }).filter(function(p) { return p > 0; });
-        var minP = validPrices.length ? Math.min.apply(null, validPrices) : (item.price || 0);
-        var fromWord = lang === 'ku' ? 'لە ' : (lang === 'ar' ? 'من ' : 'From ');
-        var countWord = lang === 'ku' ? (item.sizes.length + ' قەبارە') : (lang === 'ar' ? (item.sizes.length + ' أحجام') : (item.sizes.length + ' sizes'));
-        sizeBadgeHtml = '<span class="card-size-chip">🥤 ' + countWord + '</span>';
-        if (minP && isFinite(minP) && minP > 0) {
-            priceText = fromWord + minP.toLocaleString() + (isEmenu ? ' د.ع' : ' IQD');
+        if (validPrices.length > 0) {
+            var minP = Math.min.apply(null, validPrices);
+            var maxP = Math.max.apply(null, validPrices);
+            if (minP !== maxP) {
+                // Matching screenshot 1: renders "6,000 - 2,000" in RTL / "2,000 - 6,000" in LTR
+                priceText = '<span class="card-price-range">' + minP.toLocaleString() + ' - ' + maxP.toLocaleString() + '</span>';
+            } else {
+                priceText = minP.toLocaleString() + (isEmenu ? ' د.ع' : ' IQD');
+            }
         }
     }
     if (!priceText) {
@@ -2130,6 +2133,10 @@ function createMenuCard(item, lang, strings) {
     if (cartBtn) {
         cartBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            if (hasSizes) {
+                openProductDetail(item);
+                return;
+            }
             addToCart(item);
             cartBtn.classList.add('added');
             setTimeout(() => cartBtn.classList.remove('added'), 600);
@@ -2412,14 +2419,14 @@ function openProductDetail(item) {
     if (descEl) descEl.textContent = description;
 
     const priceEl = document.getElementById('detailPrice');
-    if (priceEl) priceEl.textContent = item.price ? item.price.toLocaleString() : '0';
+    if (priceEl) priceEl.textContent = item.price ? Number(item.price).toLocaleString() : '0';
 
-    // Sizes handling (e.g. Small, Medium, Big for drinks)
+    // Sizes & Scoops handling (Matching Screenshot 2: "هەڵبژێرە" / Accordion rows)
     var sizesWrap = document.getElementById('detailSizesWrap');
     var sizesList = document.getElementById('detailSizesList');
     var sizesTitleText = document.getElementById('detailSizesTitleText');
     if (sizesTitleText) {
-        var sizesLabel = (lang === 'ku') ? 'قەبارە هەڵبژێرە:' : ((lang === 'ar') ? 'اختر الحجم:' : 'Select Size:');
+        var sizesLabel = (lang === 'ku') ? 'هەڵبژێرە' : ((lang === 'ar') ? 'اختر' : 'Choose / Select');
         sizesTitleText.textContent = sizesLabel;
     }
 
@@ -2434,18 +2441,21 @@ function openProductDetail(item) {
             }
 
             item.sizes.forEach(function (sz, idx) {
-                var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || ('Size ' + (idx + 1));
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'detail-size-btn' + (idx === 0 ? ' active' : '');
-                btn.setAttribute('data-idx', idx);
-                btn.innerHTML =
-                    '<span class="detail-size-name">' + String(szName || 'Size') + '</span>' +
-                    '<span class="detail-size-price">' + Number(sz.price || 0).toLocaleString() + ' IQD</span>';
+                var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || ('Option ' + (idx + 1));
+                var rowBtn = document.createElement('button');
+                rowBtn.type = 'button';
+                rowBtn.className = 'detail-size-row' + (idx === 0 ? ' active' : '');
+                rowBtn.setAttribute('data-idx', idx);
+                rowBtn.innerHTML =
+                    '<div class="detail-size-left">' +
+                        '<div class="detail-size-radio"><span class="detail-size-radio-dot"></span></div>' +
+                        '<span class="detail-size-name">' + String(szName || 'Option') + '</span>' +
+                    '</div>' +
+                    '<span class="detail-size-price">' + (lang === 'ku' || lang === 'ar' ? 'IQD ' : '') + Number(sz.price || 0).toLocaleString() + (lang === 'en' ? ' IQD' : '') + '</span>';
 
-                btn.addEventListener('click', function () {
-                    sizesList.querySelectorAll('.detail-size-btn').forEach(function (b) { b.classList.remove('active'); });
-                    btn.classList.add('active');
+                rowBtn.addEventListener('click', function () {
+                    sizesList.querySelectorAll('.detail-size-row').forEach(function (b) { b.classList.remove('active'); });
+                    rowBtn.classList.add('active');
                     window._selectedDetailSize = sz;
                     if (priceEl && sz.price) {
                         priceEl.textContent = Number(sz.price).toLocaleString();
@@ -2454,12 +2464,42 @@ function openProductDetail(item) {
                         priceEl.classList.add('price-pulse');
                     }
                 });
-                sizesList.appendChild(btn);
+                sizesList.appendChild(rowBtn);
             });
         } else {
             sizesWrap.style.display = 'none';
             window._selectedDetailSize = null;
         }
+    }
+
+    // Wire up Detail Add-to-Cart Button
+    var detailAddCartBtn = document.getElementById('detailAddCartBtn');
+    if (detailAddCartBtn) {
+        var addText = (lang === 'ku') ? 'زیادکردن بۆ سەبەتە' : ((lang === 'ar') ? 'إضافة إلى السلة' : 'Add to Cart');
+        var addTextSpan = document.getElementById('detailAddCartText');
+        if (addTextSpan) addTextSpan.textContent = addText;
+        detailAddCartBtn.onclick = function () {
+            if (!_currentDetailItem) return;
+            var itemToAdd = Object.assign({}, _currentDetailItem);
+            if (window._selectedDetailSize) {
+                var sz = window._selectedDetailSize;
+                var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || '';
+                var baseName = _currentDetailItem['name_' + lang] || _currentDetailItem.name_en || _currentDetailItem.name;
+                itemToAdd = Object.assign({}, _currentDetailItem, {
+                    id: _currentDetailItem.id + '_' + (sz.name_en || sz.name_ku || sz.price),
+                    name: baseName + (szName ? ' (' + szName + ')' : ''),
+                    price: Number(sz.price || _currentDetailItem.price || 0),
+                    selectedSizeName: szName,
+                    originalItemId: _currentDetailItem.id
+                });
+            }
+            addToCart(itemToAdd);
+            detailAddCartBtn.classList.add('added');
+            setTimeout(function () {
+                detailAddCartBtn.classList.remove('added');
+                closeProductDetail();
+            }, 300);
+        };
     }
 
     // Video button
@@ -3608,7 +3648,9 @@ function saveCart() {
 
 function addToCart(item) {
     var lang = localStorage.getItem('selectedLang') || 'ku';
-    var name = item['name_' + lang] || item.name_en || item.name;
+    var name = item.selectedSizeName
+        ? item.name
+        : (item['name_' + lang] || item.name_en || item.name);
     var existing = cartItems.find(function(i) { return i.id === item.id; });
     
     if (existing) {
@@ -3617,7 +3659,7 @@ function addToCart(item) {
         cartItems.push({
             id: item.id,
             name: name,
-            price: item.price || 0,
+            price: Number(item.price || 0),
             image: item.image || '',
             quantity: 1
         });

@@ -1975,25 +1975,28 @@ function loadManageItems() {
                         '<div class="form-group admin-sizes-box">' +
                             '<div class="admin-sizes-header">' +
                                 '<label class="admin-sizes-label">' +
-                                    '<span class="admin-sizes-icon">🥤</span>' +
-                                    '<span>' + (lang === 'ku' ? 'قەبارە و نرخەکان (وەک خواردنەوەکان)' : (lang === 'ar' ? 'الأحجام والأسعار (مثل المشروبات)' : 'Sizes & Prices (e.g. Drinks)')) + '</span>' +
+                                    '<span class="admin-sizes-icon">🍨</span>' +
+                                    '<span>' + (lang === 'ku' ? 'قەبارە / سکۆپ و نرخەکان' : (lang === 'ar' ? 'الأحجام / السكوب والأسعار' : 'Sizes / Scoops & Prices')) + '</span>' +
                                 '</label>' +
                                 '<div class="admin-sizes-btn-group">' +
-                                    '<button type="button" class="btn-secondary btn-sm" id="btnPresetDrinkSizes" title="Add Small, Medium, Big">' +
-                                        '⚡ ' + (lang === 'ku' ? 'بچووک / ناوەند / گەورە' : (lang === 'ar' ? 'صغير / متوسط / كبير' : 'Small / Medium / Big')) +
+                                    '<button type="button" class="btn-secondary btn-sm" id="btnPresetIcecream" title="Add 1 Scoop, 2 Scoops, 3 Scoops">' +
+                                        '🍨 ' + (lang === 'ku' ? '١، ٢، ٣ سکۆپ' : (lang === 'ar' ? '١، ٢، ٣ سكوب' : '1, 2, 3 Scoops')) +
+                                    '</button>' +
+                                    '<button type="button" class="btn-secondary btn-sm" id="btnPresetDrinkSizes" title="Add Mini, Medium, Big">' +
+                                        '🥤 ' + (lang === 'ku' ? 'پەرداخ (Mini / Med / Big)' : (lang === 'ar' ? 'كوب (صغير / متوسط / كبير)' : 'Cup (Mini / Med / Big)')) +
                                     '</button>' +
                                     '<button type="button" class="btn-primary btn-sm" id="btnAddSizeRow">' +
-                                        '+ ' + (lang === 'ku' ? 'قەبارە' : (lang === 'ar' ? 'حجم' : 'Add Size')) +
+                                        '+ ' + (lang === 'ku' ? 'زیادکردنی بژاردە' : (lang === 'ar' ? 'إضافة خيار' : 'Add Option')) +
                                     '</button>' +
                                 '</div>' +
                             '</div>' +
                             '<div id="itemSizesList" class="item-sizes-list"></div>' +
                             '<small class="admin-sizes-hint">' +
                                 (lang === 'ku'
-                                    ? 'بۆ خواردنەوە یان خواردن: دەتوانیت چەند قەبارەیەک دیاری بکەیت (بچووک، ناوەند، گەورە) لەگەڵ نرخی هەر قەبارەیەک.'
+                                    ? 'بۆ ئایس کرێم (١، ٢، ٣ سکۆپ) یان خواردنەوە و پەرداخ (بچووک Mini، ناوەند Medium، گەورە Big) دەتوانیت نرخەکان دیاری بکەیت.'
                                     : (lang === 'ar'
-                                        ? 'للمشروبات أو الأطعمة: يمكنك تحديد أحجام متعددة (صغير، متوسط، كبير) مع سعر كل حجم.'
-                                        : 'For drinks or food: Add multiple sizes (Small, Medium, Big) with individual prices.')) +
+                                        ? 'للآيس كريم (١، ٢، ٣ سكوب) أو المشروبات (صغير Mini، متوسط Medium، كبير Big) يمكنك تحديد الأسعار لكل خيار.'
+                                        : 'For Ice Cream (1, 2, 3 Scoops) or Drinks/Glasses (Mini, Medium, Big), add options with individual prices.')) +
                             '</small>' +
                         '</div>' +
                          '<div class="form-group"><label>' + S.category + '</label>' +
@@ -3326,16 +3329,43 @@ function wireItemEvents() {
         });
     }
 
+    // Preset 1: Ice Cream Scoops (1 Scoop, 2 Scoops, 3 Scoops)
+    var btnPresetIcecream = document.getElementById('btnPresetIcecream');
+    if (btnPresetIcecream) {
+        btnPresetIcecream.addEventListener('click', function () {
+            var list = document.getElementById('itemSizesList');
+            if (list) {
+                var baseP = parseFloat((document.getElementById('itemPrice') || {}).value || 0);
+                var p1 = baseP > 0 ? baseP : 2000;
+                var p2 = baseP > 0 ? (baseP * 2) : 4000;
+                var p3 = baseP > 0 ? (baseP * 3) : 6000;
+                var presets = [
+                    { name_ku: '١ سکۆپ', name_ar: '١ سكوب', name_en: '1 Scoop', price: p1 },
+                    { name_ku: '٢ سکۆپ', name_ar: '٢ سكوب', name_en: '2 Scoops', price: p2 },
+                    { name_ku: '٣ سکۆپ', name_ar: '٣ سكوب', name_en: '3 Scoops', price: p3 }
+                ];
+                list.innerHTML = '';
+                presets.forEach(function (sz) {
+                    list.appendChild(createAdminSizeRow(sz));
+                });
+            }
+        });
+    }
+
+    // Preset 2: Cup / Glass Sizes (Mini, Medium, Big)
     var btnPresetSizes = document.getElementById('btnPresetDrinkSizes');
     if (btnPresetSizes) {
         btnPresetSizes.addEventListener('click', function () {
             var list = document.getElementById('itemSizesList');
             if (list) {
                 var baseP = parseFloat((document.getElementById('itemPrice') || {}).value || 0);
+                var p1 = baseP > 0 ? baseP : 2500;
+                var p2 = baseP > 0 ? (baseP + 1000) : 3500;
+                var p3 = baseP > 0 ? (baseP + 2000) : 4500;
                 var presets = [
-                    { name_ku: 'بچووک', name_ar: 'صغير', name_en: 'Small', price: baseP > 0 ? baseP : '' },
-                    { name_ku: 'ناوەند', name_ar: 'متوسط', name_en: 'Medium', price: baseP > 0 ? baseP + 500 : '' },
-                    { name_ku: 'گەورە', name_ar: 'كبير', name_en: 'Big', price: baseP > 0 ? baseP + 1000 : '' }
+                    { name_ku: 'بچووک (Mini)', name_ar: 'صغير (Mini)', name_en: 'Mini (Small)', price: p1 },
+                    { name_ku: 'ناوەند (Medium)', name_ar: 'متوسط (Medium)', name_en: 'Medium', price: p2 },
+                    { name_ku: 'گەورە (Big)', name_ar: 'كبير (Big)', name_en: 'Big (Large)', price: p3 }
                 ];
                 list.innerHTML = '';
                 presets.forEach(function (sz) {
