@@ -2053,17 +2053,18 @@ function createMenuCard(item, lang, strings) {
             var minP = Math.min.apply(null, validPrices);
             var maxP = Math.max.apply(null, validPrices);
             if (minP !== maxP) {
-                // Matching screenshot 1: renders "6,000 - 2,000" in RTL / "2,000 - 6,000" in LTR
-                priceText = '<span class="card-price-range">' + minP.toLocaleString() + ' - ' + maxP.toLocaleString() + '</span>';
+                // Screenshot 1: In RTL displays "6,000 - 2,000" / in LTR "2,000 - 6,000"
+                var rangeStr = (lang === 'en')
+                    ? (minP.toLocaleString() + ' - ' + maxP.toLocaleString())
+                    : (maxP.toLocaleString() + ' - ' + minP.toLocaleString());
+                priceText = '<span class="card-price-range">' + rangeStr + '</span>';
             } else {
-                priceText = minP.toLocaleString() + (isEmenu ? ' د.ع' : ' IQD');
+                priceText = '<span class="card-price-range">' + minP.toLocaleString() + '</span>';
             }
         }
     }
     if (!priceText) {
-        priceText = isEmenu
-            ? (item.price ? item.price.toLocaleString() : '0') + ' د.ع'
-            : (item.price ? item.price.toLocaleString() : '0') + ' IQD';
+        priceText = '<span class="card-price-single">' + (item.price ? Number(item.price).toLocaleString() : '0') + (isEmenu ? '' : ' IQD') + '</span>';
     }
 
     const isFav = MENU_FEATURES.isFav(item.id);
@@ -2080,20 +2081,22 @@ function createMenuCard(item, lang, strings) {
             <div class="menu-card-img-wrapper">
                 <img src="${imageUrl}" alt="${name}" class="menu-card-img" loading="lazy"
                      onerror="this.onerror=null;this.src='${fallbackImage}';">
+                ${hasSizes ? '' : `
                 <button class="menu-card-cart menu-card-add" data-item-id="${item.id}" aria-label="Add to Cart" type="button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
                     </svg>
-                </button>
+                </button>`}
             </div>
             <div class="menu-card-foot">
                 <div class="menu-card-foot-text">
-                    <span class="menu-card-foot-title">${name}${sizeBadgeHtml}</span>
+                    <span class="menu-card-foot-title">${name}</span>
                     <span class="menu-card-foot-price">${priceText}</span>
                 </div>
+                ${hasSizes ? '' : `
                 <div class="menu-card-foot-actions">
                     ${favBtnHtml}
-                </div>
+                </div>`}
             </div>
         `;
     } else {
@@ -2421,85 +2424,34 @@ function openProductDetail(item) {
     const priceEl = document.getElementById('detailPrice');
     if (priceEl) priceEl.textContent = item.price ? Number(item.price).toLocaleString() : '0';
 
-    // Sizes & Scoops handling (Matching Screenshot 2: "هەڵبژێرە" / Accordion rows)
+    // Sizes & Scoops handling (Matching Screenshot 2: Clean luxury rows "IQD 2,000 ... ١ سکۆپ")
     var sizesWrap = document.getElementById('detailSizesWrap');
     var sizesList = document.getElementById('detailSizesList');
-    var sizesTitleText = document.getElementById('detailSizesTitleText');
-    if (sizesTitleText) {
-        var sizesLabel = (lang === 'ku') ? 'هەڵبژێرە' : ((lang === 'ar') ? 'اختر' : 'Choose / Select');
-        sizesTitleText.textContent = sizesLabel;
-    }
+    var singlePriceWrap = document.getElementById('detailSinglePriceWrap');
 
-    if (sizesWrap && sizesList) {
-        sizesList.innerHTML = '';
-        if (item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
-            sizesWrap.style.display = 'block';
-            var selectedSize = item.sizes[0];
-            window._selectedDetailSize = selectedSize;
-            if (priceEl && selectedSize.price) {
-                priceEl.textContent = Number(selectedSize.price).toLocaleString();
-            }
-
+    if (item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
+        if (sizesWrap) sizesWrap.style.display = 'block';
+        if (singlePriceWrap) singlePriceWrap.style.display = 'none';
+        if (sizesList) {
+            sizesList.innerHTML = '';
             item.sizes.forEach(function (sz, idx) {
                 var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || ('Option ' + (idx + 1));
-                var rowBtn = document.createElement('button');
-                rowBtn.type = 'button';
-                rowBtn.className = 'detail-size-row' + (idx === 0 ? ' active' : '');
-                rowBtn.setAttribute('data-idx', idx);
-                rowBtn.innerHTML =
-                    '<div class="detail-size-left">' +
-                        '<div class="detail-size-radio"><span class="detail-size-radio-dot"></span></div>' +
-                        '<span class="detail-size-name">' + String(szName || 'Option') + '</span>' +
-                    '</div>' +
-                    '<span class="detail-size-price">' + (lang === 'ku' || lang === 'ar' ? 'IQD ' : '') + Number(sz.price || 0).toLocaleString() + (lang === 'en' ? ' IQD' : '') + '</span>';
-
-                rowBtn.addEventListener('click', function () {
-                    sizesList.querySelectorAll('.detail-size-row').forEach(function (b) { b.classList.remove('active'); });
-                    rowBtn.classList.add('active');
-                    window._selectedDetailSize = sz;
-                    if (priceEl && sz.price) {
-                        priceEl.textContent = Number(sz.price).toLocaleString();
-                        priceEl.classList.remove('price-pulse');
-                        void priceEl.offsetWidth;
-                        priceEl.classList.add('price-pulse');
-                    }
-                });
-                sizesList.appendChild(rowBtn);
+                var rowEl = document.createElement('div');
+                rowEl.className = 'detail-size-row';
+                rowEl.innerHTML =
+                    '<span class="detail-size-name">' + String(szName || '') + '</span>' +
+                    '<span class="detail-size-price">IQD ' + Number(sz.price || 0).toLocaleString() + '</span>';
+                sizesList.appendChild(rowEl);
             });
-        } else {
-            sizesWrap.style.display = 'none';
-            window._selectedDetailSize = null;
         }
-    }
-
-    // Wire up Detail Add-to-Cart Button
-    var detailAddCartBtn = document.getElementById('detailAddCartBtn');
-    if (detailAddCartBtn) {
-        var addText = (lang === 'ku') ? 'زیادکردن بۆ سەبەتە' : ((lang === 'ar') ? 'إضافة إلى السلة' : 'Add to Cart');
-        var addTextSpan = document.getElementById('detailAddCartText');
-        if (addTextSpan) addTextSpan.textContent = addText;
-        detailAddCartBtn.onclick = function () {
-            if (!_currentDetailItem) return;
-            var itemToAdd = Object.assign({}, _currentDetailItem);
-            if (window._selectedDetailSize) {
-                var sz = window._selectedDetailSize;
-                var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || '';
-                var baseName = _currentDetailItem['name_' + lang] || _currentDetailItem.name_en || _currentDetailItem.name;
-                itemToAdd = Object.assign({}, _currentDetailItem, {
-                    id: _currentDetailItem.id + '_' + (sz.name_en || sz.name_ku || sz.price),
-                    name: baseName + (szName ? ' (' + szName + ')' : ''),
-                    price: Number(sz.price || _currentDetailItem.price || 0),
-                    selectedSizeName: szName,
-                    originalItemId: _currentDetailItem.id
-                });
+    } else {
+        if (sizesWrap) sizesWrap.style.display = 'none';
+        if (singlePriceWrap) {
+            singlePriceWrap.style.display = 'flex';
+            if (priceEl) {
+                priceEl.textContent = 'IQD ' + (item.price ? Number(item.price).toLocaleString() : '0');
             }
-            addToCart(itemToAdd);
-            detailAddCartBtn.classList.add('added');
-            setTimeout(function () {
-                detailAddCartBtn.classList.remove('added');
-                closeProductDetail();
-            }, 300);
-        };
+        }
     }
 
     // Video button
