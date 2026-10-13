@@ -217,31 +217,37 @@
         }
 
         .top-logo-badge {
-            width: 44px;
-            height: 44px;
-            min-width: 44px;
-            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 0;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #000000;
-            box-shadow: 0 0 14px var(--neon-blue-glow), 0 3px 10px rgba(0, 0, 0, 0.7);
-            border: 1.5px solid rgba(0, 240, 255, 0.55);
-            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            padding: 0;
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         .top-brand-group:hover .top-logo-badge {
-            transform: scale(1.06);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.85), 0 4px 14px rgba(0, 0, 0, 0.8);
+            transform: scale(1.08);
         }
 
         .top-logo-img {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border-radius: 50%;
+            border-radius: 0;
             display: block;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.75)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85));
+            transition: filter 0.28s ease, transform 0.28s ease;
+        }
+
+        .top-brand-group:hover .top-logo-img {
+            filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.95)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.7)) drop-shadow(0 5px 12px rgba(0, 0, 0, 0.9));
         }
 
         /* Animated Title beside Logo */
@@ -763,9 +769,9 @@
         /* Mobile Layout Adjustments */
         @media (max-width: 400px) {
             .top-logo-badge {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
             }
             .typewriter-text {
                 font-size: 0.98rem;

@@ -378,15 +378,14 @@ body.light-mode.has-video-bg:not(.category-selected) .bg-overlay {
 }
 
 .header-logo {
-    width: 74px;
-    height: 74px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(242, 198, 89, 0.82);
-    box-shadow:
-        0 0 0 4px rgba(207, 149, 42, 0.16),
-        0 8px 24px rgba(207, 149, 42, 0.3),
-        0 0 32px rgba(207, 149, 42, 0.2);
+    width: 56px;
+    height: 56px;
+    border-radius: 0;
+    object-fit: contain;
+    border: none;
+    box-shadow: none;
+    filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.75)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85));
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s ease;
 }
 
 .header-title-stack {
@@ -6533,25 +6532,26 @@ body.emenu-layout .menu-hero-brand.hero-theme-pulse .menu-hero-logo-ring {
 }
 
 .cafe-info-logo-wrap {
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    padding: 3px;
-    background: linear-gradient(145deg, #D4A845 0%, #B8860B 48%, #8B6914 100%);
-    box-shadow:
-        0 10px 28px rgba(184, 134, 11, 0.28),
-        0 2px 10px rgba(184, 134, 11, 0.22);
+    width: 90px;
+    height: 90px;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cafe-info-logo {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
+    border-radius: 0;
     object-fit: contain;
     background: transparent;
     border: none;
     box-shadow: none;
-    filter: drop-shadow(0 6px 14px rgba(184, 134, 11, 0.35));
+    filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.8)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
 }
 
 .cafe-info-title {
@@ -7651,15 +7651,21 @@ body.emenu-layout .top-sticky-wrapper .menu-header {
     gap: 8px;
 }
 
-/* Logo ring */
+/* Logo badge - Luxury Diamond squircle contour matching Brew Logo (No circular ring) */
 body.emenu-layout .header-logo-ring {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    padding: 3px;
-    background: conic-gradient(from 180deg, #F2C659, #3ECF8E, #F2C659, #2BB777, #F2C659);
-    box-shadow: 0 0 0 3px rgba(242, 198, 89, 0.12), 0 8px 22px rgba(0, 0, 0, 0.35);
-    animation: logoRingSpin 8s linear infinite;
+    width: 54px;
+    height: 54px;
+    min-width: 54px;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    animation: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes logoRingSpin {
@@ -7671,10 +7677,19 @@ body.emenu-layout .header-logo-ring .header-logo {
     width: 100% !important;
     height: 100% !important;
     display: block;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(15, 42, 29, 0.65) !important;
+    border-radius: 0 !important;
+    object-fit: contain !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
+    filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.75)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85)) !important;
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s ease;
+}
+
+body.emenu-layout .header-brand:hover .header-logo,
+body.emenu-layout .header-logo-ring:hover .header-logo {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.95)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.7)) drop-shadow(0 5px 12px rgba(0, 0, 0, 0.9)) !important;
 }
 
 body.emenu-layout .header-brand {
@@ -8064,12 +8079,13 @@ body.emenu-layout .top-sticky-wrapper .menu-header {
 }
 
 body.emenu-layout .header-logo-ring {
-    width: 48px !important;
-    height: 48px !important;
-    padding: 2px;
-    background: linear-gradient(135deg, #3ECF8E, #F2C659);
-    animation: none;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    width: 52px !important;
+    height: 52px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    animation: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
 }
 
 body.emenu-layout .header-brand {
@@ -9003,7 +9019,7 @@ body.emenu-layout .header-title-stack .menu-hero-cursor {
 }
 
 body.emenu-layout .header-logo-ring {
-    background: linear-gradient(135deg, var(--emenu-accent, #3ECF8E), var(--emenu-price, #E8C56A)) !important;
+    background: transparent !important;
 }
 
 /* Theme button live preview */

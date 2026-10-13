@@ -20,7 +20,84 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=187">
+    <link rel="stylesheet" href="css/style.css?v=188">
+    <style>
+        /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
+        .header-logo-ring,
+        body.emenu-layout .header-logo-ring,
+        body.emenu-layout .top-sticky-wrapper .header-logo-ring {
+            width: 52px !important;
+            height: 52px !important;
+            min-width: 52px !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            animation: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        }
+
+        .header-logo,
+        body.emenu-layout .header-logo,
+        body.emenu-layout .top-sticky-wrapper .header-logo,
+        body.emenu-layout .header-logo-ring .header-logo {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 0 !important;
+            object-fit: contain !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            display: block !important;
+            filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.75)) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.85)) !important;
+            transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s ease !important;
+        }
+
+        .header-brand:hover .header-logo-ring,
+        .header-brand:hover .header-logo,
+        .header-logo-ring:hover .header-logo {
+            transform: scale(1.08) !important;
+            filter: drop-shadow(0 0 16px rgba(0, 245, 212, 0.95)) drop-shadow(0 0 28px rgba(0, 210, 255, 0.7)) drop-shadow(0 5px 12px rgba(0, 0, 0, 0.9)) !important;
+        }
+
+        /* Modal / Cafe Info Diamond Logo */
+        .cafe-info-logo-wrap {
+            width: 90px !important;
+            height: 90px !important;
+            border-radius: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .cafe-info-logo {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 0 !important;
+            object-fit: contain !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            filter: drop-shadow(0 0 12px rgba(0, 210, 255, 0.8)) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85)) !important;
+        }
+
+        @media (max-width: 640px) {
+            .header-logo-ring,
+            body.emenu-layout .header-logo-ring {
+                width: 46px !important;
+                height: 46px !important;
+                min-width: 46px !important;
+            }
+        }
+    </style>
 </head>
 <body class="menu-page emenu-layout" data-menu-theme="mocha">
 <script src="js/menu-license.js?v=2"></script>
@@ -479,7 +556,7 @@
 
             <div class="cafe-info-head">
                 <div class="cafe-info-logo-wrap">
-                    <img src="images/zayed-logo.png?v=20" alt="BREW COFFEE" class="cafe-info-logo" onerror="this.style.display='none'">
+                    <img src="images/Brew-logo.png?v=25" alt="BREW COFFEE" class="cafe-info-logo" onerror="this.style.display='none'">
                 </div>
                 <h2 class="cafe-info-title" id="cafeInfoTitle">ZAYED ALKHAIR</h2>
                 <div class="cafe-status-badge is-open" id="cafeStatusBadge">
