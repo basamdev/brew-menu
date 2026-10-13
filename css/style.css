@@ -7654,19 +7654,23 @@ body.emenu-layout .menu-grid.layout-vertical {
 body.emenu-layout .menu-grid.layout-vertical .menu-card {
     display: flex !important;
     flex-direction: row !important;
-    align-items: stretch !important;
-    height: 104px !important;
-    min-height: 104px !important;
-    max-height: 104px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 122px !important;
+    min-height: 122px !important;
+    max-height: 122px !important;
+    padding: 8px 10px !important;
+    box-sizing: border-box !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-    width: 104px !important;
-    min-width: 104px !important;
-    max-width: 104px !important;
-    height: 104px !important;
-    min-height: 104px !important;
-    max-height: 104px !important;
+    width: 106px !important;
+    min-width: 106px !important;
+    max-width: 106px !important;
+    height: 106px !important;
+    min-height: 106px !important;
+    max-height: 106px !important;
+    border-radius: 14px !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
@@ -7754,10 +7758,13 @@ body.emenu-layout .menu-grid.layout-vertical .category-heading {
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 104px !important;
-        min-width: 104px !important;
-        max-width: 104px !important;
-        height: 104px !important;
+        width: 106px !important;
+        min-width: 106px !important;
+        max-width: 106px !important;
+        height: 106px !important;
+        min-height: 106px !important;
+        max-height: 106px !important;
+        border-radius: 14px !important;
     }
 }
 
@@ -10275,18 +10282,18 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card {
         grid-column: auto !important;
         width: 100% !important;
-        height: 104px !important;
-        min-height: 104px !important;
-        max-height: 104px !important;
+        height: 122px !important;
+        min-height: 122px !important;
+        max-height: 122px !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
-        width: 104px !important;
-        min-width: 104px !important;
-        max-width: 104px !important;
-        height: 104px !important;
-        min-height: 104px !important;
-        max-height: 104px !important;
+        width: 106px !important;
+        min-width: 106px !important;
+        max-width: 106px !important;
+        height: 106px !important;
+        min-height: 106px !important;
+        max-height: 106px !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot {
