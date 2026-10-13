@@ -2454,66 +2454,171 @@ body.light-mode .detail-backdrop {
 
 /* Detail Sizes List - Minimalist Luxury Showcase (Screenshot 2) */
 .detail-sizes-wrap {
-    margin: 14px 0 0;
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin: 14px 0 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-top: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.08)) !important;
+    border-radius: 0 !important;
+}
+
+.detail-sizes-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 6px 12px !important;
+    border-bottom: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.08)) !important;
+    user-select: none;
+    cursor: default;
+}
+
+.detail-sizes-header-title {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--emenu-text, #FAF0E6) !important;
+    letter-spacing: 0;
+    transition: color 0.3s ease;
+}
+
+html[lang="ku"] .detail-sizes-header-title,
+body[data-lang="ku"] .detail-sizes-header-title,
+body.is-lang-ku .detail-sizes-header-title {
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+    font-size: 1.12rem !important;
+    font-weight: 700 !important;
+}
+
+html[lang="ar"] .detail-sizes-header-title,
+body[data-lang="ar"] .detail-sizes-header-title,
+body.is-lang-ar .detail-sizes-header-title {
+    font-family: var(--font-ar, var(--font-arabic, 'Noto Sans Arabic', 'Noto Kufi Arabic', 'Vazirmatn', sans-serif)) !important;
+    font-size: 1.12rem !important;
+    font-weight: 700 !important;
+}
+
+html[lang="en"] .detail-sizes-header-title,
+body[data-lang="en"] .detail-sizes-header-title,
+body.is-lang-en .detail-sizes-header-title {
+    font-family: var(--font-en, 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+    letter-spacing: 0.06em !important;
+    font-size: 0.95rem !important;
+    text-transform: uppercase !important;
+}
+
+.detail-sizes-header-arrow {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: var(--emenu-price, #E8C56A) !important;
+    opacity: 0.95;
+    transition: transform 0.25s ease, color 0.3s ease;
 }
 
 .detail-sizes-list {
-    display: flex;
-    flex-direction: column;
-    margin: 2px 0 0;
-    padding: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
 }
 
 .detail-size-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    background: transparent;
-    box-sizing: border-box;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 13px 12px !important;
+    border: 1px solid transparent !important;
+    border-bottom: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.06)) !important;
+    background: transparent !important;
+    border-radius: 14px !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    transition: background 0.22s ease, transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .detail-size-row:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid transparent !important;
+}
+
+.detail-size-row:hover {
+    background: color-mix(in srgb, var(--emenu-price, #E8C56A) 8%, transparent) !important;
+    transform: translateY(-1px);
+}
+
+.detail-size-row.active {
+    background: color-mix(in srgb, var(--emenu-price, #E8C56A) 15%, transparent) !important;
+    border-color: color-mix(in srgb, var(--emenu-price, #E8C56A) 34%, transparent) !important;
+    box-shadow: 0 4px 18px -4px color-mix(in srgb, var(--emenu-price, #E8C56A) 24%, transparent) !important;
+    transform: translateY(-1px);
 }
 
 .detail-size-name {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #FAF0E6;
+    font-size: 1.08rem !important;
+    font-weight: 600 !important;
+    color: var(--emenu-text, #FAF0E6) !important;
     letter-spacing: 0;
+    line-height: 1.35;
+    transition: color 0.2s ease;
+}
+
+.detail-size-row.active .detail-size-name {
+    font-weight: 700 !important;
+    color: var(--emenu-text, #FAF0E6) !important;
+}
+
+html[lang="ku"] .detail-size-name,
+body[data-lang="ku"] .detail-size-name,
+body.is-lang-ku .detail-size-name {
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
+    font-size: 1.1rem !important;
+}
+
+html[lang="ar"] .detail-size-name,
+body[data-lang="ar"] .detail-size-name,
+body.is-lang-ar .detail-size-name {
+    font-family: var(--font-ar, var(--font-arabic, 'Noto Sans Arabic', 'Noto Kufi Arabic', 'Vazirmatn', sans-serif)) !important;
+    font-size: 1.1rem !important;
+}
+
+html[lang="en"] .detail-size-name,
+body[data-lang="en"] .detail-size-name,
+body.is-lang-en .detail-size-name {
+    font-family: var(--font-en, 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
+    font-size: 1.02rem !important;
 }
 
 .detail-size-price {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #C8A888; /* Warm camel/gold from Screenshot 2 */
-    font-family: var(--font-en), -apple-system, sans-serif;
-    letter-spacing: 0.02em;
+    font-size: 1.12rem !important;
+    font-weight: 800 !important;
+    color: var(--emenu-price, #E8C56A) !important; /* Matches active theme price color */
+    font-family: var(--font-en), 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    letter-spacing: 0.02em !important;
     direction: ltr !important;
-    display: inline-block;
-    unicode-bidi: isolate;
+    display: inline-block !important;
+    unicode-bidi: isolate !important;
+    transition: color 0.3s ease, text-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.detail-size-row.active .detail-size-price {
+    text-shadow: 0 0 14px color-mix(in srgb, var(--emenu-price, #E8C56A) 55%, transparent);
+    transform: scale(1.02);
 }
 
 /* Single Price Row (Items without sizes) */
 .detail-single-price-wrap {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.08)) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 
 .detail-single-price-wrap .detail-size-price {
-    font-size: 1.25rem;
-    color: #C8A888;
+    font-size: 1.25rem !important;
+    color: var(--emenu-price, #E8C56A) !important;
 }
 
 /* Card Price Number Style (Matching Screenshot 1) */
@@ -2524,7 +2629,7 @@ body.light-mode .detail-backdrop {
     font-size: 0.94rem;
     font-weight: 700;
     letter-spacing: 0.02em;
-    color: #FAF0E6;
+    color: var(--emenu-price, #FAF0E6) !important;
     direction: ltr !important;
     unicode-bidi: isolate;
 }
@@ -6045,12 +6150,13 @@ body.emenu-layout .cart-whatsapp {
 
 /* Product detail modal - Luxury Showcase (Screenshot 2) */
 body.emenu-layout .detail-panel {
-    background: #3A1F15 !important;
-    color: #FAF0E6 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: var(--emenu-modal-bg, #3A1F15) !important;
+    color: var(--emenu-text, #FAF0E6) !important;
+    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.08)) !important;
     border-radius: 24px !important;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7) !important;
     overflow: hidden !important;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 body.emenu-layout .detail-content {
@@ -6067,15 +6173,15 @@ body.emenu-layout[data-lang="en"] .detail-content {
 }
 
 body.emenu-layout .detail-title {
-    color: #FAF0E6 !important;
-    font-size: 1.35rem !important;
+    color: var(--emenu-text, #FAF0E6) !important;
+    font-size: 1.38rem !important;
     font-weight: 800 !important;
     line-height: 1.25 !important;
     margin-bottom: 8px !important;
 }
 
 body.emenu-layout .detail-desc {
-    color: #D2C4B7 !important;
+    color: var(--emenu-muted, #D2C4B7) !important;
     font-size: 0.92rem !important;
     line-height: 1.6 !important;
     margin-bottom: 12px !important;

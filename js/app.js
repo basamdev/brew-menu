@@ -2428,6 +2428,16 @@ function openProductDetail(item) {
     var sizesWrap = document.getElementById('detailSizesWrap');
     var sizesList = document.getElementById('detailSizesList');
     var singlePriceWrap = document.getElementById('detailSinglePriceWrap');
+    var sizesTitleText = document.getElementById('detailSizesTitleText');
+
+    if (sizesTitleText) {
+        var chooseTitles = {
+            ku: 'هەڵبژێرە',
+            ar: 'اختر الحجم',
+            en: 'Choose Size'
+        };
+        sizesTitleText.textContent = chooseTitles[lang] || chooseTitles.ku;
+    }
 
     if (item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
         if (sizesWrap) sizesWrap.style.display = 'block';
@@ -2437,12 +2447,20 @@ function openProductDetail(item) {
             item.sizes.forEach(function (sz, idx) {
                 var szName = sz['name_' + lang] || sz.name_ku || sz.name_ar || sz.name_en || ('Option ' + (idx + 1));
                 var rowEl = document.createElement('div');
-                rowEl.className = 'detail-size-row';
+                rowEl.className = 'detail-size-row' + (idx === 0 ? ' active' : '');
+                rowEl.setAttribute('role', 'button');
+                rowEl.setAttribute('tabindex', '0');
                 rowEl.innerHTML =
                     '<span class="detail-size-name">' + String(szName || '') + '</span>' +
                     '<span class="detail-size-price">IQD ' + Number(sz.price || 0).toLocaleString() + '</span>';
+                rowEl.addEventListener('click', function () {
+                    sizesList.querySelectorAll('.detail-size-row').forEach(function (r) { r.classList.remove('active'); });
+                    rowEl.classList.add('active');
+                    window._selectedDetailSize = sz;
+                });
                 sizesList.appendChild(rowEl);
             });
+            window._selectedDetailSize = item.sizes[0];
         }
     } else {
         if (sizesWrap) sizesWrap.style.display = 'none';
@@ -3195,14 +3213,14 @@ function setupThemeToggle() {
 }
 
 var MENU_THEMES = window.MENU_THEMES || {
-    forest:   { id: 'forest',   light: false, meta: '#0A1C12', brown: '#3ECF8E', price: '#E8C56A', muted: '#9BB9AA', bg: '#0A1C12', sticky: '#0A1C12', action: '#143528', surface: '#1A4030', card: '#1E4F3C', card2: '#245A45', cat: '#143528', pill: '#143528', fab: '#1A4030', text: '#F4FFF9', border: 'rgba(255,255,255,0.08)', fabText: '#F4FFF9' },
-    midnight: { id: 'midnight', light: false, meta: '#060B14', brown: '#60A5FA', price: '#FBBF24', muted: '#8FA3BF', bg: '#060B14', sticky: '#060B14', action: '#121F33', surface: '#182840', card: '#1C334F', card2: '#23405F', cat: '#121F33', pill: '#121F33', fab: '#182840', text: '#EAF2FF', border: 'rgba(255,255,255,0.08)', fabText: '#EAF2FF' },
-    rose:     { id: 'rose',     light: false, meta: '#120A0E', brown: '#FB7185', price: '#FCD34D', muted: '#C9A0A9', bg: '#120A0E', sticky: '#120A0E', action: '#2E1820', surface: '#3A1F2A', card: '#4A2836', card2: '#563040', cat: '#2E1820', pill: '#2E1820', fab: '#3A1F2A', text: '#FFF1F4', border: 'rgba(255,255,255,0.08)', fabText: '#FFF1F4' },
-    gold:     { id: 'gold',     light: false, meta: '#0E0B06', brown: '#F2C659', price: '#FFE08A', muted: '#B9A67A', bg: '#0E0B06', sticky: '#0E0B06', action: '#241C10', surface: '#2E2414', card: '#3A2E18', card2: '#45361C', cat: '#241C10', pill: '#241C10', fab: '#2E2414', text: '#FFF8E7', border: 'rgba(255,255,255,0.08)', fabText: '#FFF8E7' },
-    olive:    { id: 'olive',    light: false, meta: '#10160C', brown: '#B8C26A', price: '#E4D48A', muted: '#A3A88F', bg: '#10160C', sticky: '#10160C', action: '#1A2414', surface: '#222E1A', card: '#2A3820', card2: '#334428', cat: '#1A2414', pill: '#1A2414', fab: '#222E1A', text: '#F4F7EC', border: 'rgba(255,255,255,0.08)', fabText: '#F4F7EC' },
-    cream:    { id: 'cream',    light: true,  meta: '#E4D4A4', brown: '#B8891E', price: '#8F6B12', muted: '#7A6A48', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#DCC890', surface: '#E8D9AE', card: '#E0CE98', card2: '#D6C288', cat: '#D2BC80', pill: '#DCC890', fab: '#E0CE98', text: '#2A2112', border: '#C4AE6E', fabText: '#6B5A32' },
-    mocha:    { id: 'mocha',    light: true,  meta: '#EFE4DA', brown: '#5C4033', price: '#A67C52', muted: '#6B5A50', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#F0E6DC', surface: '#F3EBE3', card: '#F0E6DC', card2: '#E8DCCF', cat: '#E0D3C7', pill: '#F0E6DC', fab: '#F0E6DC', text: '#261A14', border: '#D2C4B7', fabText: '#6B5A50' },
-    dark:     { id: 'dark',     light: false, meta: '#090909', brown: '#C4956A', price: '#E2C08A', muted: '#9A9590', bg: '#090909', sticky: '#090909', action: '#171717', surface: '#1F1F1F', card: '#2A2A2A', card2: '#323232', cat: '#171717', pill: '#171717', fab: '#1F1F1F', text: '#F0F0F0', border: 'rgba(255,255,255,0.08)', fabText: '#CFCFCF' }
+    forest:   { id: 'forest',   light: false, meta: '#0A1C12', brown: '#3ECF8E', price: '#E8C56A', muted: '#9BB9AA', bg: '#0A1C12', sticky: '#0A1C12', action: '#143528', surface: '#1A4030', card: '#163E2B', card2: '#245A45', cat: '#143528', pill: '#143528', fab: '#1A4030', text: '#F4FFF9', border: 'rgba(62,207,142,0.16)', fabText: '#F4FFF9', modalBg: '#0F2C1D' },
+    midnight: { id: 'midnight', light: false, meta: '#060B14', brown: '#60A5FA', price: '#FBBF24', muted: '#8FA3BF', bg: '#060B14', sticky: '#060B14', action: '#121F33', surface: '#182840', card: '#14253D', card2: '#23405F', cat: '#121F33', pill: '#121F33', fab: '#182840', text: '#EAF2FF', border: 'rgba(96,165,250,0.16)', fabText: '#EAF2FF', modalBg: '#0E1B2E' },
+    rose:     { id: 'rose',     light: false, meta: '#120A0E', brown: '#FB7185', price: '#FCD34D', muted: '#C9A0A9', bg: '#120A0E', sticky: '#120A0E', action: '#2E1820', surface: '#3A1F2A', card: '#3A1B28', card2: '#563040', cat: '#2E1820', pill: '#2E1820', fab: '#3A1F2A', text: '#FFF1F4', border: 'rgba(251,113,133,0.16)', fabText: '#FFF1F4', modalBg: '#26111B' },
+    gold:     { id: 'gold',     light: false, meta: '#0E0B06', brown: '#F2C659', price: '#F2C659', muted: '#B9A67A', bg: '#0E0B06', sticky: '#0E0B06', action: '#241C10', surface: '#2E2414', card: '#352410', card2: '#45361C', cat: '#241C10', pill: '#241C10', fab: '#2E2414', text: '#FFF8E7', border: 'rgba(242,198,89,0.18)', fabText: '#FFF8E7', modalBg: '#24180A' },
+    olive:    { id: 'olive',    light: false, meta: '#10160C', brown: '#B8C26A', price: '#E4D48A', muted: '#A3A88F', bg: '#10160C', sticky: '#10160C', action: '#1A2414', surface: '#222E1A', card: '#26341C', card2: '#334428', cat: '#1A2414', pill: '#1A2414', fab: '#222E1A', text: '#F4F7EC', border: 'rgba(184,194,106,0.16)', fabText: '#F4F7EC', modalBg: '#1A2413' },
+    cream:    { id: 'cream',    light: true,  meta: '#E4D4A4', brown: '#B8891E', price: '#E8C56A', muted: '#7A6A48', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#DCC890', surface: '#E8D9AE', card: '#442F1A', card2: '#D6C288', cat: '#D2BC80', pill: '#DCC890', fab: '#E0CE98', text: '#FFF8E7', border: 'rgba(184,137,30,0.18)', fabText: '#6B5A32', modalBg: '#362413' },
+    mocha:    { id: 'mocha',    light: true,  meta: '#EFE4DA', brown: '#5C4033', price: '#E8C56A', muted: '#6B5A50', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#F0E6DC', surface: '#F3EBE3', card: '#4A271B', card2: '#E8DCCF', cat: '#E0D3C7', pill: '#F0E6DC', fab: '#F0E6DC', text: '#FAF0E6', border: 'rgba(255,255,255,0.08)', fabText: '#6B5A50', modalBg: '#3A1F15' },
+    dark:     { id: 'dark',     light: false, meta: '#090909', brown: '#C4956A', price: '#E2C08A', muted: '#9A9590', bg: '#090909', sticky: '#090909', action: '#171717', surface: '#1F1F1F', card: '#222222', card2: '#323232', cat: '#171717', pill: '#171717', fab: '#1F1F1F', text: '#F0F0F0', border: 'rgba(255,255,255,0.1)', fabText: '#CFCFCF', modalBg: '#151515' }
 };
 
 function emenuBrownRing(hex, alpha) {
@@ -3236,6 +3254,7 @@ function applyMenuTheme(themeId) {
         body.style.setProperty('--emenu-bg', theme.bg);
         body.style.setProperty('--emenu-cat-bg', theme.cat);
         body.style.setProperty('--emenu-card-bg', theme.card);
+        body.style.setProperty('--emenu-modal-bg', theme.modalBg || theme.card || '#3A1F15');
         body.style.setProperty('--emenu-surface', theme.surface);
         body.style.setProperty('--emenu-pill-bg', theme.pill);
         body.style.setProperty('--emenu-fab-bg', theme.fab);

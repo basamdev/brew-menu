@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=191">
+    <link rel="stylesheet" href="css/style.css?v=192">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -217,21 +217,22 @@
             padding-bottom: calc(42px + env(safe-area-inset-bottom, 0px)) !important;
         }
 
-        /* Luxury Card Styles Matching Screenshot 1 */
-        body.emenu-layout[data-menu-theme="mocha"] .menu-card {
-            background: #4A271B !important;
+        /* Luxury Card Styles Matching Active Theme */
+        body.emenu-layout .menu-card {
+            background: var(--emenu-card-bg, #4A271B) !important;
             border: none !important;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14) !important;
         }
-        body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot {
-            background: #4A271B !important;
+        body.emenu-layout .menu-card-foot {
+            background: var(--emenu-card-bg, #4A271B) !important;
         }
-        body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot-title {
-            color: #FFFFFF !important;
+        body.emenu-layout .menu-card-foot-title {
+            color: var(--emenu-text, #FFFFFF) !important;
         }
-        body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot-price,
-        body.emenu-layout[data-menu-theme="mocha"] .card-price-range {
-            color: #FAF0E6 !important;
+        body.emenu-layout .menu-card-foot-price,
+        body.emenu-layout .card-price-range,
+        body.emenu-layout .card-price-single {
+            color: var(--emenu-price, #FAF0E6) !important;
         }
 
         /* Theme Adapters */
@@ -463,6 +464,7 @@
         b.style.setProperty('--emenu-bg', t.bg);
         b.style.setProperty('--emenu-cat-bg', t.cat);
         b.style.setProperty('--emenu-card-bg', t.card);
+        b.style.setProperty('--emenu-modal-bg', t.modalBg || t.card || '#3A1F15');
         b.style.setProperty('--emenu-surface', t.surface);
         b.style.setProperty('--emenu-pill-bg', t.pill);
         b.style.setProperty('--emenu-fab-bg', t.fab);
@@ -525,14 +527,14 @@
     }
 
     var themes = {
-        forest: { id: 'forest', light: false, meta: '#0A1C12', brown: '#3ECF8E', price: '#E8C56A', muted: '#9BB9AA', bg: '#0A1C12', sticky: '#0A1C12', action: '#143528', surface: '#1A4030', card: '#1E4F3C', card2: '#245A45', cat: '#143528', pill: '#143528', fab: '#1A4030', text: '#F4FFF9', border: 'rgba(255,255,255,0.08)', fabText: '#F4FFF9' },
-        midnight: { id: 'midnight', light: false, meta: '#060B14', brown: '#60A5FA', price: '#FBBF24', muted: '#8FA3BF', bg: '#060B14', sticky: '#060B14', action: '#121F33', surface: '#182840', card: '#1C334F', card2: '#23405F', cat: '#121F33', pill: '#121F33', fab: '#182840', text: '#EAF2FF', border: 'rgba(255,255,255,0.08)', fabText: '#EAF2FF' },
-        rose: { id: 'rose', light: false, meta: '#120A0E', brown: '#FB7185', price: '#FCD34D', muted: '#C9A0A9', bg: '#120A0E', sticky: '#120A0E', action: '#2E1820', surface: '#3A1F2A', card: '#4A2836', card2: '#563040', cat: '#2E1820', pill: '#2E1820', fab: '#3A1F2A', text: '#FFF1F4', border: 'rgba(255,255,255,0.08)', fabText: '#FFF1F4' },
-        gold: { id: 'gold', light: false, meta: '#0E0B06', brown: '#F2C659', price: '#FFE08A', muted: '#B9A67A', bg: '#0E0B06', sticky: '#0E0B06', action: '#241C10', surface: '#2E2414', card: '#3A2E18', card2: '#45361C', cat: '#241C10', pill: '#241C10', fab: '#2E2414', text: '#FFF8E7', border: 'rgba(255,255,255,0.08)', fabText: '#FFF8E7' },
-        olive: { id: 'olive', light: false, meta: '#10160C', brown: '#B8C26A', price: '#E4D48A', muted: '#A3A88F', bg: '#10160C', sticky: '#10160C', action: '#1A2414', surface: '#222E1A', card: '#2A3820', card2: '#334428', cat: '#1A2414', pill: '#1A2414', fab: '#222E1A', text: '#F4F7EC', border: 'rgba(255,255,255,0.08)', fabText: '#F4F7EC' },
-        cream: { id: 'cream', light: true, meta: '#E4D4A4', brown: '#B8891E', price: '#8F6B12', muted: '#7A6A48', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#DCC890', surface: '#E8D9AE', card: '#E0CE98', card2: '#D6C288', cat: '#D2BC80', pill: '#DCC890', fab: '#E0CE98', text: '#2A2112', border: '#C4AE6E', fabText: '#6B5A32' },
-        mocha: { id: 'mocha', light: true, meta: '#EFE4DA', brown: '#5C4033', price: '#A67C52', muted: '#6B5A50', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#F0E6DC', surface: '#F3EBE3', card: '#F0E6DC', card2: '#E8DCCF', cat: '#E0D3C7', pill: '#F0E6DC', fab: '#F0E6DC', text: '#261A14', border: '#D2C4B7', fabText: '#6B5A50' },
-        dark: { id: 'dark', light: false, meta: '#090909', brown: '#C4956A', price: '#E2C08A', muted: '#9A9590', bg: '#090909', sticky: '#090909', action: '#171717', surface: '#1F1F1F', card: '#2A2A2A', card2: '#323232', cat: '#171717', pill: '#171717', fab: '#1F1F1F', text: '#F0F0F0', border: 'rgba(255,255,255,0.08)', fabText: '#CFCFCF' }
+        forest: { id: 'forest', light: false, meta: '#0A1C12', brown: '#3ECF8E', price: '#E8C56A', muted: '#9BB9AA', bg: '#0A1C12', sticky: '#0A1C12', action: '#143528', surface: '#1A4030', card: '#163E2B', card2: '#245A45', cat: '#143528', pill: '#143528', fab: '#1A4030', text: '#F4FFF9', border: 'rgba(62,207,142,0.16)', fabText: '#F4FFF9', modalBg: '#0F2C1D' },
+        midnight: { id: 'midnight', light: false, meta: '#060B14', brown: '#60A5FA', price: '#FBBF24', muted: '#8FA3BF', bg: '#060B14', sticky: '#060B14', action: '#121F33', surface: '#182840', card: '#14253D', card2: '#23405F', cat: '#121F33', pill: '#121F33', fab: '#182840', text: '#EAF2FF', border: 'rgba(96,165,250,0.16)', fabText: '#EAF2FF', modalBg: '#0E1B2E' },
+        rose: { id: 'rose', light: false, meta: '#120A0E', brown: '#FB7185', price: '#FCD34D', muted: '#C9A0A9', bg: '#120A0E', sticky: '#120A0E', action: '#2E1820', surface: '#3A1F2A', card: '#3A1B28', card2: '#563040', cat: '#2E1820', pill: '#2E1820', fab: '#3A1F2A', text: '#FFF1F4', border: 'rgba(251,113,133,0.16)', fabText: '#FFF1F4', modalBg: '#26111B' },
+        gold: { id: 'gold', light: false, meta: '#0E0B06', brown: '#F2C659', price: '#F2C659', muted: '#B9A67A', bg: '#0E0B06', sticky: '#0E0B06', action: '#241C10', surface: '#2E2414', card: '#352410', card2: '#45361C', cat: '#241C10', pill: '#241C10', fab: '#2E2414', text: '#FFF8E7', border: 'rgba(242,198,89,0.18)', fabText: '#FFF8E7', modalBg: '#24180A' },
+        olive: { id: 'olive', light: false, meta: '#10160C', brown: '#B8C26A', price: '#E4D48A', muted: '#A3A88F', bg: '#10160C', sticky: '#10160C', action: '#1A2414', surface: '#222E1A', card: '#26341C', card2: '#334428', cat: '#1A2414', pill: '#1A2414', fab: '#222E1A', text: '#F4F7EC', border: 'rgba(184,194,106,0.16)', fabText: '#F4F7EC', modalBg: '#1A2413' },
+        cream: { id: 'cream', light: true, meta: '#E4D4A4', brown: '#B8891E', price: '#E8C56A', muted: '#7A6A48', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#DCC890', surface: '#E8D9AE', card: '#442F1A', card2: '#D6C288', cat: '#D2BC80', pill: '#DCC890', fab: '#E0CE98', text: '#FFF8E7', border: 'rgba(184,137,30,0.18)', fabText: '#6B5A32', modalBg: '#362413' },
+        mocha: { id: 'mocha', light: true, meta: '#EFE4DA', brown: '#5C4033', price: '#E8C56A', muted: '#6B5A50', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#F0E6DC', surface: '#F3EBE3', card: '#4A271B', card2: '#E8DCCF', cat: '#E0D3C7', pill: '#F0E6DC', fab: '#F0E6DC', text: '#FAF0E6', border: 'rgba(255,255,255,0.08)', fabText: '#6B5A50', modalBg: '#3A1F15' },
+        dark: { id: 'dark', light: false, meta: '#090909', brown: '#C4956A', price: '#E2C08A', muted: '#9A9590', bg: '#090909', sticky: '#090909', action: '#171717', surface: '#1F1F1F', card: '#222222', card2: '#323232', cat: '#171717', pill: '#171717', fab: '#1F1F1F', text: '#F0F0F0', border: 'rgba(255,255,255,0.1)', fabText: '#CFCFCF', modalBg: '#151515' }
     };
 
     // Default brand theme is Mocha.
@@ -792,6 +794,14 @@
                 <h2 class="detail-title" id="detailTitle"></h2>
                 <p class="detail-desc" id="detailDesc"></p>
                 <div class="detail-sizes-wrap" id="detailSizesWrap" style="display:none;">
+                    <div class="detail-sizes-header" id="detailSizesHeader">
+                        <span class="detail-sizes-header-title" id="detailSizesTitleText">هەڵبژێرە</span>
+                        <span class="detail-sizes-header-arrow" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                        </span>
+                    </div>
                     <div class="detail-sizes-list" id="detailSizesList"></div>
                 </div>
                 <div class="detail-single-price-wrap" id="detailSinglePriceWrap" style="display:none;">
@@ -999,7 +1009,7 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=173"></script>
+    <script src="js/app.js?v=174"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {
