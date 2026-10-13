@@ -2859,7 +2859,7 @@ body.is-lang-en .detail-size-name {
     MENU FEATURES: Ratings & Favorites
     ======================================== */
 
-.menu-card-actions {
+body:not(.emenu-layout) .menu-card-actions {
     position: absolute;
     bottom: 8px;
     left: 8px;
@@ -7864,13 +7864,23 @@ body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-actions,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-actions,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
     flex-shrink: 0 !important;
+    flex-grow: 0 !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
     margin: 0 !important;
     padding: 0 !important;
+    pointer-events: auto !important;
+    z-index: 2 !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav,
@@ -7974,9 +7984,37 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
 }
 
-/* List view: hide the floating grid add button */
+/* List view: show the floating image add button */
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .grid-add-btn,
 body.emenu-layout .menu-grid.layout-vertical .grid-add-btn {
-    display: none !important;
+    display: inline-flex !important;
+    position: absolute !important;
+    bottom: 6px !important;
+    left: 6px !important;
+    right: auto !important;
+    z-index: 6 !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    border: none !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px rgba(59, 130, 246, 0.35) !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #0A192F !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .grid-add-btn svg,
+body.emenu-layout .menu-grid.layout-vertical .grid-add-btn svg {
+    width: 15px !important;
+    height: 15px !important;
+    stroke: #0A192F !important;
+    stroke-width: 2.8 !important;
 }
 
 /* 2. The Image (Fixed Size: width: 90px, height: 90px, flex-shrink: 0, border-radius: 12px) */
@@ -8096,7 +8134,7 @@ body.emenu-layout .menu-grid.layout-vertical .card-price-single {
     text-align: inherit !important;
 }
 
-/* 4. Action Buttons (Heart and "+"): grouped in small flex container at far edge, flex-shrink: 0 */
+/* 4. Action Buttons (Heart): single button at far edge, flex-shrink: 0 */
 body.emenu-layout .menu-grid.layout-vertical .menu-card-actions,
 body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
     flex-shrink: 0 !important;
@@ -8105,10 +8143,18 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 8px !important;
+    gap: 0 !important;
     position: static !important;
+    width: auto !important;
+    height: auto !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
     margin: 0 !important;
     padding: 0 !important;
+    pointer-events: auto !important;
+    z-index: 2 !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-fav {
@@ -8162,42 +8208,9 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-fav.is-fav svg {
     fill: #EF4444 !important;
 }
 
-/* Modern "+" Action Button in list view */
+/* Hide redundant list-add-btn everywhere because "+" is on the image */
 body.emenu-layout .menu-grid.layout-vertical .list-add-btn {
-    position: static !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    flex-shrink: 0 !important;
-    border-radius: 12px !important;
-    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
-    border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45), 0 0 10px rgba(96, 165, 250, 0.25) !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-    color: #FFFFFF !important;
-    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-                box-shadow 0.2s ease !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .list-add-btn svg {
-    width: 18px !important;
-    height: 18px !important;
-    stroke: #FFFFFF !important;
-    stroke-width: 2.8 !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .list-add-btn:hover {
-    transform: scale(1.08) !important;
-    box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.5) !important;
-}
-
-body.emenu-layout .menu-grid.layout-vertical .list-add-btn:active {
-    transform: scale(0.92) !important;
+    display: none !important;
 }
 
 @media (min-width: 768px) {
@@ -10924,13 +10937,23 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-actions,
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot-actions,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-actions {
+        position: static !important;
+        width: auto !important;
+        height: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
         flex-shrink: 0 !important;
+        flex-grow: 0 !important;
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: center !important;
         margin: 0 !important;
         padding: 0 !important;
+        pointer-events: auto !important;
+        z-index: 2 !important;
     }
 
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-fav,
@@ -11066,12 +11089,12 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-height: 104px !important;
         padding: 7px 12px !important;
         border-radius: 16px !important;
-        background: rgba(255, 255, 255, 0.05) !important;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #1B314B) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: #142337 !important;
+        background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
+        border: 1px solid rgba(85, 145, 220, 0.24) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
         cursor: pointer !important;
@@ -11082,13 +11105,52 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
         transform: translateY(-2px) !important;
-        border-color: rgba(255, 255, 255, 0.18) !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32) !important;
+        border-color: rgba(96, 165, 250, 0.45) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
     }
 
-    /* List view: hide the floating grid add button */
+    /* List view: SHOW the circular blue "+" button on the lower-left corner of the image wrapper */
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .grid-add-btn,
     body.emenu-layout .menu-grid.layout-vertical .grid-add-btn {
-        display: none !important;
+        display: inline-flex !important;
+        position: absolute !important;
+        bottom: 6px !important;
+        left: 6px !important;
+        right: auto !important;
+        z-index: 6 !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        min-height: 32px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        border: none !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px rgba(59, 130, 246, 0.35) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        color: #0A192F !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                    box-shadow 0.2s ease !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .grid-add-btn svg,
+    body.emenu-layout .menu-grid.layout-vertical .grid-add-btn svg {
+        width: 15px !important;
+        height: 15px !important;
+        stroke: #0A192F !important;
+        stroke-width: 2.8 !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .grid-add-btn:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65) !important;
+    }
+
+    body.emenu-layout .menu-grid.layout-vertical .grid-add-btn:active {
+        transform: scale(0.92) !important;
     }
 
     /* 2. The Image (Fixed Size: width: 90px, height: 90px, flex-shrink: 0, border-radius: 12px) */
@@ -11208,7 +11270,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         text-align: inherit !important;
     }
 
-    /* 4. Action Buttons (Heart and "+"): grouped in small flex container at far edge, flex-shrink: 0 */
+    /* 4. Action Buttons (Heart): single button at far edge, flex-shrink: 0 */
     body.emenu-layout .menu-grid.layout-vertical .menu-card-actions,
     body.emenu-layout .menu-grid.layout-vertical .menu-card-foot-actions {
         flex-shrink: 0 !important;
@@ -11217,10 +11279,18 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         flex-direction: row !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 8px !important;
+        gap: 0 !important;
         position: static !important;
+        width: auto !important;
+        height: auto !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
         margin: 0 !important;
         padding: 0 !important;
+        pointer-events: auto !important;
+        z-index: 2 !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-fav {
@@ -11274,42 +11344,10 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         fill: #EF4444 !important;
     }
 
-    /* Modern "+" Action Button in list view */
-    body.emenu-layout .menu-grid.layout-vertical .list-add-btn {
-        position: static !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        flex-shrink: 0 !important;
-        border-radius: 12px !important;
-        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
-        border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.45), 0 0 10px rgba(96, 165, 250, 0.25) !important;
-        cursor: pointer !important;
-        padding: 0 !important;
-        color: #FFFFFF !important;
-        transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-                    box-shadow 0.2s ease !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .list-add-btn svg {
-        width: 18px !important;
-        height: 18px !important;
-        stroke: #FFFFFF !important;
-        stroke-width: 2.8 !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .list-add-btn:hover {
-        transform: scale(1.08) !important;
-        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.5) !important;
-    }
-
-    body.emenu-layout .menu-grid.layout-vertical .list-add-btn:active {
-        transform: scale(0.92) !important;
+    /* Hide redundant list-add-btn everywhere because "+" is on the image wrapper */
+    body.emenu-layout .menu-grid.layout-vertical .list-add-btn,
+    body.emenu-layout .list-add-btn {
+        display: none !important;
     }
 }
 
