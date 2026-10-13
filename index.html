@@ -16,14 +16,16 @@
     <meta name="apple-mobile-web-app-title" content="BREW COFFEE">
     <meta name="theme-color" content="#12100E">
     
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Luxury Kurdish (Noto Kufi Arabic, Vazirmatn, Noto Sans Arabic) & Modern Latin (Outfit, Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --font-ar: 'Cairo', 'Tajawal', sans-serif;
+            /* Luxury Kurdish Typography Stack: Full native Sorani Kurdish OpenType support */
+            --font-ku: 'Noto Kufi Arabic', 'Vazirmatn', 'Noto Sans Arabic', 'Rabar', 'Unikurd', 'Segoe UI', system-ui, sans-serif;
+            --font-ar: 'Noto Kufi Arabic', 'Vazirmatn', 'Noto Sans Arabic', 'Cairo', 'Tajawal', sans-serif;
             --font-en: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-serif: 'Playfair Display', 'Cinzel', serif;
             
@@ -58,13 +60,48 @@
             overflow: hidden;
             background-color: var(--bg-dark);
             color: var(--text-white);
-            font-family: var(--font-ar);
+            font-family: var(--font-ku);
             user-select: none;
             -webkit-user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* Kurdish Specific Typography - Never destroy cursive connections */
+        html[lang="ku"],
+        body[data-lang="ku"] {
+            font-family: var(--font-ku) !important;
+        }
+
+        body[data-lang="ku"] * {
+            font-family: var(--font-ku);
+            letter-spacing: 0 !important;
+        }
+
+        /* Arabic Specific Typography */
+        html[lang="ar"],
+        body[data-lang="ar"] {
+            font-family: var(--font-ar) !important;
+        }
+
+        body[data-lang="ar"] * {
+            font-family: var(--font-ar);
+            letter-spacing: 0 !important;
+        }
+
+        /* English Specific Typography */
+        html[lang="en"],
         body[data-lang="en"] {
             font-family: var(--font-en);
+        }
+
+        body[data-lang="en"] * {
+            font-family: var(--font-en);
+        }
+
+        .smart-serve-name {
+            font-family: var(--font-en) !important;
+            letter-spacing: 0.04em !important;
         }
 
         /* ----------------------------------------------------
@@ -222,11 +259,19 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.65));
-            letter-spacing: 0.04em;
+            letter-spacing: 0;
             white-space: nowrap;
             min-height: 1.3em;
             display: inline-block;
             transition: all 0.15s ease;
+            font-feature-settings: "liga" 1, "calt" 1;
+        }
+
+        [dir="rtl"] .typewriter-text,
+        body[data-lang="ku"] .typewriter-text,
+        body[data-lang="ar"] .typewriter-text {
+            letter-spacing: 0 !important;
+            font-family: var(--font-ku);
         }
 
         .typewriter-cursor {
@@ -644,11 +689,32 @@
             transition: color 0.2s ease;
         }
 
-        body[data-lang="ku"] .powered-by-text,
+        body[data-lang="ku"] .powered-by-text {
+            font-family: var(--font-ku) !important;
+            letter-spacing: 0 !important;
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
         body[data-lang="ar"] .powered-by-text {
-            font-family: var(--font-ar);
-            letter-spacing: 0;
-            font-size: 0.8rem;
+            font-family: var(--font-ar) !important;
+            letter-spacing: 0 !important;
+            font-size: 0.84rem;
+            font-weight: 600;
+        }
+
+        body[data-lang="ku"] #menuBtnLabel {
+            font-family: var(--font-ku) !important;
+            letter-spacing: 0 !important;
+            font-weight: 800;
+            font-size: 1.35rem;
+        }
+
+        body[data-lang="ar"] #menuBtnLabel {
+            font-family: var(--font-ar) !important;
+            letter-spacing: 0 !important;
+            font-weight: 800;
+            font-size: 1.35rem;
         }
 
         .powered-by-brand-row {
@@ -963,9 +1029,9 @@
             // ----------------------------------------------------
             (function initTitleTypewriter() {
                 var words = [
-                    { text: 'BREW COFFEE', isAr: false },
-                    { text: 'بريو كوفي', isAr: true },
-                    { text: 'بروو كۆفی', isAr: true }
+                    { text: 'BREW COFFEE', lang: 'en' },
+                    { text: 'بريو كوفي', lang: 'ar' },
+                    { text: 'بروو کۆفی', lang: 'ku' }
                 ];
                 var textEl = document.getElementById('typewriterText');
                 if (!textEl) return;
@@ -980,11 +1046,23 @@
 
                 function typeLoop() {
                     var current = words[wordIdx];
-                    var fullText = current.text;
+                    var chars = Array.from(current.text);
+
+                    // Apply proper font and zero letter-spacing before inserting characters
+                    if (current.lang === 'ku') {
+                        textEl.style.fontFamily = "var(--font-ku)";
+                        textEl.style.letterSpacing = "0";
+                    } else if (current.lang === 'ar') {
+                        textEl.style.fontFamily = "var(--font-ar)";
+                        textEl.style.letterSpacing = "0";
+                    } else {
+                        textEl.style.fontFamily = "var(--font-en)";
+                        textEl.style.letterSpacing = "0.04em";
+                    }
 
                     if (isDeleting) {
                         charIdx--;
-                        textEl.textContent = fullText.substring(0, charIdx);
+                        textEl.textContent = chars.slice(0, charIdx).join('');
                         if (charIdx <= 0) {
                             isDeleting = false;
                             wordIdx = (wordIdx + 1) % words.length;
@@ -994,15 +1072,8 @@
                         setTimeout(typeLoop, deleteSpeed);
                     } else {
                         charIdx++;
-                        textEl.textContent = fullText.substring(0, charIdx);
-                        if (current.isAr) {
-                            textEl.style.fontFamily = "var(--font-ar)";
-                            textEl.style.letterSpacing = "0";
-                        } else {
-                            textEl.style.fontFamily = "var(--font-en)";
-                            textEl.style.letterSpacing = "0.04em";
-                        }
-                        if (charIdx >= fullText.length) {
+                        textEl.textContent = chars.slice(0, charIdx).join('');
+                        if (charIdx >= chars.length) {
                             isDeleting = true;
                             setTimeout(typeLoop, pauseEnd);
                             return;
