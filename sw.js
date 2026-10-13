@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zayed-v134';
+const CACHE_NAME = 'zayed-v135';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
     './images/zayed-logo.png',
     './images/Brew-logo.png',
     './images/smart-serve-logo.png',
+    './images/brew-cafe-bg.jpg',
     './assets/icon-192.png',
     './assets/icon-512.png',
     './assets/icon-512-maskable.png',
