@@ -19,7 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=202">
+    <link rel="stylesheet" href="css/style.css?v=203">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -448,6 +448,21 @@
         return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
     }
 
+    // Readable icon/text color on top of the accent (dark tint of the accent, or white on dark accents)
+    function emenuOnAccent(hex) {
+        if (!hex || hex.charAt(0) !== '#') return '#FFFFFF';
+        var h = hex.slice(1);
+        if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+        var rgb = [0, 2, 4].map(function (i) { return parseInt(h.slice(i, i + 2), 16); });
+        var lum = rgb.map(function (v) {
+            v = v / 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        var L = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+        if (L <= 0.179) return '#FFFFFF';
+        return 'rgb(' + rgb.map(function (v) { return Math.round(v * 0.16); }).join(',') + ')';
+    }
+
     function applyEmenuThemeCssVars(b, t) {
         b.setAttribute('data-menu-theme', t.id || 'mocha');
         if (t.light) b.classList.add('light-mode'); else b.classList.remove('light-mode');
@@ -470,6 +485,11 @@
         b.style.setProperty('--emenu-fab-accent-ring', emenuBrownRing(t.brown, 0.22));
         b.style.setProperty('--emenu-fab-accent-ring-strong', emenuBrownRing(t.brown, 0.38));
         b.style.setProperty('--emenu-price', t.price || t.brown);
+        b.style.setProperty('--emenu-on-accent', emenuOnAccent(t.brown));
+        b.style.setProperty('--emenu-accent-soft', emenuBrownRing(t.brown, 0.22));
+        b.style.setProperty('--emenu-accent-line', emenuBrownRing(t.brown, 0.4));
+        b.style.setProperty('--emenu-accent-glow', emenuBrownRing(t.brown, 0.35));
+        b.style.setProperty('--emenu-accent-glow-strong', emenuBrownRing(t.brown, 0.6));
         b.style.setProperty('--emenu-muted', t.muted || (t.light ? '#6B6B6B' : '#A9C2B5'));
         b.style.setProperty('--emenu-sticky', t.sticky || t.bg);
         b.style.setProperty('--emenu-action', t.action || t.surface);

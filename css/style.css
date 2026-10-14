@@ -7665,9 +7665,9 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card {
     width: 100% !important;
     min-height: 255px !important;
     border-radius: 18px !important;
-    background: #142337 !important;
-    background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
-    border: 1px solid rgba(85, 145, 220, 0.24) !important;
+    background: var(--emenu-card-bg, #4A271B) !important;
+    background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+    border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
@@ -7683,8 +7683,8 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card {
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
     transform: translateY(-2px) !important;
-    border-color: rgba(96, 165, 250, 0.45) !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
+    border-color: var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
@@ -7696,7 +7696,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
     position: relative !important;
     overflow: hidden !important;
     border-radius: 17px 17px 0 0 !important;
-    background: #0E1724 !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -7730,14 +7730,14 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-
     min-width: 40px !important;
     min-height: 40px !important;
     border-radius: 50% !important;
-    background: #5097F5 !important;
-    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    background: var(--emenu-accent, #5C4033) !important;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--emenu-accent, #5C4033) 78%, #fff) 0%, var(--emenu-accent, #5C4033) 100%) !important;
     border: none !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px var(--emenu-accent-glow, rgba(92, 64, 51, 0.35)) !important;
     cursor: pointer !important;
     padding: 0 !important;
     margin: 0 !important;
-    color: #0A192F !important;
+    color: var(--emenu-on-accent, #FFFFFF) !important;
     align-items: center !important;
     justify-content: center !important;
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -7748,14 +7748,14 @@ body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
     width: 18px !important;
     height: 18px !important;
-    stroke: #0A192F !important;
+    stroke: var(--emenu-on-accent, #FFFFFF) !important;
     stroke-width: 2.8 !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
     transform: scale(1.08) !important;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
+    box-shadow: 0 4px 16px var(--emenu-accent-glow-strong, rgba(92, 64, 51, 0.6)) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:active,
@@ -7965,7 +7965,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card {
     padding: 7px 12px !important;
     border-radius: 16px !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #1B314B) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #4A271B) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
@@ -7998,13 +7998,13 @@ body.emenu-layout .menu-grid.layout-vertical .grid-add-btn {
     min-width: 32px !important;
     min-height: 32px !important;
     border-radius: 50% !important;
-    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--emenu-accent, #5C4033) 78%, #fff) 0%, var(--emenu-accent, #5C4033) 100%) !important;
     border: none !important;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px rgba(59, 130, 246, 0.35) !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px var(--emenu-accent-glow, rgba(92, 64, 51, 0.35)) !important;
     cursor: pointer !important;
     padding: 0 !important;
     margin: 0 !important;
-    color: #0A192F !important;
+    color: var(--emenu-on-accent, #FFFFFF) !important;
     align-items: center !important;
     justify-content: center !important;
 }
@@ -8013,7 +8013,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper .grid-add-bt
 body.emenu-layout .menu-grid.layout-vertical .grid-add-btn svg {
     width: 15px !important;
     height: 15px !important;
-    stroke: #0A192F !important;
+    stroke: var(--emenu-on-accent, #FFFFFF) !important;
     stroke-width: 2.8 !important;
 }
 
@@ -8029,7 +8029,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
     max-height: 90px !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    background: #14253B !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
     position: relative !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -8946,9 +8946,9 @@ body.emenu-layout .menu-grid.layout-horizontal {
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card {
-    background: #142337 !important;
-    background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
-    border: 1px solid rgba(85, 145, 220, 0.24) !important;
+    background: var(--emenu-card-bg, #4A271B) !important;
+    background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+    border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
     border-radius: 18px !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
     overflow: hidden !important;
@@ -8958,8 +8958,8 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card {
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
     transform: translateY(-2px) !important;
-    border-color: rgba(96, 165, 250, 0.45) !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
+    border-color: var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
@@ -8970,7 +8970,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
     max-height: 168px !important;
     border-radius: 17px 17px 0 0 !important;
     overflow: hidden !important;
-    background: #0E1724 !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img,
@@ -8994,14 +8994,14 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-
     width: 40px !important;
     height: 40px !important;
     border-radius: 50% !important;
-    background: #5097F5 !important;
-    background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+    background: var(--emenu-accent, #5C4033) !important;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--emenu-accent, #5C4033) 78%, #fff) 0%, var(--emenu-accent, #5C4033) 100%) !important;
     border: none !important;
-    color: #0A192F !important;
+    color: var(--emenu-on-accent, #FFFFFF) !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px var(--emenu-accent-glow, rgba(92, 64, 51, 0.35)) !important;
     z-index: 6 !important;
     cursor: pointer !important;
 }
@@ -9009,7 +9009,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
     transform: scale(1.08) !important;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
+    box-shadow: 0 4px 16px var(--emenu-accent-glow-strong, rgba(92, 64, 51, 0.6)) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-foot,
@@ -10738,9 +10738,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         width: 100% !important;
         min-height: 255px !important;
         border-radius: 18px !important;
-        background: #142337 !important;
-        background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
-        border: 1px solid rgba(85, 145, 220, 0.24) !important;
+        background: var(--emenu-card-bg, #4A271B) !important;
+        background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+        border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
@@ -10756,8 +10756,8 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card:hover,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card:hover {
         transform: translateY(-2px) !important;
-        border-color: rgba(96, 165, 250, 0.45) !important;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px rgba(59, 130, 246, 0.2) !important;
+        border-color: var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42), 0 0 16px var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
     }
 
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper,
@@ -10769,7 +10769,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         position: relative !important;
         overflow: hidden !important;
         border-radius: 17px 17px 0 0 !important;
-        background: #0E1724 !important;
+        background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
         margin: 0 !important;
         padding: 0 !important;
     }
@@ -10803,14 +10803,14 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         min-width: 40px !important;
         min-height: 40px !important;
         border-radius: 50% !important;
-        background: #5097F5 !important;
-        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        background: var(--emenu-accent, #5C4033) !important;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--emenu-accent, #5C4033) 78%, #fff) 0%, var(--emenu-accent, #5C4033) 100%) !important;
         border: none !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 0 12px var(--emenu-accent-glow, rgba(92, 64, 51, 0.35)) !important;
         cursor: pointer !important;
         padding: 0 !important;
         margin: 0 !important;
-        color: #0A192F !important;
+        color: var(--emenu-on-accent, #FFFFFF) !important;
         align-items: center !important;
         justify-content: center !important;
         transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -10821,14 +10821,14 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn svg {
         width: 18px !important;
         height: 18px !important;
-        stroke: #0A192F !important;
+        stroke: var(--emenu-on-accent, #FFFFFF) !important;
         stroke-width: 2.8 !important;
     }
 
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:hover,
     body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper .grid-add-btn:hover {
         transform: scale(1.08) !important;
-        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.65) !important;
+        box-shadow: 0 4px 16px var(--emenu-accent-glow-strong, rgba(92, 64, 51, 0.6)) !important;
     }
 
     body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img-wrapper .grid-add-btn:active,
@@ -11089,9 +11089,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-height: 104px !important;
         padding: 7px 12px !important;
         border-radius: 16px !important;
-        background: #142337 !important;
-        background: linear-gradient(180deg, #182C44 0%, #101E2F 100%) !important;
-        border: 1px solid rgba(85, 145, 220, 0.24) !important;
+        background: var(--emenu-card-bg, #4A271B) !important;
+        background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+        border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
@@ -11105,7 +11105,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card:hover {
         transform: translateY(-2px) !important;
-        border-color: rgba(96, 165, 250, 0.45) !important;
+        border-color: var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
     }
 
@@ -11123,13 +11123,13 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         min-width: 32px !important;
         min-height: 32px !important;
         border-radius: 50% !important;
-        background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%) !important;
+        background: linear-gradient(135deg, color-mix(in srgb, var(--emenu-accent, #5C4033) 78%, #fff) 0%, var(--emenu-accent, #5C4033) 100%) !important;
         border: none !important;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35), 0 0 10px var(--emenu-accent-glow, rgba(92, 64, 51, 0.35)) !important;
         cursor: pointer !important;
         padding: 0 !important;
         margin: 0 !important;
-        color: #0A192F !important;
+        color: var(--emenu-on-accent, #FFFFFF) !important;
         align-items: center !important;
         justify-content: center !important;
         transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -11140,13 +11140,13 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
     body.emenu-layout .menu-grid.layout-vertical .grid-add-btn svg {
         width: 15px !important;
         height: 15px !important;
-        stroke: #0A192F !important;
+        stroke: var(--emenu-on-accent, #FFFFFF) !important;
         stroke-width: 2.8 !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .grid-add-btn:hover {
         transform: scale(1.08) !important;
-        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.65) !important;
+        box-shadow: 0 3px 12px var(--emenu-accent-glow-strong, rgba(92, 64, 51, 0.6)) !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .grid-add-btn:active {
@@ -11165,7 +11165,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-height: 90px !important;
         border-radius: 12px !important;
         overflow: hidden !important;
-        background: #14253B !important;
+        background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
         position: relative !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -11590,12 +11590,13 @@ body.menu-expired .menu-expired-overlay {
 }
 
 /* ==========================================================================
-   FINAL: "+" & HEART BUTTONS — exact match to reference screenshot
-   - "+": flat light-blue circle on image lower-left, dark navy thick plus
-   - Heart: dark rounded-square on lighter steel-navy footer, white outline
+   FINAL: "+" & HEART BUTTONS — colors follow the active menu theme
+   - Card / footer: --emenu-card-bg, border: --emenu-accent-line
+   - "+": --emenu-accent circle on image lower-left, --emenu-on-accent plus
+   - Heart: darker shade of the card color, white outline
    ========================================================================== */
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot {
-    background: #1F3A5A !important;
+    background: var(--emenu-card-bg, #4A271B) !important;
     border-top: none !important;
 }
 
@@ -11611,8 +11612,8 @@ html body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
 html body.emenu-layout .menu-grid:not(.layout-vertical) .category-section > .menu-card {
     min-height: 0 !important;
     height: auto !important;
-    background: #1F3A5A !important;
-    border: 1px solid rgba(96, 150, 215, 0.38) !important;
+    background: var(--emenu-card-bg, #4A271B) !important;
+    border: 1px solid var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
     border-radius: 14px !important;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
 }
@@ -11639,9 +11640,9 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-bt
     margin: 0 !important;
     border-radius: 50% !important;
     border: none !important;
-    background: #5EA6F7 !important;
+    background: var(--emenu-accent, #5C4033) !important;
     background-image: none !important;
-    color: #0B1626 !important;
+    color: var(--emenu-on-accent, #FFFFFF) !important;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
     z-index: 6 !important;
     transform: none;
@@ -11657,13 +11658,13 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-bt
 html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn svg {
     width: 20px !important;
     height: 20px !important;
-    stroke: #0B1626 !important;
+    stroke: var(--emenu-on-accent, #FFFFFF) !important;
     stroke-width: 2.6 !important;
     fill: none !important;
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn:hover {
-    background: #74B3F9 !important;
+    background: color-mix(in srgb, var(--emenu-accent, #5C4033) 82%, #fff) !important;
     transform: scale(1.06) !important;
 }
 
@@ -11684,7 +11685,7 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav {
     padding: 0 !important;
     margin: 0 !important;
     border-radius: 11px !important;
-    background: #0F1A29 !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 62%, #000) !important;
     background-image: none !important;
     border: 1px solid rgba(255, 255, 255, 0.07) !important;
     color: #FFFFFF !important;
@@ -11701,13 +11702,13 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav svg 
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav:hover {
-    background: #16243A !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 74%, #000) !important;
     transform: scale(1.05) !important;
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav.is-fav {
     color: #EF4444 !important;
-    background: #0F1A29 !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 62%, #000) !important;
     border-color: rgba(239, 68, 68, 0.35) !important;
 }
 
@@ -11715,16 +11716,16 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav.is-f
     fill: #EF4444 !important;
 }
 
-/* Footer text: white title + gold price */
+/* Footer text: theme text title + theme price color */
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-title {
-    color: #FFFFFF !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     font-weight: 700 !important;
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price,
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price .card-price-range,
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price .card-price-single {
-    color: #F5B53A !important;
+    color: var(--emenu-price, #F5B53A) !important;
     font-weight: 700 !important;
 }
 
@@ -11736,9 +11737,9 @@ html body.emenu-layout .menu-grid .menu-card .list-add-btn {
 /* List view: same button look, scaled for the smaller image */
 html body.emenu-layout .menu-grid.layout-vertical .menu-card,
 html body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card {
-    background: #1F3A5A !important;
+    background: var(--emenu-card-bg, #4A271B) !important;
     background-image: none !important;
-    border: 1px solid rgba(96, 150, 215, 0.38) !important;
+    border: 1px solid var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
 }
 
 html body.emenu-layout .menu-grid.layout-vertical .menu-card .menu-card-foot {
