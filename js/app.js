@@ -2937,6 +2937,30 @@ function applyLanguageUI(lang) {
     if (searchInput) {
         searchInput.placeholder = strings.searchPlaceholder || strings.searchItems || 'Search menu...';
     }
+
+    var overlayInput = document.getElementById('searchOverlayInput');
+    if (overlayInput) {
+        var searchPlaceholders = {
+            ku: 'گەڕان بکە',
+            ar: 'ابحث هنا...',
+            en: 'Search menu...'
+        };
+        overlayInput.placeholder = searchPlaceholders[lang] || strings.searchPlaceholder || 'Search menu...';
+    }
+
+    var searchOverlay = document.getElementById('searchOverlayView');
+    if (searchOverlay) {
+        var isRtlSearch = (lang === 'ku' || lang === 'ar');
+        searchOverlay.setAttribute('dir', isRtlSearch ? 'rtl' : 'ltr');
+        if (!searchOverlay.hidden && typeof renderSearchOverlayItems === 'function') {
+            renderSearchOverlayItems(overlayInput ? overlayInput.value : '');
+        }
+    }
+
+    var searchModalWrap = document.getElementById('searchPreviewModalWrap');
+    if (searchModalWrap && !searchModalWrap.hidden && window._currentSearchPreviewItem && typeof openSearchItemPreview === 'function') {
+        openSearchItemPreview(window._currentSearchPreviewItem);
+    }
 }
 
 function updateAdminPanelText(strings) {
@@ -3112,81 +3136,252 @@ function closeLangMenu() {
     }
 }
 
+function openSearchOverlay() {
+    var overlay = document.getElementById('searchOverlayView');
+    if (!overlay) return;
+
+    if (typeof closeLangMenu === 'function') closeLangMenu();
+    var themeDropdown = document.getElementById('themeDropdown');
+    if (themeDropdown) themeDropdown.classList.remove('open');
+
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var isRtl = (lang === 'ku' || lang === 'ar');
+    overlay.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+    document.body.classList.add('search-overlay-open');
+    overlay.hidden = false;
+
+    var input = document.getElementById('searchOverlayInput');
+    var clearBtn = document.getElementById('searchOverlayClear');
+    if (input) {
+        var placeholders = {
+            ku: 'گەڕان بکە',
+            ar: 'ابحث هنا...',
+            en: 'Search menu...'
+        };
+        input.placeholder = placeholders[lang] || placeholders.ku;
+        input.value = '';
+        if (clearBtn) clearBtn.hidden = true;
+        setTimeout(function () { input.focus(); }, 60);
+    }
+
+    renderSearchOverlayItems('');
+}
+
+function closeSearchOverlay() {
+    closeSearchItemPreview();
+    var overlay = document.getElementById('searchOverlayView');
+    if (overlay) overlay.hidden = true;
+    document.body.classList.remove('search-overlay-open');
+    var btn = document.getElementById('headerSearchBtn');
+    if (btn) btn.classList.remove('is-active');
+}
+
 function closeHeaderSearch() {
+    closeSearchOverlay();
     var panel = document.getElementById('headerSearchPanel');
     var btn = document.getElementById('headerSearchBtn');
     if (panel) panel.hidden = true;
     if (btn) btn.classList.remove('is-active');
 }
 
+function openSearchItemPreview(item) {
+    if (!item) return;
+    window._currentSearchPreviewItem = item;
+    var modalWrap = document.getElementById('searchPreviewModalWrap');
+    var imgEl = document.getElementById('searchPreviewImage');
+    var nameEl = document.getElementById('searchPreviewName');
+    var priceEl = document.getElementById('searchPreviewPrice');
+    if (!modalWrap) return;
+
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var name = item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || item.name || 'Unnamed Item';
+    var fallbackImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27300%27%3E%3Crect fill=%231a1a1a width=%27400%27 height=%27300%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%2740%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%23D4AF37%27%3E%E2%98%95%3C/text%3E%3C/svg%3E';
+    var imageUrl = (typeof normalizeImageUrl === 'function' ? normalizeImageUrl(item.image) : item.image) || fallbackImage;
+
+    var priceNum = Number(item.price) || 0;
+    if ((!priceNum || priceNum === 0) && item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
+        priceNum = Number(item.sizes[0].price) || 0;
+    }
+    // Screenshot 2 format: clean formatted price like "7,500"
+    var priceText = priceNum ? priceNum.toLocaleString() : '0';
+
+    if (imgEl) {
+        imgEl.src = imageUrl;
+        imgEl.alt = name;
+        imgEl.onerror = function () { this.onerror = null; this.src = fallbackImage; };
+    }
+    if (nameEl) nameEl.textContent = name;
+    if (priceEl) priceEl.textContent = priceText;
+
+    modalWrap.hidden = false;
+}
+
+function closeSearchItemPreview() {
+    window._currentSearchPreviewItem = null;
+    var modalWrap = document.getElementById('searchPreviewModalWrap');
+    if (modalWrap) modalWrap.hidden = true;
+}
+
+function renderSearchOverlayItems(query) {
+    var container = document.getElementById('searchOverlayItems');
+    var emptyEl = document.getElementById('searchOverlayEmpty');
+    var emptyTextEl = document.getElementById('searchEmptyText');
+    if (!container) return;
+
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var allItems = (window.MenuData && typeof MenuData.getItems === 'function')
+        ? (MenuData.getItems() || [])
+        : (cachedMenuItems || []);
+
+    var q = String(query || '').toLowerCase().trim();
+    var filtered = allItems;
+    if (q) {
+        filtered = allItems.filter(function (item) {
+            var nKu = String(item.name_ku || '').toLowerCase();
+            var nAr = String(item.name_ar || '').toLowerCase();
+            var nEn = String(item.name_en || '').toLowerCase();
+            var nDef = String(item.name || '').toLowerCase();
+            var cat = String(item.category || '').toLowerCase();
+            var desc = String(item.description || item.description_ku || item.description_ar || item.description_en || '').toLowerCase();
+            return nKu.indexOf(q) !== -1 ||
+                   nAr.indexOf(q) !== -1 ||
+                   nEn.indexOf(q) !== -1 ||
+                   nDef.indexOf(q) !== -1 ||
+                   cat.indexOf(q) !== -1 ||
+                   desc.indexOf(q) !== -1;
+        });
+    }
+
+    if (filtered.length === 0) {
+        container.innerHTML = '';
+        if (emptyEl) emptyEl.hidden = false;
+        if (emptyTextEl) {
+            var emptyMsgs = {
+                ku: 'هیچ ئایتمێک نەدۆزرایەوە',
+                ar: 'لم يتم العثور على أي عنصر',
+                en: 'No items found'
+            };
+            emptyTextEl.textContent = emptyMsgs[lang] || emptyMsgs.ku;
+        }
+        return;
+    }
+
+    if (emptyEl) emptyEl.hidden = true;
+
+    var html = '';
+    filtered.forEach(function (item) {
+        var name = item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || item.name || 'Unnamed Item';
+        var priceNum = Number(item.price) || 0;
+        var priceDisplay = '';
+
+        if (item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0) {
+            var validPrices = item.sizes.map(function(s) { return Number(s.price) || 0; }).filter(function(p) { return p > 0; });
+            if (validPrices.length > 0) {
+                var minP = Math.min.apply(null, validPrices);
+                var maxP = Math.max.apply(null, validPrices);
+                if (minP !== maxP) {
+                    priceDisplay = 'IQD ' + minP.toLocaleString() + ' - ' + maxP.toLocaleString();
+                } else {
+                    priceDisplay = 'IQD ' + minP.toLocaleString();
+                }
+            }
+        }
+        if (!priceDisplay) {
+            priceDisplay = 'IQD ' + (priceNum ? priceNum.toLocaleString() : '0');
+        }
+
+        var safeName = String(name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        html += '<div class="search-overlay-row" data-item-id="' + item.id + '" role="button" tabindex="0">' +
+                    '<span class="search-row-title">' + safeName + '</span>' +
+                    '<span class="search-row-price">' + priceDisplay + '</span>' +
+                '</div>';
+    });
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.search-overlay-row').forEach(function (row) {
+        row.addEventListener('click', function () {
+            var id = row.getAttribute('data-item-id');
+            var found = allItems.find(function (i) { return String(i.id) === String(id); });
+            if (found) {
+                openSearchItemPreview(found);
+            }
+        });
+        row.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                row.click();
+            }
+        });
+    });
+}
+
 function setupHeaderSearch() {
     var btn = document.getElementById('headerSearchBtn');
-    var panel = document.getElementById('headerSearchPanel');
-    var input = document.getElementById('headerSearchInput');
-    var clearBtn = document.getElementById('headerSearchClear');
-    if (!btn || !panel || !input) return;
+    if (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            openSearchOverlay();
+        });
+    }
 
-    var strings = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
-    input.placeholder = strings.searchPlaceholder || strings.searchItems || 'Search menu...';
+    var backBtn = document.getElementById('searchOverlayBack');
+    if (backBtn) {
+        backBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeSearchOverlay();
+        });
+    }
 
-    btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        closeLangMenu();
-        var themeDropdown = document.getElementById('themeDropdown');
-        if (themeDropdown) themeDropdown.classList.remove('open');
-
-        var opening = panel.hidden;
-        panel.hidden = !opening;
-        btn.classList.toggle('is-active', opening);
-        if (opening) {
-            if (clearBtn) clearBtn.hidden = false;
-            setTimeout(function () { input.focus(); }, 30);
-        } else {
-            input.value = '';
-            if (clearBtn) clearBtn.hidden = true;
-            applyMenuSearch('');
-        }
-    });
-
-    input.addEventListener('input', function () {
-        var q = input.value.trim();
-        if (clearBtn) clearBtn.hidden = false;
-        applyMenuSearch(q);
-    });
-
-    input.addEventListener('click', function (e) {
-        e.stopPropagation();
-    });
+    var searchInput = document.getElementById('searchOverlayInput');
+    var clearBtn = document.getElementById('searchOverlayClear');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            var q = searchInput.value.trim();
+            if (clearBtn) clearBtn.hidden = !q;
+            renderSearchOverlayItems(q);
+        });
+    }
 
     if (clearBtn) {
         clearBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            if (input.value.trim()) {
-                input.value = '';
-                applyMenuSearch('');
-                input.focus();
-            } else {
-                closeHeaderSearch();
-                applyMenuSearch('');
+            if (searchInput) {
+                searchInput.value = '';
+                clearBtn.hidden = true;
+                renderSearchOverlayItems('');
+                searchInput.focus();
             }
         });
     }
 
-    document.addEventListener('click', function (e) {
-        if (!panel.hidden && !panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-            closeHeaderSearch();
-            input.value = '';
-            if (clearBtn) clearBtn.hidden = true;
-            applyMenuSearch('');
-        }
-    });
+    var previewCloseBtn = document.getElementById('searchPreviewClose');
+    if (previewCloseBtn) {
+        previewCloseBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeSearchItemPreview();
+        });
+    }
+
+    var previewBackdrop = document.getElementById('searchPreviewBackdrop');
+    if (previewBackdrop) {
+        previewBackdrop.addEventListener('click', function (e) {
+            e.stopPropagation();
+            closeSearchItemPreview();
+        });
+    }
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && !panel.hidden) {
-            closeHeaderSearch();
-            input.value = '';
-            if (clearBtn) clearBtn.hidden = true;
-            applyMenuSearch('');
+        if (e.key === 'Escape') {
+            var previewWrap = document.getElementById('searchPreviewModalWrap');
+            if (previewWrap && !previewWrap.hidden) {
+                closeSearchItemPreview();
+                return;
+            }
+            var searchOverlay = document.getElementById('searchOverlayView');
+            if (searchOverlay && !searchOverlay.hidden) {
+                closeSearchOverlay();
+            }
         }
     });
 }

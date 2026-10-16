@@ -13913,6 +13913,533 @@ body.emenu-layout .menu-grid .menu-card .menu-card-foot-title {
     padding: 0 !important;
 }
 
+/* ==========================================================================
+   FULL-SCREEN LUXURY SEARCH OVERLAY (MATCHING SCREENSHOT 1 & 2)
+   ========================================================================== */
+
+/* Prevent background scrolling when search is open */
+body.search-overlay-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+}
+
+.search-overlay-view {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: var(--emenu-bg, #0B1626) !important;
+    color: var(--emenu-text, #FFFFFF) !important;
+    overflow: hidden !important;
+    animation: searchOverlayFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.search-overlay-view[hidden] {
+    display: none !important;
+}
+
+@keyframes searchOverlayFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Theme variations for Search Overlay Background (Screenshot 1: Rich Mocha) */
+body[data-menu-theme="mocha"] .search-overlay-view,
+body.emenu-layout[data-menu-theme="mocha"] .search-overlay-view {
+    background: #2A1810 !important;
+    color: #F5EBE1 !important;
+}
+
+body.light-mode .search-overlay-view,
+body.light-mode.emenu-layout .search-overlay-view {
+    background: #F8FAFC !important;
+    color: #0F172A !important;
+}
+
+/* Top Search Header Bar */
+.search-overlay-topbar {
+    width: 100% !important;
+    max-width: 640px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: max(14px, env(safe-area-inset-top)) 16px 14px !important;
+    box-sizing: border-box !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: transparent !important;
+    flex-shrink: 0 !important;
+}
+
+body[data-menu-theme="mocha"] .search-overlay-topbar {
+    border-bottom-color: rgba(212, 163, 115, 0.16) !important;
+}
+
+body.light-mode .search-overlay-topbar {
+    border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Input Wrapper */
+.search-overlay-input-wrap {
+    flex: 1 !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    position: relative !important;
+}
+
+.search-overlay-glass-icon {
+    flex-shrink: 0 !important;
+    color: var(--emenu-muted, rgba(255, 255, 255, 0.6)) !important;
+    opacity: 0.8 !important;
+}
+
+body[data-menu-theme="mocha"] .search-overlay-glass-icon {
+    color: #D4A373 !important;
+}
+
+body.light-mode .search-overlay-glass-icon {
+    color: #64748B !important;
+}
+
+.search-overlay-input {
+    flex: 1 !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: inherit !important;
+    font-size: 1.12rem !important;
+    font-weight: 500 !important;
+    font-family: inherit !important;
+    padding: 6px 0 !important;
+    -webkit-appearance: none !important;
+}
+
+.search-overlay-input::placeholder {
+    color: var(--emenu-muted, rgba(255, 255, 255, 0.45)) !important;
+    opacity: 0.8 !important;
+    font-weight: 400 !important;
+}
+
+body[data-menu-theme="mocha"] .search-overlay-input::placeholder {
+    color: rgba(245, 235, 225, 0.45) !important;
+}
+
+body.light-mode .search-overlay-input::placeholder {
+    color: rgba(15, 23, 42, 0.4) !important;
+}
+
+.search-overlay-clear-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    border: none !important;
+    color: inherit !important;
+    font-size: 0.8rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    transition: background 0.18s ease !important;
+}
+
+.search-overlay-clear-btn[hidden] {
+    display: none !important;
+}
+
+/* Back Arrow Button (Screenshot 1: sleek arrow) */
+.search-overlay-back-btn {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--emenu-text, #FFFFFF) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    transition: transform 0.18s ease, background 0.18s ease !important;
+}
+
+body[data-menu-theme="mocha"] .search-overlay-back-btn {
+    color: #D4A373 !important;
+}
+
+body.light-mode .search-overlay-back-btn {
+    color: #0F172A !important;
+}
+
+.search-overlay-back-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.search-overlay-back-btn:active {
+    transform: scale(0.92) !important;
+}
+
+/* In RTL (Screenshot 1): Topbar aligns glass on left, input text on right, and back arrow on right pointing left */
+html[dir="rtl"] .search-overlay-topbar,
+.search-overlay-view[dir="rtl"] .search-overlay-topbar {
+    direction: ltr !important;
+}
+
+html[dir="rtl"] .search-overlay-input,
+.search-overlay-view[dir="rtl"] .search-overlay-input {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* In LTR: Back arrow is on the left pointing left, input is on the right */
+html[dir="ltr"] .search-overlay-topbar,
+.search-overlay-view[dir="ltr"] .search-overlay-topbar {
+    direction: ltr !important;
+    flex-direction: row-reverse !important;
+}
+
+html[dir="ltr"] .search-overlay-input,
+.search-overlay-view[dir="ltr"] .search-overlay-input {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* Scrollable Items List */
+.search-overlay-scroll {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+}
+
+.search-overlay-items {
+    max-width: 640px !important;
+    margin: 0 auto !important;
+    padding: 6px 16px 80px !important;
+    box-sizing: border-box !important;
+}
+
+/* Individual Item Row (Screenshot 1: Name on top, Price below) */
+.search-overlay-row {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 15px 4px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    cursor: pointer !important;
+    transition: background 0.16s ease, transform 0.12s ease !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+body[data-menu-theme="mocha"] .search-overlay-row {
+    border-bottom-color: rgba(212, 163, 115, 0.12) !important;
+}
+
+body.light-mode .search-overlay-row {
+    border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+.search-overlay-row:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.search-overlay-row:active {
+    background: rgba(255, 255, 255, 0.06) !important;
+    transform: scale(0.99) !important;
+}
+
+.search-row-title {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    color: var(--emenu-text, #FFFFFF) !important;
+}
+
+html[dir="rtl"] .search-row-title {
+    text-align: right !important;
+    font-family: var(--font-ku) !important;
+}
+
+html[dir="ltr"] .search-row-title {
+    text-align: left !important;
+    font-family: var(--font-en) !important;
+}
+
+body[data-menu-theme="mocha"] .search-row-title {
+    color: #F5EBE1 !important;
+}
+
+body.light-mode .search-row-title {
+    color: #0F172A !important;
+}
+
+.search-row-price {
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    margin-top: 4px !important;
+    color: var(--emenu-price, #FBBF24) !important;
+    font-family: var(--font-en), 'Outfit', sans-serif !important;
+    letter-spacing: 0.02em !important;
+}
+
+html[dir="rtl"] .search-row-price {
+    text-align: right !important;
+}
+
+html[dir="ltr"] .search-row-price {
+    text-align: left !important;
+}
+
+body[data-menu-theme="mocha"] .search-row-price {
+    color: #D4A373 !important;
+}
+
+body.light-mode .search-row-price {
+    color: #D97706 !important;
+}
+
+/* Empty Search Results */
+.search-overlay-empty {
+    max-width: 400px !important;
+    margin: 60px auto 0 !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 24px !important;
+    color: var(--emenu-muted, rgba(255, 255, 255, 0.6)) !important;
+}
+
+.search-overlay-empty[hidden] {
+    display: none !important;
+}
+
+.search-empty-icon {
+    font-size: 2.4rem !important;
+    opacity: 0.7 !important;
+}
+
+.search-empty-text {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+}
+
+/* ==========================================================================
+   IMAGE PREVIEW POPUP MODAL (SCREENSHOT 2)
+   ========================================================================== */
+
+.search-preview-modal-wrap {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 100010 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+}
+
+.search-preview-modal-wrap[hidden] {
+    display: none !important;
+}
+
+.search-preview-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.78) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    animation: searchBackdropFade 0.2s ease !important;
+}
+
+@keyframes searchBackdropFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.search-preview-card {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 420px !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    z-index: 2 !important;
+    animation: searchCardPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    background: #000 !important;
+}
+
+@keyframes searchCardPop {
+    from {
+        opacity: 0;
+        transform: scale(0.93) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Top-Left Close Button (Screenshot 2: dark circular badge with ✕) */
+.search-preview-close-btn {
+    position: absolute !important;
+    top: 14px !important;
+    left: 14px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background: rgba(0, 0, 0, 0.58) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #FFFFFF !important;
+    font-size: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 12 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transition: transform 0.18s ease, background 0.18s ease !important;
+}
+
+.search-preview-close-btn:hover {
+    transform: scale(1.08) !important;
+    background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.search-preview-close-btn:active {
+    transform: scale(0.92) !important;
+}
+
+.search-preview-media {
+    width: 100% !important;
+    max-height: 64vh !important;
+    background: #111 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.search-preview-media img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 64vh !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+/* Caption Bar Attached to Bottom of Image (Screenshot 2) */
+.search-preview-footer {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 18px !important;
+    box-sizing: border-box !important;
+    background: var(--emenu-card-bg, #14253D) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body[data-menu-theme="mocha"] .search-preview-footer {
+    background: #45281B !important;
+    border-top-color: rgba(212, 163, 115, 0.18) !important;
+}
+
+body.light-mode .search-preview-footer {
+    background: #FFFFFF !important;
+    border-top-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* In RTL: Title on Right, Price on Left (Screenshot 2: 7,500 on left, جەوهەرە سوور on right) */
+html[dir="rtl"] .search-preview-footer {
+    flex-direction: row !important;
+}
+
+html[dir="rtl"] .search-preview-name {
+    order: 2 !important;
+    text-align: right !important;
+}
+
+html[dir="rtl"] .search-preview-price {
+    order: 1 !important;
+    text-align: left !important;
+}
+
+/* In LTR: Title on Left, Price on Right */
+html[dir="ltr"] .search-preview-footer {
+    flex-direction: row !important;
+}
+
+html[dir="ltr"] .search-preview-name {
+    order: 1 !important;
+    text-align: left !important;
+}
+
+html[dir="ltr"] .search-preview-price {
+    order: 2 !important;
+    text-align: right !important;
+}
+
+.search-preview-name {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--emenu-text, #FFFFFF) !important;
+    font-family: inherit !important;
+    line-height: 1.35 !important;
+}
+
+body[data-menu-theme="mocha"] .search-preview-name {
+    color: #F5EBE1 !important;
+}
+
+body.light-mode .search-preview-name {
+    color: #0F172A !important;
+}
+
+.search-preview-price {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    color: var(--emenu-price, #FBBF24) !important;
+    font-family: var(--font-en), 'Outfit', sans-serif !important;
+    letter-spacing: 0.02em !important;
+}
+
+body[data-menu-theme="mocha"] .search-preview-price {
+    color: #E6B980 !important;
+}
+
+body.light-mode .search-preview-price {
+    color: #D97706 !important;
+}
+
+
 
 
 

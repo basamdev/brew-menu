@@ -1770,6 +1770,54 @@
         </div>
     </div>
 
+    <!-- Full-Screen Search Overlay & Image Preview Modal (Screenshot 1 & 2) -->
+    <div class="search-overlay-view" id="searchOverlayView" hidden aria-modal="true" role="dialog">
+        <!-- Top Search Bar -->
+        <div class="search-overlay-topbar">
+            <div class="search-overlay-input-wrap">
+                <svg class="search-overlay-glass-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" class="search-overlay-input" id="searchOverlayInput" enterkeyhint="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="گەڕان بکە">
+                <button type="button" class="search-overlay-clear-btn" id="searchOverlayClear" aria-label="Clear search" hidden>✕</button>
+            </div>
+            <button type="button" class="search-overlay-back-btn" id="searchOverlayBack" aria-label="Back">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Scrollable Items List (Screenshot 1: Name on top, Price below, subtle dividers) -->
+        <div class="search-overlay-scroll" id="searchOverlayScroll">
+            <div class="search-overlay-items" id="searchOverlayItems">
+                <!-- Dynamically populated rows -->
+            </div>
+            <div class="search-overlay-empty" id="searchOverlayEmpty" hidden>
+                <span class="search-empty-icon">🔍</span>
+                <span class="search-empty-text" id="searchEmptyText">هیچ ئایتمێک نەدۆزرایەوە</span>
+            </div>
+        </div>
+
+        <!-- Image Preview Modal (Screenshot 2: popup when tapping an item) -->
+        <div class="search-preview-modal-wrap" id="searchPreviewModalWrap" hidden>
+            <div class="search-preview-backdrop" id="searchPreviewBackdrop"></div>
+            <div class="search-preview-card" id="searchPreviewCard" role="dialog" aria-modal="true">
+                <button type="button" class="search-preview-close-btn" id="searchPreviewClose" aria-label="Close preview">✕</button>
+                <div class="search-preview-media">
+                    <img id="searchPreviewImage" src="" alt="" loading="lazy">
+                </div>
+                <!-- Bottom bar under image (Screenshot 2: Name on right, Price on left in RTL) -->
+                <div class="search-preview-footer" id="searchPreviewFooter">
+                    <span class="search-preview-name" id="searchPreviewName"></span>
+                    <span class="search-preview-price" id="searchPreviewPrice"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification for Add to Cart -->
     <div class="cart-toast" id="cartToast" role="status" aria-live="polite">
         <div class="cart-toast-inner">
