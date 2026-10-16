@@ -6,12 +6,25 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Helper function to verify SmartServe Super Administrator custom claim
+    function isSuperAdmin() {
+      return request.auth != null && (
+        request.auth.token.superadmin == true ||
+        request.auth.token.admin == true
+      );
+    }
+
     // Subscriptions collection:
-    // Anyone can read subscription status (needed by public QR menu to check validity)
-    // Only authenticated SmartServe administrators can create, update, or renew subscriptions
+    // Anyone (customers, restaurant owners) can read subscription status to verify validity
+    // ONLY SmartServe Super Admin with trusted custom claim can create, update, or renew
     match /subscriptions/{restaurantId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // Subscription audit logs: Super Admin only
+    match /subscription_audit_logs/{logId} {
+      allow read, write: if isSuperAdmin();
     }
 
     // Settings (cafe info, hours, contacts)

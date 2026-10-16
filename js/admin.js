@@ -8032,173 +8032,33 @@ function loadManageSubscriptions() {
                     '</div>' +
                 '</div>' +
 
-                // Action buttons
-                '<div style="display:flex; flex-direction:column; gap:12px; margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">' +
-                    // Primary Renew 1 Year Button
-                    '<button type="button" id="btnAdminSubRenew1Year" style="background:linear-gradient(135deg, #D4AF37 0%, #AA820A 100%); color:#121214; font-weight:800; font-size:1rem; padding:14px 24px; border:none; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 6px 20px rgba(212,175,55,0.3); transition:all 0.2s ease;">' +
-                        '<span>⚡</span> ' + escapeHtmlText(T.renewBtn) +
-                    '</button>' +
-
-                    // Secondary action row
-                    '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">' +
-                        '<button type="button" id="btnAdminSubSimulateExpire" style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#EF4444; font-weight:700; padding:11px 16px; border-radius:10px; cursor:pointer; font-size:0.86rem; transition:all 0.2s ease;">' +
-                            '<span>🛑</span> ' + escapeHtmlText(T.simulateExpireBtn) +
-                        '</button>' +
-                        '<a href="' + previewUrl + '" target="_blank" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#FAF8F5; font-weight:600; padding:11px 16px; border-radius:10px; text-decoration:none; text-align:center; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;">' +
-                            '<span>👁️</span> ' + escapeHtmlText(T.previewExpiredBtn) +
+                // Restaurant Owner View: Read-only subscription info & SmartServe Support link
+                '<div style="display:flex; flex-direction:column; gap:16px; margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">' +
+                    '<div style="background:linear-gradient(135deg, rgba(212,175,55,0.1), rgba(0,0,0,0.3)); border:1px solid rgba(212,175,55,0.25); border-radius:12px; padding:16px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">' +
+                        '<div>' +
+                            '<div style="font-weight:700; color:#FAF8F5; margin-bottom:4px; font-size:0.95rem;">' +
+                                '<i class="fa-solid fa-shield-halved" style="color:#D4AF37;"></i> بەڕێوەبردنی مۆڵەتی SmartServe' +
+                            '</div>' +
+                            '<div style="font-size:0.84rem; color:#A8A29E; line-height:1.5;">' +
+                                'چالاککردن و نوێکردنەوەی ساڵانە لەلایەن ستافی فەرمی SmartServe بەڕێوەدەبرێت. بۆ نوێکردنەوە یان درێژکردنەوەی مۆڵەت پەیوەندی بکە.' +
+                            '</div>' +
+                        '</div>' +
+                        '<a href="https://wa.me/' + (localStorage.getItem('whatsappPhone') || '9647501234567').replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent('سڵاو، دەمەوێت مۆڵەتی مێنیوی SmartServe بۆ ڕێستۆرانتی ' + rId + ' نوێ بکەمەوە.') + '" target="_blank" style="background:#25D366; color:#FFF; font-weight:700; font-size:0.88rem; padding:10px 18px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(37,211,102,0.3);">' +
+                            '<i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> پەیوەندی بە SmartServe بکە' +
                         '</a>' +
-                        '<a href="' + liveMenuUrl + '" target="_blank" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#FAF8F5; font-weight:600; padding:11px 16px; border-radius:10px; text-decoration:none; text-align:center; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;">' +
+                    '</div>' +
+
+                    // Secondary utility links
+                    '<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">' +
+                        '<a href="' + liveMenuUrl + '" target="_blank" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#FAF8F5; font-weight:600; padding:10px 16px; border-radius:10px; text-decoration:none; font-size:0.86rem; display:inline-flex; align-items:center; gap:8px;">' +
                             '<span>🌐</span> ' + escapeHtmlText(T.openLiveMenuBtn) +
+                        '</a>' +
+                        '<a href="smartserve-admin.html" target="_blank" style="color:#D4AF37; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">' +
+                            '<i class="fa-solid fa-lock"></i> SmartServe Super Admin Portal ➔' +
                         '</a>' +
                     '</div>' +
                 '</div>' +
             '</div>';
-
-        // Wire Renew 1 Year
-        var btnRenew = document.getElementById('btnAdminSubRenew1Year');
-        if (btnRenew) {
-            btnRenew.addEventListener('click', function () {
-                if (!confirm(T.confirmRenew)) return;
-                btnRenew.disabled = true;
-                btnRenew.textContent = 'Saving to Firebase...';
-
-                var now = new Date();
-                var oneYearLater = new Date(now.getTime());
-                oneYearLater.setFullYear(now.getFullYear() + 1);
-
-                var rName = (inputRName.value || 'Brew Cafe & Rest').trim();
-                var adminEmail = (typeof getCurrentAdminEmail === 'function' ? getCurrentAdminEmail() : null) || 'admin';
-
-                var savePayload = {
-                    restaurantId: rId,
-                    restaurantName: rName,
-                    status: 'active',
-                    periodYears: 1,
-                    activatedAt: (subData && subData.activatedAt) ? subData.activatedAt : now.toISOString(),
-                    lastRenewedAt: now.toISOString(),
-                    expiresAt: oneYearLater.toISOString(),
-                    updatedAt: now.toISOString(),
-                    updatedBy: adminEmail
-                };
-
-                // Prepare Firestore modular timestamp payload
-                var firestorePayload = {
-                    restaurantId: rId,
-                    restaurantName: rName,
-                    status: 'active',
-                    periodYears: 1,
-                    activatedAt: (subData && subData.activatedAt && subData.activatedAt.toDate)
-                        ? subData.activatedAt
-                        : ((window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString()),
-                    lastRenewedAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString(),
-                    expiresAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(oneYearLater) : oneYearLater.toISOString(),
-                    updatedAt: (window.serverTimestamp && typeof window.serverTimestamp === 'function') ? window.serverTimestamp() : now.toISOString(),
-                    updatedBy: adminEmail
-                };
-
-                // Cache locally immediately
-                try {
-                    localStorage.setItem('smartserve_sub_' + rId, JSON.stringify({
-                        status: 'active',
-                        expiresAt: oneYearLater.toISOString(),
-                        verifiedAt: Date.now()
-                    }));
-                } catch (e) {}
-
-                function finishSuccess() {
-                    if (typeof showAdminToast === 'function') {
-                        showAdminToast(T.renewSuccess + oneYearLater.toLocaleDateString());
-                    } else {
-                        alert(T.renewSuccess + oneYearLater.toLocaleDateString());
-                    }
-                    loadSubscriptionForId(rId);
-                }
-
-                if (window.db && typeof doc === 'function' && typeof setDoc === 'function') {
-                    setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
-                        if (window.subscriptionApi && typeof window.subscriptionApi.save === 'function') {
-                            window.subscriptionApi.save(savePayload).catch(function () {});
-                        }
-                        finishSuccess();
-                    }).catch(function (err) {
-                        console.error('Firestore subscription save error:', err);
-                        var errMsg = (err && err.message ? err.message : String(err));
-                        if (errMsg.indexOf('permission') !== -1 || errMsg.indexOf('denied') !== -1) {
-                            alert('⚠️ Firestore Permission Denied.\n\nPlease check Firebase Console → Firestore Rules and ensure you published the updated firestore.rules allowing authenticated admin write access.');
-                        } else {
-                            alert('⚠️ Cloud save failed: ' + errMsg + '\nChanges saved in local session.');
-                        }
-                        finishSuccess();
-                    });
-                } else if (window.subscriptionApi && typeof window.subscriptionApi.save === 'function') {
-                    window.subscriptionApi.save(savePayload).then(function () {
-                        finishSuccess();
-                    }).catch(function (err) {
-                        alert('Error saving subscription: ' + (err && err.message ? err.message : err));
-                        btnRenew.disabled = false;
-                        btnRenew.textContent = T.renewBtn;
-                    });
-                } else {
-                    finishSuccess();
-                }
-            });
-        }
-
-        // Wire Simulate Expired
-        var btnExpire = document.getElementById('btnAdminSubSimulateExpire');
-        if (btnExpire) {
-            btnExpire.addEventListener('click', function () {
-                if (!confirm(T.confirmExpire)) return;
-                btnExpire.disabled = true;
-
-                var now = new Date();
-                var yesterday = new Date(now.getTime() - (86400000 * 2));
-                var rName = (inputRName.value || 'Brew Cafe & Rest').trim();
-                var adminEmail = (typeof getCurrentAdminEmail === 'function' ? getCurrentAdminEmail() : null) || 'admin';
-
-                var firestorePayload = {
-                    restaurantId: rId,
-                    restaurantName: rName,
-                    status: 'expired',
-                    periodYears: 1,
-                    activatedAt: (subData && subData.activatedAt && subData.activatedAt.toDate)
-                        ? subData.activatedAt
-                        : ((window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(new Date(now.getTime() - 86400000 * 370)) : now.toISOString()),
-                    lastRenewedAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString(),
-                    expiresAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(yesterday) : yesterday.toISOString(),
-                    updatedAt: (window.serverTimestamp && typeof window.serverTimestamp === 'function') ? window.serverTimestamp() : now.toISOString(),
-                    updatedBy: adminEmail
-                };
-
-                try {
-                    localStorage.setItem('smartserve_sub_' + rId, JSON.stringify({
-                        status: 'expired',
-                        expiresAt: yesterday.toISOString(),
-                        verifiedAt: Date.now()
-                    }));
-                } catch (e) {}
-
-                function finishExpire() {
-                    if (typeof showAdminToast === 'function') {
-                        showAdminToast(T.expireSimSuccess);
-                    } else {
-                        alert(T.expireSimSuccess);
-                    }
-                    loadSubscriptionForId(rId);
-                }
-
-                if (window.db && typeof doc === 'function' && typeof setDoc === 'function') {
-                    setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
-                        finishExpire();
-                    }).catch(function (err) {
-                        console.error('Simulate expire error:', err);
-                        finishExpire();
-                    });
-                } else {
-                    finishExpire();
-                }
-            });
-        }
     }
 
     function loadSubscriptionForId(rId) {

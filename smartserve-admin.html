@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartServe Super Admin • Restaurant Subscriptions</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="images/smart-serve-logo.png?v=3">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/smartserve-admin.css?v=101">
+</head>
+<body class="ss-admin-page">
+
+    <!-- Auth Gate / Login Modal -->
+    <div class="ss-auth-gate" id="ssAuthGate">
+        <div class="ss-auth-card">
+            <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="ss-auth-logo">
+            <h1 class="ss-auth-title">SmartServe Super Admin</h1>
+            <p class="ss-auth-subtitle">Private Subscription & License Management</p>
+
+            <div class="ss-auth-error" id="ssAuthError"></div>
+
+            <form id="ssLoginForm" autocomplete="on">
+                <div class="ss-form-group" style="text-align: left;">
+                    <label for="ssLoginEmail">Super Admin Email</label>
+                    <input type="email" id="ssLoginEmail" placeholder="superadmin@smartserve.com" required autocomplete="email">
+                </div>
+                <div class="ss-form-group" style="text-align: left;">
+                    <label for="ssLoginPassword">Master Password</label>
+                    <input type="password" id="ssLoginPassword" placeholder="••••••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="ss-btn-primary" id="ssLoginBtn" style="width: 100%; justify-content: center; padding: 13px; margin-top: 10px;">
+                    <span id="ssLoginBtnText"><i class="fa-solid fa-shield-halved"></i> Authorize & Enter</span>
+                    <span id="ssLoginSpinner" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...</span>
+                </button>
+            </form>
+
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.8rem; color: #78716C;">
+                Restaurant owner? <a href="login.html" style="color: #D4AF37; text-decoration: none;">Go to Restaurant Owner Portal</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Container -->
+    <div class="ss-container" id="ssMainLayout" style="display: none;">
+        
+        <!-- Navbar -->
+        <header class="ss-navbar">
+            <a href="smartserve-admin.html" class="ss-brand">
+                <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="ss-brand-logo">
+                <div class="ss-brand-title">
+                    <span>SmartServe</span>
+                    <span class="ss-brand-badge">Super Admin Console</span>
+                </div>
+            </a>
+
+            <div class="ss-user-status">
+                <div class="ss-user-pill">
+                    <i class="fa-solid fa-user-shield" style="color: #D4AF37;"></i>
+                    <span id="ssAdminUserEmail">admin@smartserve.com</span>
+                    <span class="ss-role-tag">SUPER ADMIN</span>
+                </div>
+                <button type="button" class="ss-btn-logout" id="ssLogoutBtn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                </button>
+            </div>
+        </header>
+
+        <!-- KPI Metrics Grid -->
+        <section class="ss-metrics-grid">
+            <div class="ss-metric-card">
+                <div class="ss-metric-icon gold"><i class="fa-solid fa-utensils"></i></div>
+                <div class="ss-metric-info">
+                    <div class="ss-metric-label">Total Subscriptions</div>
+                    <div class="ss-metric-value" id="kpiTotal">0</div>
+                </div>
+            </div>
+            <div class="ss-metric-card">
+                <div class="ss-metric-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="ss-metric-info">
+                    <div class="ss-metric-label">Active Menus</div>
+                    <div class="ss-metric-value" id="kpiActive">0</div>
+                </div>
+            </div>
+            <div class="ss-metric-card">
+                <div class="ss-metric-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div class="ss-metric-info">
+                    <div class="ss-metric-label">Expired Menus</div>
+                    <div class="ss-metric-value" id="kpiExpired">0</div>
+                </div>
+            </div>
+            <div class="ss-metric-card">
+                <div class="ss-metric-icon yellow"><i class="fa-solid fa-clock"></i></div>
+                <div class="ss-metric-info">
+                    <div class="ss-metric-label">Expiring Soon (&lt; 30d)</div>
+                    <div class="ss-metric-value" id="kpiExpiringSoon">0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls: Search & Filter & Action -->
+        <section class="ss-control-bar">
+            <div class="ss-search-wrap">
+                <i class="fa-solid fa-magnifying-glass" style="color: #9CA3AF;"></i>
+                <input type="text" id="ssSearchInput" placeholder="Search by Restaurant ID or Name...">
+            </div>
+
+            <div class="ss-filter-chips" id="ssFilterChips">
+                <button type="button" class="ss-chip active" data-filter="all">All Subscriptions</button>
+                <button type="button" class="ss-chip" data-filter="active">Active</button>
+                <button type="button" class="ss-chip" data-filter="expired">Expired</button>
+                <button type="button" class="ss-chip" data-filter="soon">Expiring Soon</button>
+            </div>
+
+            <button type="button" class="ss-btn-primary" id="btnOpenAddModal">
+                <i class="fa-solid fa-plus"></i> New Subscription
+            </button>
+        </section>
+
+        <!-- Subscriptions Table Card -->
+        <section class="ss-table-card">
+            <div class="ss-table-wrap">
+                <table class="ss-table">
+                    <thead>
+                        <tr>
+                            <th>Restaurant</th>
+                            <th>Status</th>
+                            <th>Activated Date</th>
+                            <th>Expiration Date</th>
+                            <th>Remaining Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ssSubscriptionTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: #D4AF37;">
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading subscriptions...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Audit Logs Card -->
+        <section class="ss-audit-card">
+            <div class="ss-audit-header">
+                <div class="ss-audit-title">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: #D4AF37;"></i>
+                    <span>Subscription Audit Trail (Recent Admin Actions)</span>
+                </div>
+                <button type="button" class="ss-btn-sm link" id="btnRefreshAuditLogs">
+                    <i class="fa-solid fa-rotate"></i> Refresh Logs
+                </button>
+            </div>
+            <div class="ss-table-wrap">
+                <table class="ss-table" style="font-size: 0.82rem;">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Restaurant ID</th>
+                            <th>Action</th>
+                            <th>Admin Identity</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ssAuditTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 24px; color: #A8A29E;">
+                                Loading audit logs...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Modal: Add or Custom Renew Subscription -->
+    <div class="ss-modal-overlay" id="ssSubscriptionModal">
+        <div class="ss-modal">
+            <button type="button" class="ss-modal-close" id="btnCloseModal">✕</button>
+            <h3 style="margin-bottom: 6px; font-size: 1.15rem; color: #FAF8F5;" id="ssModalTitle">Manage Subscription</h3>
+            <p style="font-size: 0.82rem; color: #A8A29E; margin-bottom: 20px;">Activate or extend license for this restaurant.</p>
+
+            <form id="ssSubscriptionForm">
+                <div class="ss-form-group">
+                    <label for="modalRestaurantId">Restaurant ID (Document ID)</label>
+                    <input type="text" id="modalRestaurantId" placeholder="e.g. brew-coffee" required style="font-family: monospace;">
+                </div>
+                <div class="ss-form-group">
+                    <label for="modalRestaurantName">Restaurant / Cafe Name</label>
+                    <input type="text" id="modalRestaurantName" placeholder="Brew Cafe & Rest" required>
+                </div>
+                <div class="ss-form-group">
+                    <label for="modalPeriodYears">License Extension Period</label>
+                    <select id="modalPeriodYears">
+                        <option value="1" selected>1 Calendar Year (Standard)</option>
+                        <option value="2">2 Calendar Years</option>
+                        <option value="3">3 Calendar Years</option>
+                        <option value="5">5 Calendar Years</option>
+                        <option value="custom">Custom Expiration Date</option>
+                    </select>
+                </div>
+                <div class="ss-form-group" id="modalCustomDateWrap" style="display: none;">
+                    <label for="modalCustomDate">Specific Expiry Date</label>
+                    <input type="date" id="modalCustomDate">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 24px;">
+                    <button type="submit" class="ss-btn-primary" style="flex: 1; justify-content: center;" id="modalSubmitBtn">
+                        <i class="fa-solid fa-bolt"></i> Apply Subscription
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-auth.js";
+      import { getFirestore, collection, doc, getDoc, getDocs, setDoc, query, orderBy, limit, addDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCRPdqIjA-S-VwBNt-8FEDDvkkfKfjSK8s",
+        authDomain: "brew-coffee-1cd84.firebaseapp.com",
+        projectId: "brew-coffee-1cd84",
+        storageBucket: "brew-coffee-1cd84.firebasestorage.app",
+        messagingSenderId: "96919307440",
+        appId: "1:96919307440:web:2450c01c4a1bd604e66775",
+        measurementId: "G-X0D6048HLC"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      window.firebaseApp = app;
+      window.auth = auth;
+      window.db = db;
+      window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+      window.signOut = signOut;
+      window.onAuthStateChanged = onAuthStateChanged;
+      window.collection = collection;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.getDocs = getDocs;
+      window.setDoc = setDoc;
+      window.addDoc = addDoc;
+      window.query = query;
+      window.orderBy = orderBy;
+      window.limit = limit;
+      window.serverTimestamp = serverTimestamp;
+      window.Timestamp = Timestamp;
+    </script>
+
+    <!-- Super Admin Controller Script -->
+    <script src="js/smartserve-admin.js?v=101"></script>
+</body>
+</html>
