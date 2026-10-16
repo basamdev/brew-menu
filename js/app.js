@@ -2138,16 +2138,15 @@ function createMenuCard(item, lang, strings) {
     card.addEventListener('click', openDetail);
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); } });
 
-    card.querySelectorAll('.menu-card-cart').forEach((cartBtn) => {
+    card.querySelectorAll('.menu-card-cart, .grid-add-btn').forEach((cartBtn) => {
         cartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
-            if (hasSizes) {
-                openProductDetail(item);
-                return;
-            }
-            addToCart(item);
+
             cartBtn.classList.add('added');
-            setTimeout(() => cartBtn.classList.remove('added'), 600);
+            setTimeout(() => cartBtn.classList.remove('added'), 700);
+
+            addToCart(item);
         });
     });
 
@@ -2462,12 +2461,14 @@ function openProductDetail(item) {
                     sizesList.querySelectorAll('.detail-size-row').forEach(function (r) { r.classList.remove('active'); });
                     rowEl.classList.add('active');
                     window._selectedDetailSize = sz;
+                    syncDetailPriceAndButton();
                 });
                 sizesList.appendChild(rowEl);
             });
             window._selectedDetailSize = item.sizes[0];
         }
     } else {
+        window._selectedDetailSize = null;
         if (sizesWrap) sizesWrap.style.display = 'none';
         if (singlePriceWrap) {
             singlePriceWrap.style.display = 'flex';
@@ -2476,6 +2477,71 @@ function openProductDetail(item) {
             }
         }
     }
+
+    // Modal Add-to-Cart Stepper & Action
+    var _detailQuantity = 1;
+    function syncDetailPriceAndButton() {
+        var unitPrice = 0;
+        if (window._selectedDetailSize && window._selectedDetailSize.price) {
+            unitPrice = parseItemPrice(window._selectedDetailSize.price);
+        } else {
+            unitPrice = parseItemPrice(item.price);
+        }
+        var total = unitPrice * _detailQuantity;
+        var btnPrice = document.getElementById('detailBtnPrice');
+        if (btnPrice) {
+            btnPrice.textContent = (total > 0 ? total.toLocaleString() : '0') + ' IQD';
+        }
+        var qtyVal = document.getElementById('detailQtyVal');
+        if (qtyVal) {
+            qtyVal.textContent = _detailQuantity;
+        }
+    }
+
+    var minusBtn = document.getElementById('detailQtyMinus');
+    var plusBtn = document.getElementById('detailQtyPlus');
+    var addCartBtn = document.getElementById('detailAddToCartBtn');
+    var addCartText = document.getElementById('detailAddToCartText');
+
+    if (addCartText) {
+        var addTextMap = {
+            ku: 'زیادکردن بۆ سەبەتە',
+            ar: 'إضافة للسلة',
+            en: 'Add to Cart'
+        };
+        addCartText.textContent = addTextMap[lang] || addTextMap.ku;
+    }
+
+    if (minusBtn) {
+        minusBtn.onclick = function (e) {
+            e.stopPropagation();
+            if (_detailQuantity > 1) {
+                _detailQuantity--;
+                syncDetailPriceAndButton();
+            }
+        };
+    }
+
+    if (plusBtn) {
+        plusBtn.onclick = function (e) {
+            e.stopPropagation();
+            _detailQuantity++;
+            syncDetailPriceAndButton();
+        };
+    }
+
+    if (addCartBtn) {
+        addCartBtn.onclick = function (e) {
+            e.stopPropagation();
+            addToCart(item, {
+                size: window._selectedDetailSize,
+                quantity: _detailQuantity
+            });
+            closeProductDetail();
+        };
+    }
+
+    syncDetailPriceAndButton();
 
     // Video button
     const videoBtn = document.getElementById('videoPlayBtn');
@@ -3639,27 +3705,155 @@ function saveCart() {
     localStorage.setItem('cart_items', JSON.stringify(cartItems));
 }
 
-function addToCart(item) {
+function parseItemPrice(p) {
+    if (typeof p === 'number' && !isNaN(p)) return p;
+    if (!p) return 0;
+    var clean = String(p).replace(/[^\d.]/g, '');
+    var num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+}
+
+function triggerCartBadgeBounce() {
+    var badges = document.querySelectorAll('#cartBadge, .cart-badge');
+    var cartBtns = document.querySelectorAll('#cartBtn, .header-cart-btn, .menu-fab-cart');
+    badges.forEach(function (badge) {
+        badge.classList.remove('cart-badge-bounce');
+        void badge.offsetWidth;
+        badge.classList.add('cart-badge-bounce');
+    });
+    cartBtns.forEach(function (btn) {
+        btn.classList.remove('cart-badge-bounce');
+        void btn.offsetWidth;
+        btn.classList.add('cart-badge-bounce');
+    });
+}
+
+function showAddToCartToast(name, price) {
+    var toast = document.getElementById('cartToast');
+    if (!toast) return;
+
+    var titleEl = document.getElementById('cartToastTitle');
+    var priceEl = document.getElementById('cartToastPrice');
     var lang = localStorage.getItem('selectedLang') || 'ku';
-    var name = item.selectedSizeName
-        ? item.name
-        : (item['name_' + lang] || item.name_en || item.name);
-    var existing = cartItems.find(function(i) { return i.id === item.id; });
-    
+
+    var addedText = {
+        ku: 'زیادکرا بۆ سەبەتە',
+        ar: 'تمت الإضافة للسلة',
+        en: 'Added to cart'
+    };
+    var label = addedText[lang] || addedText.ku;
+
+    if (titleEl) titleEl.textContent = name;
+    if (priceEl) priceEl.textContent = label + (price ? ' • ' + Number(price).toLocaleString() + ' IQD' : '');
+
+    var actionBtn = document.getElementById('cartToastAction');
+    if (actionBtn) {
+        var cartLabel = {
+            ku: 'سەبەتە 🛒',
+            ar: 'السلة 🛒',
+            en: 'View Cart 🛒'
+        };
+        actionBtn.textContent = cartLabel[lang] || cartLabel.ku;
+        actionBtn.onclick = function (e) {
+            e.stopPropagation();
+            toast.classList.remove('show');
+            openCartPanel();
+        };
+    }
+
+    toast.classList.add('show');
+
+    if (window._toastTimer) clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(function () {
+        toast.classList.remove('show');
+    }, 3200);
+
+    if (navigator && navigator.vibrate) {
+        try { navigator.vibrate(35); } catch (e) {}
+    }
+}
+
+function addToCart(item, options) {
+    if (!item) return;
+    options = options || {};
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var qty = Math.max(1, parseInt(options.quantity, 10) || 1);
+
+    var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
+    var selectedSize = options.size || (hasSizes ? item.sizes[0] : null);
+
+    var baseName = item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || item.name || 'Item';
+    var finalName = baseName;
+    var finalPrice = parseItemPrice(item.price);
+    var cartId = String(item.id || ('item_' + Date.now()));
+
+    if (selectedSize) {
+        var szName = selectedSize['name_' + lang] || selectedSize.name_ku || selectedSize.name_ar || selectedSize.name_en || selectedSize.name || '';
+        if (szName) {
+            finalName = baseName + ' (' + szName + ')';
+        }
+        if (selectedSize.price) {
+            finalPrice = parseItemPrice(selectedSize.price);
+        }
+        var szId = selectedSize.id || szName || finalPrice;
+        cartId = String(item.id || 'item') + '_' + String(szId).replace(/\s+/g, '_');
+    }
+
+    if (!Array.isArray(cartItems)) cartItems = [];
+
+    var existing = cartItems.find(function(i) { return i.id === cartId; });
     if (existing) {
-        existing.quantity += 1;
+        existing.quantity += qty;
     } else {
         cartItems.push({
-            id: item.id,
-            name: name,
-            price: Number(item.price || 0),
-            image: item.image || '',
-            quantity: 1
+            id: cartId,
+            itemId: item.id,
+            name: finalName,
+            price: finalPrice,
+            image: normalizeImageUrl(item.image) || '',
+            quantity: qty
         });
     }
+
     saveCart();
     updateCartBadge();
+    showAddToCartToast(finalName, finalPrice);
+    triggerCartBadgeBounce();
 }
+window.addToCart = addToCart;
+
+// Global delegated capture listener so '+' buttons on cards always work 100% reliably
+(function setupGlobalAddButtons() {
+    var _lastClickTime = 0;
+    document.addEventListener('click', function (e) {
+        var addBtn = e.target && e.target.closest ? e.target.closest('.grid-add-btn, .menu-card-cart, .menu-card-add') : null;
+        if (!addBtn) return;
+        if (addBtn.id === 'detailAddToCartBtn' || addBtn.closest('#detailCartActionBar')) return;
+
+        var cardEl = addBtn.closest('.menu-card');
+        var itemId = addBtn.getAttribute('data-item-id') || (cardEl && cardEl.getAttribute('data-id'));
+        if (!itemId) return;
+
+        var now = Date.now();
+        if (now - _lastClickTime < 300) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+        }
+        _lastClickTime = now;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var item = findMenuItemById(itemId);
+        if (!item) return;
+
+        addBtn.classList.add('added');
+        setTimeout(function () { addBtn.classList.remove('added'); }, 700);
+
+        addToCart(item);
+    }, true);
+})();
 
 function removeFromCart(itemId) {
     cartItems = cartItems.filter(function(i) { return i.id !== itemId; });
@@ -3685,12 +3879,12 @@ function getCartTotal() {
 }
 
 function updateCartBadge() {
-    var badge = document.getElementById('cartBadge');
-    var count = cartItems.reduce(function(sum, i) { return sum + i.quantity; }, 0);
-    if (badge) {
+    var badges = document.querySelectorAll('#cartBadge, .cart-badge');
+    var count = Array.isArray(cartItems) ? cartItems.reduce(function(sum, i) { return sum + (i.quantity || 1); }, 0) : 0;
+    badges.forEach(function (badge) {
         badge.textContent = count;
         badge.style.display = count > 0 ? 'flex' : 'none';
-    }
+    });
 }
 
 function clearCart() {
