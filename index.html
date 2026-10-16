@@ -910,7 +910,7 @@
     </main>
 
     <!-- Core App Logic & Settings -->
-    <script src="js/app.js?v=190"></script>
+    <script src="js/app.js?v=191"></script>
     <script>
         (function () {
             'use strict';
@@ -1153,13 +1153,13 @@
                 }
             }
 
-            // Logo Click Actions: Single click opens menu, Double click opens admin
+            // Logo Click Actions: Single click opens menu, Double click opens login
             function setupLogoActions(targetEl) {
                 if (!targetEl) return;
                 if (typeof setupLogoClickActions === 'function') {
                     setupLogoClickActions(targetEl, function () {
                         window.location.href = 'menu.html?lang=' + encodeURIComponent(currentLang);
-                    }, 'admin.html');
+                    }, 'login.html');
                 } else {
                     var clicks = 0;
                     var timer = null;
@@ -1174,7 +1174,7 @@
                         } else if (clicks === 2) {
                             clearTimeout(timer);
                             clicks = 0;
-                            window.location.href = 'admin.html';
+                            window.location.href = 'login.html';
                         }
                     });
                 }

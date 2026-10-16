@@ -1,36 +1,90 @@
-// Login.js - Handles admin authentication
+// Login.js - Handles admin authentication with Firebase and local fallbacks
 
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
+    const loginBox = document.getElementById('loginBox');
     const loginError = document.getElementById('loginError');
+    const loginErrorText = document.getElementById('loginErrorText');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('loginBtn');
+    const btnText = loginBtn ? loginBtn.querySelector('.btn-text') : null;
+    const btnSpinner = loginBtn ? loginBtn.querySelector('.btn-spinner') : null;
+    const pwdToggleBtn = document.getElementById('pwdToggleBtn');
+    const pwdEyeIcon = document.getElementById('pwdEyeIcon');
 
-    function showMessage(element, message, isError) {
-        if (!element) return;
-        element.textContent = message || '';
-        element.style.display = message ? 'block' : 'none';
-        if (element === loginError) {
-            element.style.color = isError ? '#ff5c5c' : '#2e7d32';
+    // Toggle password visibility
+    if (pwdToggleBtn && passwordInput && pwdEyeIcon) {
+        pwdToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                pwdEyeIcon.classList.remove('fa-eye');
+                pwdEyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                pwdEyeIcon.classList.remove('fa-eye-slash');
+                pwdEyeIcon.classList.add('fa-eye');
+            }
+        });
+    }
+
+    function showErrorMessage(message) {
+        if (!loginError) return;
+        if (loginErrorText) {
+            loginErrorText.textContent = message || 'Wrong email or wrong password';
+        } else {
+            loginError.textContent = message || 'Wrong email or wrong password';
+        }
+        loginError.style.display = 'flex';
+
+        if (emailInput) emailInput.classList.add('input-error');
+        if (passwordInput) passwordInput.classList.add('input-error');
+
+        if (loginBox) {
+            loginBox.classList.remove('shake');
+            void loginBox.offsetWidth; // Trigger reflow to restart CSS animation
+            loginBox.classList.add('shake');
         }
     }
+
+    function hideErrorMessage() {
+        if (loginError) loginError.style.display = 'none';
+        if (emailInput) emailInput.classList.remove('input-error');
+        if (passwordInput) passwordInput.classList.remove('input-error');
+    }
+
+    function setLoading(isLoading) {
+        if (!loginBtn) return;
+        loginBtn.disabled = isLoading;
+        if (btnText) btnText.style.display = isLoading ? 'none' : 'inline-block';
+        if (btnSpinner) btnSpinner.style.display = isLoading ? 'inline-flex' : 'none';
+    }
+
+    [emailInput, passwordInput].forEach(function(inp) {
+        if (!inp) return;
+        inp.addEventListener('input', function() {
+            hideErrorMessage();
+        });
+    });
 
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            hideErrorMessage();
 
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = (emailInput ? emailInput.value : '').trim();
+            const password = passwordInput ? passwordInput.value : '';
 
             if (!email || !password) {
-                showMessage(loginError, 'Please fill in all fields', true);
+                showErrorMessage('تکایە هەردوو خانەی ئیمەیڵ و وشەی نهێنی پڕبکەرەوە / Please fill in both email and password');
                 return;
             }
 
-            if (typeof USE_LOCAL_API !== 'undefined' && USE_LOCAL_API) {
-                // Use authApi.login() which resolves the API URL absolutely
-                // (via getApiUrl) and sends credentials. Building the URL
-                // relatively with localApiRequest('auth.php') only works when
-                // login.html shares the exact origin/path as the PHP backend;
-                // otherwise the POST never reaches api/auth.php and login fails.
+            setLoading(true);
+
+            // 1. If local API is explicitly enabled
+            if (typeof USE_LOCAL_API !== 'undefined' && USE_LOCAL_API && typeof authApi !== 'undefined') {
                 authApi.login(email, password).then(function(response) {
                     if (response.token) {
                         window.currentAuthToken = response.token;
@@ -38,45 +92,79 @@ document.addEventListener('DOMContentLoaded', function() {
                         localStorage.setItem('adminAuthToken', response.token);
                         localStorage.setItem('adminUser', JSON.stringify(response.user));
                     }
-                    showMessage(loginError, '', false);
-                    window.location.href = 'admin.html';
-                }).catch(function(error) {
-                    showMessage(loginError, error.message || 'Authentication failed', true);
+                    hideErrorMessage();
+                    window.location.replace('admin.html');
+                }).catch(function() {
+                    setLoading(false);
+                    showErrorMessage('Wrong email or wrong password / ئیمەیڵ یان وشەی نهێنی هەڵەیە');
                 });
                 return;
             }
 
-            signInWithEmailAndPassword(auth, email, password)
-                .then(function() {
-                    showMessage(loginError, '', false);
-                    window.location.href = 'admin.html';
-                })
-                .catch(function(error) {
-                    const errorCode = error.code;
-                    let errorMessage = 'Authentication failed';
+            // 2. Firebase Authentication
+            function executeFirebaseAuth() {
+                var authInstance = window.auth;
+                if (!authInstance || typeof signInWithEmailAndPassword !== 'function') {
+                    setLoading(false);
+                    showErrorMessage('Firebase Auth is initializing... Please retry in a second.');
+                    return;
+                }
 
-                    if (errorCode === 'auth/user-not-found') {
-                        errorMessage = 'No user found with this email';
-                    } else if (errorCode === 'auth/wrong-password') {
-                        errorMessage = 'Invalid password';
-                    } else if (errorCode === 'auth/invalid-email') {
-                        errorMessage = 'Please enter a valid email';
-                    } else if (errorCode === 'auth/network-request-failed') {
-                        errorMessage = 'Network error. Please try again';
-                    } else if (errorCode === 'auth/operation-not-allowed') {
-                        errorMessage = 'Enable Email/Password sign-in in Firebase Authentication';
-                    }
+                signInWithEmailAndPassword(authInstance, email, password)
+                    .then(function(userCredential) {
+                        hideErrorMessage();
+                        try {
+                            localStorage.setItem('adminUserEmail', (userCredential.user && userCredential.user.email) || email);
+                            localStorage.setItem('adminLoginTime', String(Date.now()));
+                        } catch (err) {}
+                        window.location.replace('admin.html');
+                    })
+                    .catch(function(error) {
+                        setLoading(false);
+                        const errorCode = (error && error.code) || '';
+                        console.warn('Firebase login attempt failed:', errorCode, error.message);
 
-                    showMessage(loginError, errorMessage, true);
-                });
+                        if (
+                            errorCode === 'auth/invalid-credential' ||
+                            errorCode === 'auth/invalid-login-credentials' ||
+                            errorCode === 'auth/user-not-found' ||
+                            errorCode === 'auth/wrong-password' ||
+                            errorCode === 'auth/invalid-email'
+                        ) {
+                            showErrorMessage('Wrong email or wrong password / ئیمەیڵ یان وشەی نهێنی هەڵەیە');
+                        } else if (errorCode === 'auth/too-many-requests') {
+                            showErrorMessage('هەوڵی زۆری نادروست درا، تکایە کەمێکی تر دووبارە بکەرەوە / Too many attempts. Please try again later.');
+                        } else if (errorCode === 'auth/operation-not-allowed') {
+                            showErrorMessage('⚠️ لە Firebase Console بەشی Authentication ➔ Sign-in method پێویستە Email/Password چالاک (Enable) بکرێت');
+                        } else if (errorCode === 'auth/network-request-failed') {
+                            showErrorMessage('کێشەی هێڵی ئینتەرنێت هەیە، تکایە هێڵەکەت بپشکنە / Network error. Please check your internet.');
+                        } else {
+                            showErrorMessage('Wrong email or wrong password / ئیمەیڵ یان وشەی نهێنی هەڵەیە');
+                        }
+                    });
+            }
+
+            if (window.auth && typeof signInWithEmailAndPassword === 'function') {
+                executeFirebaseAuth();
+            } else {
+                setTimeout(executeFirebaseAuth, 350);
+            }
         });
     }
 
+    // Auto-forward if user is already authenticated
     if (typeof USE_LOCAL_API === 'undefined' || !USE_LOCAL_API) {
-        onAuthStateChanged(auth, function(user) {
-            if (user) {
-                window.location.href = 'admin.html';
+        function checkExistingAuth() {
+            if (typeof onAuthStateChanged === 'function' && window.auth) {
+                onAuthStateChanged(window.auth, function(user) {
+                    if (user) {
+                        window.location.replace('admin.html');
+                    }
+                });
+            } else {
+                setTimeout(checkExistingAuth, 250);
             }
-        });
+        }
+        checkExistingAuth();
     }
 });

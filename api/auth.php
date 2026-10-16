@@ -21,6 +21,7 @@ session_start();
 
 // Admin credentials
 $validAdmins = [
+    'brew@gmail.com' => 'brew111222333',
     'admin@brew.com' => 'admin123',
     'admin@coffee.com' => 'admin123',
     'admin@shawarma.com' => 'admin123',

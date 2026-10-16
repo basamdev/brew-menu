@@ -33,8 +33,58 @@
             }
         })();
     </script>
+    <style>
+        /* Auth Gate - Hide admin UI completely until authenticated */
+        .admin-container {
+            display: none !important;
+        }
+        body.admin-authenticated .admin-container {
+            display: flex !important;
+        }
+        .admin-auth-guard {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            background: #060A12;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: #FAF8F5;
+            font-family: 'Inter', 'Noto Kufi Arabic', sans-serif;
+            transition: opacity 0.3s ease;
+        }
+        .admin-auth-guard-logo {
+            width: 72px;
+            height: auto;
+            animation: pulseGateLogo 2s infinite ease-in-out;
+            filter: drop-shadow(0 4px 16px rgba(212, 175, 55, 0.4));
+        }
+        .admin-auth-spinner {
+            width: 34px;
+            height: 34px;
+            border: 3px solid rgba(212, 175, 55, 0.15);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spinGate 0.8s linear infinite;
+        }
+        .admin-auth-text {
+            font-size: 0.9rem;
+            color: rgba(212, 175, 55, 0.9);
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        @keyframes spinGate { to { transform: rotate(360deg); } }
+        @keyframes pulseGateLogo { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.06); opacity: 1; } }
+    </style>
 </head>
 <body class="admin-page">
+    <div class="admin-auth-guard" id="adminAuthGuard">
+        <img src="images/Brew-logo.png?v=25" alt="BREW CAFE & REST" class="admin-auth-guard-logo">
+        <div class="admin-auth-spinner"></div>
+        <div class="admin-auth-text">پشکنینی چوونەژوورەوە... / Verifying access...</div>
+    </div>
     <div class="admin-container admin-layout">
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
         <div class="admin-sidebar" id="adminSidebar">
@@ -142,9 +192,9 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=130"></script>
-    <script src="js/app.js?v=172"></script>
+    <script src="js/app.js?v=191"></script>
     <script src="js/local-api.js?v=120"></script>
-    <script src="js/admin.js?v=141"></script>
+    <script src="js/admin.js?v=142"></script>
     <script>
         (function () {
             var brand = document.getElementById('adminBrandLogo');

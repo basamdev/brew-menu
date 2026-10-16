@@ -5970,7 +5970,7 @@ window.setupLogoClickActions = function (logoEl, onSingleClick, doubleClickHref)
 
     var clicks = 0;
     var timer = null;
-    var doubleHref = doubleClickHref || 'admin.html';
+    var doubleHref = doubleClickHref || 'login.html';
     var delay = 320;
 
     logoEl.style.cursor = 'pointer';

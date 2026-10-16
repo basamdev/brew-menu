@@ -1229,6 +1229,15 @@ function showFirestoreApiDisabledAlert() {
 
 var _adminAuthInitialized = false;
 window.adminAuthReady = new Promise(function (resolve) {
+    function revealAdmin() {
+        document.body.classList.add('admin-authenticated');
+        var guard = document.getElementById('adminAuthGuard');
+        if (guard) {
+            guard.style.opacity = '0';
+            setTimeout(function() { guard.style.display = 'none'; }, 300);
+        }
+    }
+
     if (USE_LOCAL_API) {
         _adminAuthInitialized = true;
         var storedToken = localStorage.getItem('adminAuthToken');
@@ -1237,6 +1246,7 @@ window.adminAuthReady = new Promise(function (resolve) {
             try {
                 window.currentAuthToken = storedToken;
                 window.currentUser = JSON.parse(storedUser);
+                revealAdmin();
                 resolve(window.currentUser);
                 syncAdminFinancialsFromServer();
                 warmAdminOfflineCache();
@@ -1246,46 +1256,40 @@ window.adminAuthReady = new Promise(function (resolve) {
                 localStorage.removeItem('adminAuthToken');
                 localStorage.removeItem('adminUser');
                 resolve(null);
-                if (navigator.onLine) {
-                    window.location.href = 'login.html';
-                } else {
-                    hydrateAdminFromLocalCache();
-                    refreshAdminCurrentSection();
-                }
+                window.location.replace('login.html');
             }
         } else {
             resolve(null);
-            if (navigator.onLine) {
-                window.location.href = 'login.html';
-            } else {
-                hydrateAdminFromLocalCache();
-                refreshAdminCurrentSection();
-            }
+            window.location.replace('login.html');
         }
         return;
     }
     
-    if (!window.auth) {
-        resolve(null);
-        return;
+    function attachAuthListener() {
+        if (!window.auth || typeof auth.onAuthStateChanged !== 'function') {
+            setTimeout(attachAuthListener, 150);
+            return;
+        }
+
+        auth.onAuthStateChanged(function (user) {
+            if (!_adminAuthInitialized) {
+                _adminAuthInitialized = true;
+                resolve(user);
+            }
+            if (user) {
+                revealAdmin();
+                syncAdminFinancialsFromServer();
+                warmAdminOfflineCache();
+                startAdminLiveListeners();
+                refreshAdminCurrentSection();
+            } else {
+                // Not authenticated -> immediately navigate to login.html
+                window.location.replace('login.html');
+            }
+        });
     }
-    auth.onAuthStateChanged(function (user) {
-        if (!_adminAuthInitialized) {
-            _adminAuthInitialized = true;
-            resolve(user);
-        }
-        if (user) {
-            syncAdminFinancialsFromServer();
-            warmAdminOfflineCache();
-            startAdminLiveListeners();
-            refreshAdminCurrentSection();
-        } else if (!navigator.onLine) {
-            hydrateAdminFromLocalCache();
-            refreshAdminCurrentSection();
-        } else if (navigator.onLine) {
-            window.location.href = 'login.html';
-        }
-    });
+
+    attachAuthListener();
 });
 
 function whenAdminReady(fn) {

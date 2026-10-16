@@ -21,25 +21,63 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css?v=117">
-    <link rel="stylesheet" href="css/login.css?v=117">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css?v=208">
+    <link rel="stylesheet" href="css/login.css?v=118">
 </head>
 <body>
     <div class="login-container">
-        <div class="login-box">
-            <h2>Admin Login</h2>
-            <form id="loginForm">
+        <div class="login-box" id="loginBox">
+            <div class="login-brand">
+                <a href="menu.html" title="BREW CAFE & REST">
+                    <img src="images/Brew-logo.png?v=25" alt="BREW CAFE & REST" class="login-logo" onerror="this.style.display='none'">
+                </a>
+                <h1 class="login-brand-title">BREW CAFE & REST</h1>
+                <p class="login-subtitle">چوونەژوورەوەی ئەدمین • Admin Portal</p>
+            </div>
+            
+            <div id="loginError" class="login-error-alert" role="alert" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="loginErrorText">Wrong email or wrong password</span>
+            </div>
+
+            <form id="loginForm" novalidate autocomplete="on">
                 <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
+                    <label for="email">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span>ئیمەیڵ / Email</span>
+                    </label>
+                    <div class="input-field-wrap">
+                        <input type="email" id="email" placeholder="brew@gmail.com" autocomplete="email" required>
+                    </div>
                 </div>
+
                 <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
+                    <label for="password">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>وشەی نهێنی / Password</span>
+                    </label>
+                    <div class="input-field-wrap">
+                        <input type="password" id="password" placeholder="••••••••••••" autocomplete="current-password" required>
+                        <button type="button" class="pwd-toggle-btn" id="pwdToggleBtn" aria-label="Toggle password visibility">
+                            <i class="fa-regular fa-eye" id="pwdEyeIcon"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="login-btn">Login</button>
-                <div id="loginError" class="error-message"></div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">چوونەژوورەوە • Login</span>
+                    <span class="btn-spinner" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> تکایە چاوەڕێبە...</span>
+                </button>
             </form>
+
+            <div class="login-footer">
+                <a href="menu.html" class="back-to-menu-link">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>گەڕانەوە بۆ مێنیو / Back to Menu</span>
+                </a>
+            </div>
         </div>
     </div>
     
@@ -101,12 +139,12 @@
     <script src="js/firebase.js?v=126"></script>
     
     <!-- App.js for theme handling -->
-    <script src="js/app.js?v=120"></script>
+    <script src="js/app.js?v=191"></script>
     
     <!-- Local API -->
-    <script src="js/local-api.js?v=117"></script>
+    <script src="js/local-api.js?v=120"></script>
     
     <!-- Login Script -->
-    <script src="js/login.js?v=117"></script>
+    <script src="js/login.js?v=118"></script>
 </body>
 </html>

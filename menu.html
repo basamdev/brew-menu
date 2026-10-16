@@ -2002,16 +2002,16 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=190"></script>
+    <script src="js/app.js?v=191"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {
             var heroLogo = document.querySelector('.menu-hero-logo');
             var headerLogo = document.getElementById('headerLogo');
-            // Single → index.html | Double → admin.html
+            // Single → index.html | Double → login.html
             function goIndex() { window.location.href = 'index.html'; }
-            setupLogoClickActions(heroLogo, goIndex, 'admin.html');
-            setupLogoClickActions(headerLogo, goIndex, 'admin.html');
+            setupLogoClickActions(heroLogo, goIndex, 'login.html');
+            setupLogoClickActions(headerLogo, goIndex, 'login.html');
 
             function syncPoweredLabel() {
                 var currentLang = localStorage.getItem('selectedLang') || 'ku';
