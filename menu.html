@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=210">
+    <link rel="stylesheet" href="css/style.css?v=211">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -1951,7 +1951,7 @@
             <section class="cafe-info-block cafe-info-block--reviews" id="cafeCustomerReviewsSection">
                 <div class="cafe-review-header">
                     <div class="cafe-review-header-icon">
-                        <i class="fa-solid fa-gem"></i>
+                        <img src="images/review-icons/gem.svg" alt="Luxury Review" class="cafe-review-header-img">
                     </div>
                     <div class="cafe-review-header-text">
                         <h3 class="cafe-review-title" id="cafeReviewTitle">
@@ -1975,23 +1975,23 @@
                     </span>
                     <div class="review-aspect-chips" id="reviewAspectChips">
                         <button type="button" class="aspect-chip active" data-aspect="all">
-                            <span class="aspect-chip-icon">🌟</span>
+                            <img src="images/review-icons/star.svg" class="aspect-chip-icon-img" alt="">
                             <span class="aspect-chip-text" data-i18n="aspectOverall">گشتی</span>
                         </button>
                         <button type="button" class="aspect-chip" data-aspect="drinks">
-                            <span class="aspect-chip-icon">🍹</span>
+                            <img src="images/review-icons/drinks.svg" class="aspect-chip-icon-img" alt="">
                             <span class="aspect-chip-text" data-i18n="aspectDrinks">خواردنەوەکان</span>
                         </button>
                         <button type="button" class="aspect-chip" data-aspect="foods">
-                            <span class="aspect-chip-icon">🍽️</span>
+                            <img src="images/review-icons/foods.svg" class="aspect-chip-icon-img" alt="">
                             <span class="aspect-chip-text" data-i18n="aspectFoods">خواردنەکان</span>
                         </button>
                         <button type="button" class="aspect-chip" data-aspect="service">
-                            <span class="aspect-chip-icon">🤝</span>
+                            <img src="images/review-icons/service.svg" class="aspect-chip-icon-img" alt="">
                             <span class="aspect-chip-text" data-i18n="aspectService">خزمەتگوزاری</span>
                         </button>
                         <button type="button" class="aspect-chip" data-aspect="decor">
-                            <span class="aspect-chip-icon">🏛️</span>
+                            <img src="images/review-icons/decor.svg" class="aspect-chip-icon-img" alt="">
                             <span class="aspect-chip-text" data-i18n="aspectDecor">کەشوهەوا و دیزاین</span>
                         </button>
                     </div>
@@ -2016,14 +2016,32 @@
                     </div>
                 </div>
 
-                <!-- Luxury Quick Compliments Chips -->
+                <!-- Luxury Quick Compliments Chips with 3D Visual Icons -->
                 <div class="review-quick-compliments" id="reviewQuickCompliments">
-                    <span class="quick-chip" data-tag="خواردنەوەی بەتام و تایبەت 🍹">🍹 خواردنەوەی بەتام و تایبەت</span>
-                    <span class="quick-chip" data-tag="خواردنی کواڵیتی باڵا و فرێش 🍽️">🍽️ خواردنی کواڵیتی باڵا و فرێش</span>
-                    <span class="quick-chip" data-tag="خزمەتگوزاری بێوێنە و خێرا ⚡">⚡ خزمەتگوزاری بێوێنە و خێرا</span>
-                    <span class="quick-chip" data-tag="کارمەندی ڕووخۆش و میواندۆست 😊">😊 کارمەندی ڕووخۆش و میواندۆست</span>
-                    <span class="quick-chip" data-tag="دیزاینی لوکس و ئارامبەخش 🏛️">🏛️ دیزاینی لوکس و ئارامبەخش</span>
-                    <span class="quick-chip" data-tag="پێشوازی شایستە و بەڕێز 💎">💎 پێشوازی شایستە و بەڕێز</span>
+                    <span class="quick-chip" data-tag="خواردنەوەی بەتام و تایبەت">
+                        <img src="images/review-icons/drinks.svg" class="quick-chip-icon-img" alt="">
+                        <span>خواردنەوەی بەتام و تایبەت</span>
+                    </span>
+                    <span class="quick-chip" data-tag="خواردنی کواڵیتی باڵا و فرێش">
+                        <img src="images/review-icons/foods.svg" class="quick-chip-icon-img" alt="">
+                        <span>خواردنی کواڵیتی باڵا و فرێش</span>
+                    </span>
+                    <span class="quick-chip" data-tag="خزمەتگوزاری بێوێنە و خێرا">
+                        <img src="images/review-icons/speed.svg" class="quick-chip-icon-img" alt="">
+                        <span>خزمەتگوزاری بێوێنە و خێرا</span>
+                    </span>
+                    <span class="quick-chip" data-tag="کارمەندی ڕووخۆش و میواندۆست">
+                        <img src="images/review-icons/staff.svg" class="quick-chip-icon-img" alt="">
+                        <span>کارمەندی ڕووخۆش و میواندۆست</span>
+                    </span>
+                    <span class="quick-chip" data-tag="دیزاینی لوکس و ئارامبەخش">
+                        <img src="images/review-icons/decor.svg" class="quick-chip-icon-img" alt="">
+                        <span>دیزاینی لوکس و ئارامبەخش</span>
+                    </span>
+                    <span class="quick-chip" data-tag="پێشوازی شایستە و بەڕێز">
+                        <img src="images/review-icons/gem.svg" class="quick-chip-icon-img" alt="">
+                        <span>پێشوازی شایستە و بەڕێز</span>
+                    </span>
                 </div>
 
                 <!-- Form -->
@@ -2084,11 +2102,26 @@
                     </div>
 
                     <div class="feed-filter-chips" id="feedFilterChips">
-                        <button type="button" class="feed-filter-chip active" data-feed-cat="all">🌟 گشتی</button>
-                        <button type="button" class="feed-filter-chip" data-feed-cat="drinks">🍹 خواردنەوەکان</button>
-                        <button type="button" class="feed-filter-chip" data-feed-cat="foods">🍽️ خواردنەکان</button>
-                        <button type="button" class="feed-filter-chip" data-feed-cat="service">🤝 خزمەتگوزاری</button>
-                        <button type="button" class="feed-filter-chip" data-feed-cat="decor">🏛️ دیزاین</button>
+                        <button type="button" class="feed-filter-chip active" data-feed-cat="all">
+                            <img src="images/review-icons/star.svg" class="feed-filter-icon-img" alt="">
+                            <span>گشتی</span>
+                        </button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="drinks">
+                            <img src="images/review-icons/drinks.svg" class="feed-filter-icon-img" alt="">
+                            <span>خواردنەوەکان</span>
+                        </button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="foods">
+                            <img src="images/review-icons/foods.svg" class="feed-filter-icon-img" alt="">
+                            <span>خواردنەکان</span>
+                        </button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="service">
+                            <img src="images/review-icons/service.svg" class="feed-filter-icon-img" alt="">
+                            <span>خزمەتگوزاری</span>
+                        </button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="decor">
+                            <img src="images/review-icons/decor.svg" class="feed-filter-icon-img" alt="">
+                            <span>دیزاین</span>
+                        </button>
                     </div>
 
                     <div class="feed-cards-wrap" id="feedCardsWrap">
@@ -2152,7 +2185,7 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=193"></script>
+    <script src="js/app.js?v=194"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <filter id="speedShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#D97706" flood-opacity="0.4" />
+    </filter>
+    <radialGradient id="speedAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FDE047" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="boltLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="50%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+    <linearGradient id="boltDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="50%" stop-color="#D97706" />
+      <stop offset="100%" stop-color="#9A3412" />
+    </linearGradient>
+    <linearGradient id="boltRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFBEB" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Aura -->
+  <circle cx="32" cy="32" r="28" fill="url(#speedAura)" />
+
+  <!-- Speed Motion Trails -->
+  <path d="M12 22 L20 22" stroke="#FDE047" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+  <path d="M8 32 L18 32" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" opacity="0.8" />
+  <path d="M14 42 L22 42" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+
+  <g filter="url(#speedShadow)">
+    <!-- 3D Beveled Lightning Bolt -->
+    <!-- Light Facet -->
+    <polygon points="36,4 18,34 32,34 26,60 48,28 34,28" fill="url(#boltLight)" />
+    <!-- Bevel Dark Side Facet -->
+    <polygon points="36,4 32,28 34,28 48,28 26,60 30,34 32,34" fill="url(#boltDark)" />
+
+    <!-- Outer Rim Stroke -->
+    <polygon points="36,4 18,34 32,34 26,60 48,28 34,28" fill="none" stroke="url(#boltRim)" stroke-width="1.2" stroke-linejoin="round" />
+  </g>
+
+  <!-- Specular Glint -->
+  <polygon points="36,5 24,28 32,28" fill="#FFFFFF" opacity="0.8" />
+
+  <!-- Sparkle -->
+  <g transform="translate(48, 18)">
+    <path d="M0 -5 Q0 0 5 0 Q0 0 0 5 Q0 0 -5 0 Q0 0 0 -5 Z" fill="#FFFFFF" opacity="0.95" />
+  </g>
+</svg>

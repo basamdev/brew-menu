@@ -12802,6 +12802,13 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     box-shadow: 0 6px 16px rgba(212, 175, 55, 0.22);
 }
 
+.cafe-review-header-img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.5));
+}
+
 .cafe-review-header-text {
     flex: 1;
     min-width: 160px;
@@ -12903,6 +12910,21 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     white-space: nowrap;
 }
 
+.aspect-chip-icon-img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+    vertical-align: middle;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.35));
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.aspect-chip:hover .aspect-chip-icon-img,
+.aspect-chip.active .aspect-chip-icon-img {
+    transform: scale(1.18) rotate(-4deg);
+}
+
 .aspect-chip[data-aspect="all"] {
     flex: 1 1 100%;
 }
@@ -13002,6 +13024,22 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     color: rgba(250, 248, 245, 0.85);
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.quick-chip-icon-img {
+    width: 17px;
+    height: 17px;
+    object-fit: contain;
+    flex-shrink: 0;
+    vertical-align: middle;
+    margin-inline-end: 2px;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.2s ease;
+}
+
+.quick-chip:hover .quick-chip-icon-img,
+.quick-chip.selected .quick-chip-icon-img {
+    transform: scale(1.15);
 }
 
 .quick-chip:hover {
@@ -13270,6 +13308,24 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.feed-filter-icon-img {
+    width: 17px;
+    height: 17px;
+    object-fit: contain;
+    flex-shrink: 0;
+    vertical-align: middle;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
+    transition: transform 0.2s ease;
+}
+
+.feed-filter-chip:hover .feed-filter-icon-img,
+.feed-filter-chip.active .feed-filter-icon-img {
+    transform: scale(1.14);
 }
 
 .feed-filter-chip:hover {
@@ -13377,6 +13433,18 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     padding: 3px 8px;
     border-radius: 999px;
     border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.feed-cat-pill-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+    vertical-align: middle;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.3));
 }
 
 .feed-cat-pill.cat-all {

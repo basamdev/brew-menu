@@ -7027,8 +7027,8 @@ function loadCustomerReviews() {
         '<div class="admin-reviews-page">' +
             '<div class="admin-section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">' +
                 '<div>' +
-                    '<h2 style="margin:0;font-size:1.45rem;display:flex;align-items:center;gap:8px;">' +
-                        '<span>⭐</span>' +
+                    '<h2 style="margin:0;font-size:1.45rem;display:flex;align-items:center;gap:10px;">' +
+                        '<img src="images/review-icons/star.svg" class="admin-header-title-icon" alt="">' +
                         '<span>' + (S.manageReviews || 'Customer Reviews') + '</span>' +
                         '<span class="badge badge-accent" id="adminTotalReviewsBadge" style="font-size:0.8rem;padding:3px 10px;border-radius:999px;">0</span>' +
                     '</h2>' +
@@ -7046,27 +7046,27 @@ function loadCustomerReviews() {
             '<!-- Review KPI Stats (Drinks, Foods, Service, Decor) -->' +
             '<div class="admin-stats" id="adminReviewsStats" style="grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));margin-bottom:20px;">' +
                 '<div class="stat-card" style="border-color:rgba(var(--gold-rgb),0.35);">' +
-                    '<h3>⭐ تێکڕای بەها (Average)</h3>' +
+                    '<h3 style="display:flex;align-items:center;gap:6px;"><img src="images/review-icons/star.svg" class="admin-kpi-icon-img" alt=""><span>تێکڕای بەها (Average)</span></h3>' +
                     '<div class="stat-value" id="statAvgRating" style="color:var(--gold);font-size:2rem;">5.0 ★</div>' +
                     '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statTotalCount">لەسەر بنەمای 0 ڕا</p>' +
                 '</div>' +
                 '<div class="stat-card">' +
-                    '<h3>🍹 خواردنەوەکان (Drinks)</h3>' +
+                    '<h3 style="display:flex;align-items:center;gap:6px;"><img src="images/review-icons/drinks.svg" class="admin-kpi-icon-img" alt=""><span>خواردنەوەکان (Drinks)</span></h3>' +
                     '<div class="stat-value" id="statDrinksScore" style="color:#38BDF8;">100%</div>' +
                     '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statDrinksCount">0 هەڵسەنگاندن</p>' +
                 '</div>' +
                 '<div class="stat-card">' +
-                    '<h3>🍽️ خواردنەکان (Foods)</h3>' +
+                    '<h3 style="display:flex;align-items:center;gap:6px;"><img src="images/review-icons/foods.svg" class="admin-kpi-icon-img" alt=""><span>خواردنەکان (Foods)</span></h3>' +
                     '<div class="stat-value" id="statFoodsScore" style="color:#FB923C;">100%</div>' +
                     '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statFoodsCount">0 هەڵسەنگاندن</p>' +
                 '</div>' +
                 '<div class="stat-card">' +
-                    '<h3>🤝 خزمەتگوزاری (Service)</h3>' +
+                    '<h3 style="display:flex;align-items:center;gap:6px;"><img src="images/review-icons/service.svg" class="admin-kpi-icon-img" alt=""><span>خزمەتگوزاری (Service)</span></h3>' +
                     '<div class="stat-value" id="statServiceScore" style="color:#34D399;">100%</div>' +
                     '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statServiceCount">0 هەڵسەنگاندن</p>' +
                 '</div>' +
                 '<div class="stat-card">' +
-                    '<h3>🏛️ دیزاین و کەش (Decor)</h3>' +
+                    '<h3 style="display:flex;align-items:center;gap:6px;"><img src="images/review-icons/decor.svg" class="admin-kpi-icon-img" alt=""><span>دیزاین و کەش (Decor)</span></h3>' +
                     '<div class="stat-value" id="statDecorScore" style="color:#C084FC;">100%</div>' +
                     '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statDecorCount">0 هەڵسەنگاندن</p>' +
                 '</div>' +
@@ -7075,7 +7075,8 @@ function loadCustomerReviews() {
             '<!-- Star Rating Distribution Bar Chart -->' +
             '<div class="card" id="adminStarBreakdownCard" style="margin-bottom:20px;padding:18px 22px;">' +
                 '<div style="font-size:0.92rem;font-weight:700;color:var(--text-primary);margin-bottom:12px;display:flex;align-items:center;gap:8px;">' +
-                    '<span>📊</span> <span>دابەشبوونی ئەستێرەکانی هەڵسەنگاندن (Rating Distribution)</span>' +
+                    '<img src="images/review-icons/analytics.svg" class="admin-kpi-icon-img" style="width:22px;height:22px;" alt="">' +
+                    '<span>دابەشبوونی ئەستێرەکانی هەڵسەنگاندن (Rating Distribution)</span>' +
                 '</div>' +
                 '<div class="rating-dist-bars" id="ratingDistBars" style="display:flex;flex-direction:column;gap:8px;">' +
                     '<!-- Bars rendered dynamically -->' +
@@ -7094,11 +7095,11 @@ function loadCustomerReviews() {
                     '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">' +
                         '<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">بابەت:</span>' +
                         '<div class="filter-chips-group" id="adminReviewCatFilter" style="display:flex;flex-wrap:wrap;gap:6px;">' +
-                            '<button type="button" class="btn-chip active" data-cat="all">🌟 گشتی (All)</button>' +
-                            '<button type="button" class="btn-chip" data-cat="drinks">🍹 خواردنەوەکان</button>' +
-                            '<button type="button" class="btn-chip" data-cat="foods">🍽️ خواردنەکان</button>' +
-                            '<button type="button" class="btn-chip" data-cat="service">🤝 خزمەتگوزاری</button>' +
-                            '<button type="button" class="btn-chip" data-cat="decor">🏛️ دیزاین</button>' +
+                            '<button type="button" class="btn-chip active" data-cat="all"><img src="images/review-icons/star.svg" class="admin-chip-icon-img" alt=""> گشتی (All)</button>' +
+                            '<button type="button" class="btn-chip" data-cat="drinks"><img src="images/review-icons/drinks.svg" class="admin-chip-icon-img" alt=""> خواردنەوەکان</button>' +
+                            '<button type="button" class="btn-chip" data-cat="foods"><img src="images/review-icons/foods.svg" class="admin-chip-icon-img" alt=""> خواردنەکان</button>' +
+                            '<button type="button" class="btn-chip" data-cat="service"><img src="images/review-icons/service.svg" class="admin-chip-icon-img" alt=""> خزمەتگوزاری</button>' +
+                            '<button type="button" class="btn-chip" data-cat="decor"><img src="images/review-icons/decor.svg" class="admin-chip-icon-img" alt=""> دیزاین</button>' +
                         '</div>' +
                         '<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-inline-start:8px;">ئەستێرە:</span>' +
                         '<select id="adminReviewRatingSelect" style="padding:8px 12px;border-radius:10px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);font-size:0.85rem;">' +
@@ -7334,12 +7335,12 @@ function renderAdminReviewsUI(allReviews) {
     }
 
     var catBadges = {
-        'all': '<span class="admin-review-badge badge-cat-all">🌟 گشتی • Overall</span>',
-        'drinks': '<span class="admin-review-badge badge-cat-drinks">🍹 خواردنەوەکان • Drinks</span>',
-        'foods': '<span class="admin-review-badge badge-cat-foods">🍽️ خواردنەکان • Foods</span>',
-        'drinks_food': '<span class="admin-review-badge badge-cat-drinks">🍹 خواردنەوەکان</span>',
-        'service': '<span class="admin-review-badge badge-cat-service">🤝 خزمەتگوزاری • Service</span>',
-        'decor': '<span class="admin-review-badge badge-cat-decor">🏛️ کەشوهەوا و دیزاین</span>'
+        'all': '<span class="admin-review-badge badge-cat-all"><img src="images/review-icons/star.svg" class="admin-review-badge-icon" alt=""> گشتی • Overall</span>',
+        'drinks': '<span class="admin-review-badge badge-cat-drinks"><img src="images/review-icons/drinks.svg" class="admin-review-badge-icon" alt=""> خواردنەوەکان • Drinks</span>',
+        'foods': '<span class="admin-review-badge badge-cat-foods"><img src="images/review-icons/foods.svg" class="admin-review-badge-icon" alt=""> خواردنەکان • Foods</span>',
+        'drinks_food': '<span class="admin-review-badge badge-cat-drinks"><img src="images/review-icons/drinks.svg" class="admin-review-badge-icon" alt=""> خواردنەوەکان</span>',
+        'service': '<span class="admin-review-badge badge-cat-service"><img src="images/review-icons/service.svg" class="admin-review-badge-icon" alt=""> خزمەتگوزاری • Service</span>',
+        'decor': '<span class="admin-review-badge badge-cat-decor"><img src="images/review-icons/decor.svg" class="admin-review-badge-icon" alt=""> کەشوهەوا و دیزاین</span>'
     };
 
     var html = '<div class="admin-reviews-grid">';

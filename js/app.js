@@ -5538,12 +5538,12 @@ function renderGuestReviewsFiltered() {
     }
 
     var catMeta = {
-        'all': { label: '🌟 گشتی', cls: 'cat-all' },
-        'drinks': { label: '🍹 خواردنەوەکان', cls: 'cat-drinks' },
-        'foods': { label: '🍽️ خواردنەکان', cls: 'cat-foods' },
-        'drinks_food': { label: '🍹 خواردنەوەکان', cls: 'cat-drinks' },
-        'service': { label: '🤝 خزمەتگوزاری', cls: 'cat-service' },
-        'decor': { label: '🏛️ کەشوهەوا و دیزاین', cls: 'cat-decor' }
+        'all': { label: 'گشتی', icon: 'images/review-icons/star.svg', cls: 'cat-all' },
+        'drinks': { label: 'خواردنەوەکان', icon: 'images/review-icons/drinks.svg', cls: 'cat-drinks' },
+        'foods': { label: 'خواردنەکان', icon: 'images/review-icons/foods.svg', cls: 'cat-foods' },
+        'drinks_food': { label: 'خواردنەوەکان', icon: 'images/review-icons/drinks.svg', cls: 'cat-drinks' },
+        'service': { label: 'خزمەتگوزاری', icon: 'images/review-icons/service.svg', cls: 'cat-service' },
+        'decor': { label: 'کەشوهەوا و دیزاین', icon: 'images/review-icons/decor.svg', cls: 'cat-decor' }
     };
 
     var html = '';
@@ -5581,7 +5581,10 @@ function renderGuestReviewsFiltered() {
                         '</div>' +
                     '</div>' +
                     '<div class="feed-card-badge-wrap">' +
-                        '<span class="feed-cat-pill ' + meta.cls + '">' + meta.label + '</span>' +
+                        '<span class="feed-cat-pill ' + meta.cls + '">' +
+                            '<img src="' + meta.icon + '" class="feed-cat-pill-icon" alt="">' +
+                            '<span>' + meta.label + '</span>' +
+                        '</span>' +
                     '</div>' +
                 '</div>' +
 
