@@ -5254,29 +5254,29 @@ body.emenu-layout .menu-fab-fav .fav-badge.show {
 }
 
 /* ========================================
-   LUXURY FAVORITES OVERLAY & PANEL
+   LUXURY FAVORITES OVERLAY & PANEL (CENTER FLOATING)
    ======================================== */
 .fav-overlay {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(12px, 3vw, 24px) !important;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
 }
 
 .fav-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(3, 7, 18, 0.78);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: opacity 0.32s ease;
+    background: rgba(3, 7, 18, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: opacity 0.3s ease;
 }
 
 .fav-overlay.open {
@@ -5288,22 +5288,25 @@ body.emenu-layout .menu-fab-fav .fav-badge.show {
 .fav-panel {
     position: relative;
     z-index: 1;
-    width: min(540px, 100%);
-    max-height: min(88vh, 760px);
+    width: min(520px, calc(100vw - 28px)) !important;
+    max-width: 520px !important;
+    height: auto !important;
+    max-height: min(84vh, 740px) !important;
     background: var(--emenu-modal-bg, #0E1B2E);
     color: var(--emenu-text, #EAF2FF);
-    border-radius: 28px;
+    border-radius: 26px !important;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--emenu-border, rgba(96, 165, 250, 0.22));
-    box-shadow: 0 28px 75px rgba(0, 0, 0, 0.65), 0 0 35px rgba(96, 165, 250, 0.15);
-    transform: translateY(22px) scale(0.96);
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.72), 0 0 40px rgba(96, 165, 250, 0.16) !important;
+    transform: scale(0.92) translateY(12px);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
     overflow: hidden;
+    margin: auto !important;
 }
 
 .fav-overlay.open .fav-panel {
-    transform: translateY(0) scale(1);
+    transform: scale(1) translateY(0) !important;
 }
 
 /* Header */
@@ -5356,6 +5359,29 @@ body.emenu-layout .menu-fab-fav .fav-badge.show {
     align-items: center;
     gap: 8px;
     line-height: 1.2;
+}
+
+.fav-count-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 12px;
+    background: var(--emenu-accent, #60A5FA);
+    color: var(--emenu-on-accent, #060B14);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 2px 8px var(--emenu-accent-glow, rgba(96, 165, 250, 0.35));
+}
+
+body[data-menu-theme="mocha"] .fav-count-pill,
+body.emenu-layout[data-menu-theme="mocha"] .fav-count-pill {
+    background: #5C4033 !important;
+    color: #FAF5EF !important;
+    box-shadow: 0 2px 8px rgba(92, 64, 51, 0.25) !important;
 }
 
 .fav-subtitle {
@@ -5554,6 +5580,61 @@ body.emenu-layout .menu-fab-fav .fav-badge.show {
     font-size: 0.72rem;
     color: var(--emenu-muted, #8FA3BF);
     opacity: 0.85;
+}
+
+.fav-in-cart-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #10B981;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+body[data-menu-theme="mocha"] .fav-in-cart-pill,
+body.emenu-layout[data-menu-theme="mocha"] .fav-in-cart-pill {
+    background: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.4) !important;
+    color: #059669 !important;
+}
+
+.fav-item-desc {
+    margin: 2px 0 0;
+    font-size: 0.78rem;
+    color: var(--emenu-muted, #8FA3BF);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    opacity: 0.85;
+}
+
+body[data-menu-theme="mocha"] .fav-item-desc,
+body.emenu-layout[data-menu-theme="mocha"] .fav-item-desc {
+    color: #6B5446 !important;
+}
+
+/* Custom scrollbar for items */
+.fav-items::-webkit-scrollbar {
+    width: 5px;
+}
+
+.fav-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.fav-items::-webkit-scrollbar-thumb {
+    background: var(--emenu-border, rgba(255, 255, 255, 0.15));
+    border-radius: 10px;
+}
+
+body[data-menu-theme="mocha"] .fav-items::-webkit-scrollbar-thumb,
+body.emenu-layout[data-menu-theme="mocha"] .fav-items::-webkit-scrollbar-thumb {
+    background: rgba(92, 64, 51, 0.22) !important;
 }
 
 /* Actions in item */
@@ -5862,22 +5943,26 @@ body.emenu-layout[data-menu-theme="mocha"] .fav-item-remove-btn:hover {
     border-color: rgba(239, 68, 68, 0.35) !important;
 }
 
-/* Mobile responsive drawer style */
+/* Mobile responsive centered free floating modal (never dock to bottom) */
 @media (max-width: 640px) {
     .fav-overlay {
-        padding: 0;
-        align-items: flex-end;
+        padding: 12px !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .fav-panel {
-        width: 100%;
-        max-height: 88vh;
-        border-radius: 28px 28px 0 0;
-        transform: translateY(100%);
+        width: 100% !important;
+        max-width: calc(100vw - 24px) !important;
+        height: auto !important;
+        max-height: min(84vh, 680px) !important;
+        border-radius: 24px !important;
+        margin: auto !important;
+        transform: scale(0.92) translateY(10px) !important;
     }
 
     .fav-overlay.open .fav-panel {
-        transform: translateY(0);
+        transform: scale(1) translateY(0) !important;
     }
 
     .fav-header {
@@ -5902,6 +5987,7 @@ body.emenu-layout[data-menu-theme="mocha"] .fav-item-remove-btn:hover {
     .fav-item {
         padding: 10px 12px;
         gap: 10px;
+        border-radius: 16px;
     }
 
     .fav-item-media {
@@ -5931,6 +6017,7 @@ body.emenu-layout[data-menu-theme="mocha"] .fav-item-remove-btn:hover {
     .fav-add-all-btn {
         padding: 12px 16px;
         font-size: 0.88rem;
+        border-radius: 14px;
     }
 }
 

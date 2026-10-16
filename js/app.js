@@ -5367,6 +5367,7 @@ function renderFavItems() {
     var favFooterCount = document.getElementById('favFooterCount');
     var favFooterTotal = document.getElementById('favFooterTotal');
     var favSubtitle = document.getElementById('favSubtitle');
+    var favCountPill = document.getElementById('favCountPill');
 
     var subtitleTexts = {
         ku: 'خواردنەوە و بەرهەمە دڵخوازەکانت',
@@ -5387,6 +5388,11 @@ function renderFavItems() {
             totalPrice += parseItemPrice(item.price);
         }
     });
+
+    if (favCountPill) {
+        favCountPill.textContent = String(validItems.length);
+        favCountPill.style.display = validItems.length > 0 ? 'inline-flex' : 'none';
+    }
 
     if (!validItems.length) {
         if (clearBtn) clearBtn.style.display = 'none';
@@ -5501,15 +5507,8 @@ function renderFavItems() {
                 }
                 setTimeout(function () {
                     addAllBtn.classList.remove('added');
-                    if (addAllText) {
-                        var addAllLabels = {
-                            ku: 'هەمووی زیادبکە بۆ سەبەتە 🛒',
-                            ar: 'إضافة الكل للسلة 🛒',
-                            en: 'Add All to Cart 🛒'
-                        };
-                        addAllText.textContent = addAllLabels[lang] || addAllLabels.ku;
-                    }
-                }, 1600);
+                    renderFavItems();
+                }, 1300);
             };
         }
     }
@@ -5544,6 +5543,22 @@ function renderFavItems() {
         var img = normalizeImageUrl(item.image) || fallbackImage;
         var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
         var categoryName = item.category ? (item['category_' + lang] || item.category) : '';
+        var desc = item['description_' + lang] || item.description_en || item.description_ar || item.description_ku || item.description || '';
+        var descHtml = desc ? '<p class="fav-item-desc">' + desc + '</p>' : '';
+
+        var cartMatch = Array.isArray(cartItems) ? cartItems.filter(function (ci) {
+            return ci.itemId === item.id || ci.id === id || ci.id.indexOf(id + '_') === 0;
+        }) : [];
+        var qtyInCart = cartMatch.reduce(function (sum, ci) { return sum + (ci.quantity || 1); }, 0);
+        var inCartPill = '';
+        if (qtyInCart > 0) {
+            var inCartLabel = {
+                ku: qtyInCart + ' لە سەبەتەدایە',
+                ar: qtyInCart + ' في السلة',
+                en: qtyInCart + ' in cart'
+            };
+            inCartPill = '<span class="fav-in-cart-pill">🛒 ' + (inCartLabel[lang] || inCartLabel.ku) + '</span>';
+        }
 
         var sizeBadge = '';
         if (hasSizes) {
@@ -5557,8 +5572,12 @@ function renderFavItems() {
                     sizeBadge +
                 '</div>' +
                 '<div class="fav-item-info" data-open-id="' + id + '" title="' + (viewDetailsHint[lang] || viewDetailsHint.ku) + '">' +
-                    (categoryName ? '<span class="fav-item-cat-label">' + categoryName + '</span>' : '') +
+                    '<div class="fav-item-topline">' +
+                        (categoryName ? '<span class="fav-item-cat-label">' + categoryName + '</span>' : '') +
+                        inCartPill +
+                    '</div>' +
                     '<h4 class="fav-item-name">' + name + '</h4>' +
+                    descHtml +
                     '<div class="fav-item-pricing">' +
                         '<span class="fav-item-price">' + priceFormatted + ' IQD</span>' +
                         (hasSizes ? '<span class="fav-item-sizes-hint">✨ ' + (lang === 'ku' ? 'چەندین قەبارە' : (lang === 'ar' ? 'خيارات متعددة' : 'Size choices')) + '</span>' : '') +
@@ -5620,10 +5639,8 @@ function renderFavItems() {
 
             setTimeout(function () {
                 btn.classList.remove('added');
-                if (cartTextEl) {
-                    cartTextEl.textContent = addCartLabels[lang] || addCartLabels.ku;
-                }
-            }, 1200);
+                renderFavItems();
+            }, 1000);
         });
     });
 
