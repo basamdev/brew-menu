@@ -9,6 +9,62 @@
     var _categories = [];
     var _itemsUnsub = null;
     var _categoriesUnsub = null;
+    var _lastItemsOnUpdate = null;
+    var _lastCategoriesOnUpdate = null;
+
+    function getCombinedItems(baseItems) {
+        baseItems = baseItems || _items;
+        if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
+            var testItems = window.TestMenu.getTestItems() || [];
+            if (testItems.length) {
+                var map = {};
+                var combined = [];
+                baseItems.forEach(function (it) {
+                    if (it && it.id) { map[it.id] = true; combined.push(it); }
+                });
+                testItems.forEach(function (it) {
+                    if (it && it.id && !map[it.id]) { map[it.id] = true; combined.push(it); }
+                });
+                return combined;
+            }
+        }
+        return baseItems;
+    }
+
+    function getCombinedCategories(baseCats) {
+        baseCats = baseCats || _categories;
+        if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
+            var testCats = window.TestMenu.getTestCategories() || [];
+            if (testCats.length) {
+                var map = {};
+                var combined = [];
+                baseCats.forEach(function (c) {
+                    if (c && c.id) { map[c.id] = true; combined.push(c); }
+                });
+                testCats.forEach(function (tc) {
+                    if (tc && tc.id && !map[tc.id]) {
+                        map[tc.id] = true;
+                        combined.push({ id: tc.id, data: tc });
+                    }
+                });
+                return sortCategoriesList(combined);
+            }
+        }
+        return baseCats;
+    }
+
+    function syncTestMode() {
+        if (_lastItemsOnUpdate) {
+            _lastItemsOnUpdate(getCombinedItems(_items.slice()));
+        }
+        if (_lastCategoriesOnUpdate) {
+            _lastCategoriesOnUpdate(getCombinedCategories(_categories.slice()));
+        }
+    }
+
+    window.addEventListener('brew_test_menu_changed', function () {
+        syncTestMode();
+    });
 
     function isMobileBrowser() {
         return window.innerWidth <= 1024 ||
@@ -41,6 +97,7 @@
 
     function loadItems(timeoutMs, onUpdate, onError) {
         if (_itemsUnsub) { _itemsUnsub(); _itemsUnsub = null; }
+        if (typeof onUpdate === 'function') _lastItemsOnUpdate = onUpdate;
 
         whenDbReady(function (db) {
             if (!db) {
@@ -59,7 +116,7 @@
                 settled = true;
                 if (softTimer) clearTimeout(softTimer);
                 if (hardTimer) clearTimeout(hardTimer);
-                if (typeof onUpdate === 'function') onUpdate(list);
+                if (typeof onUpdate === 'function') onUpdate(getCombinedItems(list));
             }
 
             function finishError(err) {
@@ -108,7 +165,7 @@
                     }
                     _items.length = 0;
                     _items.push.apply(_items, collectItemDocs(snap));
-                    if (typeof onUpdate === 'function') onUpdate(_items.slice());
+                    if (typeof onUpdate === 'function') onUpdate(getCombinedItems(_items.slice()));
                     if (!snap.metadata.fromCache || _items.length > 0) {
                         settled = true;
                         if (hardTimer) {
@@ -145,11 +202,12 @@
             _categories.push({ id: doc.id, data: doc.data() });
         });
         sortCategoriesList(_categories);
-        onUpdate(_categories.slice());
+        onUpdate(getCombinedCategories(_categories.slice()));
     }
 
     function loadCategories(timeoutMs, onUpdate, onError) {
         if (_categoriesUnsub) { _categoriesUnsub(); _categoriesUnsub = null; }
+        if (typeof onUpdate === 'function') _lastCategoriesOnUpdate = onUpdate;
 
         whenDbReady(function (db) {
             if (!db) {
@@ -169,7 +227,7 @@
                 settled = true;
                 if (softTimer) clearTimeout(softTimer);
                 if (hardTimer) clearTimeout(hardTimer);
-                if (typeof onUpdate === 'function') onUpdate(list);
+                if (typeof onUpdate === 'function') onUpdate(getCombinedCategories(list));
             }
 
             function finishError(err) {
@@ -229,11 +287,11 @@
         });
     }
 
-    function getItems() { return _items; }
-    function getCategories() { return _categories; }
+    function getItems() { return getCombinedItems(_items); }
+    function getCategories() { return getCombinedCategories(_categories); }
 
     function filterItems(searchTerm, category) {
-        var filtered = _items.slice();
+        var filtered = getCombinedItems(_items).slice();
         if (searchTerm) {
             var lang = localStorage.getItem('selectedLang') || 'ku';
             var term = searchTerm.toLowerCase();
@@ -262,6 +320,7 @@
         getItems: getItems,
         getCategories: getCategories,
         filterItems: filterItems,
-        unsubscribeAll: unsubscribeAll
+        unsubscribeAll: unsubscribeAll,
+        syncTestMode: syncTestMode
     };
 })();

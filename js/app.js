@@ -208,6 +208,7 @@ const i18n = {
         reports: 'ڕاپۆرتەکان',
         cashier: 'کاشێر',
         manageReviews: 'هەڵسەنگاندنەکان',
+        manageTestMenu: 'مینیوی تاقیکاری',
         customerReviewsTitle: 'ڕا و بەهای کڕیار',
         customerReviewsSubtitle: 'سەرنج و بۆچوونی بەڕێزتان ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
         reviewAspectLabel: 'بابەتی هەڵسەنگاندنەکە:',
@@ -481,6 +482,7 @@ const i18n = {
         reports: 'التقارير',
         cashier: 'الصندوق',
         manageReviews: 'التقييمات والآراء',
+        manageTestMenu: 'موك التجربة (Test Menu)',
         customerReviewsTitle: 'آراء وانطباعات الضيوف',
         customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بأعلى معايير الجودة والضيافة',
         reviewAspectLabel: 'موضوع التقييم:',
@@ -754,6 +756,7 @@ const i18n = {
         reports: 'Reports',
         cashier: 'Cashier',
         manageReviews: 'Customer Reviews',
+        manageTestMenu: 'Test Menu Suite',
         customerReviewsTitle: 'Guest Reviews & Feedback',
         customerReviewsSubtitle: 'Your impressions inspire our culinary craft and hospitality',
         reviewAspectLabel: 'Review Category:',
@@ -2838,6 +2841,13 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    // Listen for test menu live mock updates
+    window.addEventListener('brew_test_menu_changed', function () {
+        if (window.location.pathname.includes('menu.html') && typeof loadMenuItems === 'function') {
+            loadMenuItems();
+        }
+    });
 });
 
 /* ========================================
@@ -2936,6 +2946,9 @@ function updateAdminPanelText(strings) {
         dashboard: strings.dashboard,
         items: strings.manageItems,
         categories: strings.manageCategories,
+        offers: strings.manageOffers,
+        reviews: strings.manageReviews,
+        testmenu: strings.manageTestMenu,
         cashier: strings.cashier,
         expenses: strings.expenses,
         settings: strings.settings,

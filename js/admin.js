@@ -1629,6 +1629,7 @@ function loadAdminSection(section) {
         else if (section === 'categories') { loadManageCategories(); }
         else if (section === 'offers') { loadManageOffers(); }
         else if (section === 'reviews') { loadCustomerReviews(); }
+        else if (section === 'testmenu') { loadTestMenuSuite(); }
         else if (section === 'cashier') { loadCashier(); }
         else if (section === 'expenses') { loadExpenses(); }
         else if (section === 'settings') { loadSettings(); }
@@ -1950,7 +1951,17 @@ function loadManageItems() {
     var S = i18n[lang] || i18n.en;
     itemsActiveCategory = 'all';
     var adminContent = document.getElementById('adminContent');
+
+    var testNotice = '';
+    if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
+        testNotice = '<div class="admin-test-active-alert">' +
+            '<div><span style="font-size:1.15rem;margin-right:6px;">🧪</span><strong>' + (lang === 'ku' ? 'دۆخی تاقیکاری چالاکە (Test Mode Active):' : (lang === 'ar' ? 'وضع التجربة نشط:' : 'Test Mode Active:')) + '</strong> ' + (lang === 'ku' ? '٢٧ ئایتمی تاقیکاری لە مێنوودا دەردەکەون بەبێ دەستکاری Firebase.' : (lang === 'ar' ? 'أصناف التجربة معروضة في المنيو بدون المساس بفايربيس.' : 'Mock items are active on menu.html with zero Firebase impact.')) + '</div>' +
+            '<button type="button" class="btn-sm btn-danger" id="btnQuickClearTestItems" style="white-space:nowrap;padding:5px 12px;font-size:0.8rem;border-radius:8px;">🗑️ ' + (lang === 'ku' ? 'سڕینەوە بە ١ کلیک' : (lang === 'ar' ? 'حذف بنقرة واحدة' : '1-Click Clear')) + '</button>' +
+        '</div>';
+    }
+
     adminContent.innerHTML =
+        testNotice +
         '<div class="card">' +
             '<h2>' + S.manageItems + '</h2>' +
             '<button class="btn-primary" id="addItemBtn" style="margin-bottom:16px;">' + S.addNewItem + '</button>' +
@@ -2051,8 +2062,20 @@ function loadManageItems() {
         '</div>';
     loadCategoriesDropdown();
     loadCategoryFilter();
-    refreshCategoriesCache();
     wireItemEvents();
+
+    var quickClearBtn = document.getElementById('btnQuickClearTestItems');
+    if (quickClearBtn) {
+        quickClearBtn.addEventListener('click', function () {
+            if (window.TestMenu && typeof window.TestMenu.clearTestMenu === 'function') {
+                window.TestMenu.clearTestMenu();
+                if (typeof showAdminToast === 'function') {
+                    showAdminToast('🗑️ داتای تاقیکاری بە سەرکەوتوویی سڕایەوە');
+                }
+                loadManageItems();
+            }
+        });
+    }
     
     // Show loading state
     var itemsListEl = document.getElementById('itemsList');
@@ -3865,9 +3888,20 @@ function renderCategoriesListNow() {
 }
 
 function loadManageCategories() {
-    var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var S = i18n[lang] || i18n.en;
     var adminContent = document.getElementById('adminContent');
+
+    var testNotice = '';
+    if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
+        testNotice = '<div class="admin-test-active-alert">' +
+            '<div><span style="font-size:1.15rem;margin-right:6px;">🧪</span><strong>' + (lang === 'ku' ? 'دۆخی تاقیکاری چالاکە (Test Mode Active):' : (lang === 'ar' ? 'وضع التجربة نشط:' : 'Test Mode Active:')) + '</strong> ' + (lang === 'ku' ? '٧ بەشی تاقیکاری پیشان دەدرێن بەبێ دەستکاری و نووسین لە Firebase.' : (lang === 'ar' ? 'الفئات التجريبية معروضة بدون التأثير على قاعدة بيانات فايربيس.' : 'Mock categories are active with zero Firebase impact.')) + '</div>' +
+            '<button type="button" class="btn-sm btn-danger" id="btnQuickClearTestCats" style="white-space:nowrap;padding:5px 12px;font-size:0.8rem;border-radius:8px;">🗑️ ' + (lang === 'ku' ? 'سڕینەوە بە ١ کلیک' : (lang === 'ar' ? 'حذف بنقرة واحدة' : '1-Click Clear')) + '</button>' +
+        '</div>';
+    }
+
     adminContent.innerHTML =
+        testNotice +
         '<div class="card">' +
             '<h2>' + S.manageCategories + '</h2>' +
             '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">' +
@@ -3901,6 +3935,19 @@ function loadManageCategories() {
         '</div>';
     loadCategoriesList();
     wireCategoryEvents();
+
+    var quickClearBtn = document.getElementById('btnQuickClearTestCats');
+    if (quickClearBtn) {
+        quickClearBtn.addEventListener('click', function () {
+            if (window.TestMenu && typeof window.TestMenu.clearTestMenu === 'function') {
+                window.TestMenu.clearTestMenu();
+                if (typeof showAdminToast === 'function') {
+                    showAdminToast('🗑️ داتای تاقیکاری بە سەرکەوتوویی سڕایەوە');
+                }
+                loadManageCategories();
+            }
+        });
+    }
 }
 
 /* Distinct category names actually used by the menu items (so the manager can
@@ -7445,5 +7492,203 @@ window.deleteCustomerReview = function (reviewId) {
 };
 
 window.loadCustomerReviews = loadCustomerReviews;
+
+/* ============ TEST MENU SUITE (ZERO FIREBASE IMPACT) ============ */
+function loadTestMenuSuite() {
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var adminContent = document.getElementById('adminContent');
+    if (!adminContent) return;
+
+    var isTestActive = window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive();
+    var sampleCats = (window.TestMenu && window.TestMenu.sampleCategories) ? window.TestMenu.sampleCategories : [];
+    var sampleItems = (window.TestMenu && window.TestMenu.sampleItems) ? window.TestMenu.sampleItems : [];
+
+    var activeCatFilter = 'all';
+
+    function renderView() {
+        isTestActive = window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive();
+
+        var titleText = lang === 'ku' ? 'تاقیکردنەوەی خێرای مێنوو (Test Menu Sandbox)' : (lang === 'ar' ? 'بيئة تجربة القائمة (Test Menu Sandbox)' : 'Test Menu Sandbox & Mock Generator');
+        var subtitleText = lang === 'ku'
+            ? 'زیادکردنی خێرای بەش و خواردنەکان بۆ تاقیکردنەوە بەبێ دەستکاری Firebase و بە ١ کلیک سڕینەوەیان'
+            : (lang === 'ar'
+                ? 'إضافة فئات وأطعمة تجريبية فوراً لاختبار القائمة بدون التأثير على فايربيس ومع إمكانية حذفها بضغطة زر'
+                : 'Instantly populate categories & items to test menu.html without touching Firebase, with 1-click wipe.');
+
+        var statusBadge = isTestActive
+            ? '<span class="test-suite-status-badge is-active">🟢 ' + (lang === 'ku' ? 'چالاکە لە مێنوو (٧ بەش و ٢٧ ئایتم)' : (lang === 'ar' ? 'نشط في المنيو (٧ فئات و ٢٧ صنف)' : 'Active on menu.html (7 Cats, 27 Items)')) + '</span>'
+            : '<span class="test-suite-status-badge is-inactive">⚪ ' + (lang === 'ku' ? 'ناکارایە (تەنها مینیوی فەرمی دەردەکەوێت)' : (lang === 'ar' ? 'غير نشط (تظهر فقط القائمة الرسمية)' : 'Inactive (Live menu only)')) + '</span>';
+
+        var html = '<div class="admin-test-menu-page">' +
+            '<div class="admin-section-header test-suite-header">' +
+                '<div>' +
+                    '<h2 class="test-suite-title">' +
+                        '<span class="test-suite-icon">🧪</span>' +
+                        '<span>' + titleText + '</span>' +
+                        statusBadge +
+                    '</h2>' +
+                    '<p class="test-suite-sub">' + subtitleText + '</p>' +
+                '</div>' +
+            '</div>' +
+
+            '<!-- Security Guarantee Shield -->' +
+            '<div class="test-suite-shield-card">' +
+                '<div class="shield-icon-col">🛡️</div>' +
+                '<div class="shield-text-col">' +
+                    '<h3>' + (lang === 'ku' ? '١٠٠٪ پارێزراوە لە دەستکاری Firebase (Zero Firebase Impact)' : (lang === 'ar' ? 'أمان تام بنسبة ١٠٠٪ بدون المساس بفايربيس' : '100% Safe Isolated Mock • Zero Firebase Impact')) + '</h3>' +
+                    '<p>' + (lang === 'ku'
+                        ? 'ئەم کردارە هیچ داواکارییەکی نووسین، دەستکاری یان سڕینەوە ناخاتە سەر داتابەیسی Firebase Firestore. هەموو بەش و ئایتمەکان بە تەواوی لە براوسەردا (Local Sandbox) کار دەکەن و لە ڕێگەی تەنها یەک کلیکەوە هەر کاتێک بتەوێت دەسڕدرێنەوە.'
+                        : (lang === 'ar'
+                            ? 'هذه العملية لا تقوم بأي كتابة أو تعديل أو حذف في قاعدة بيانات فايربيس الرسمية. جميع البيانات محصورة بالكامل في المتصفح، ويمكن مسحها بالكامل بضغطة زر واحدة في أي وقت.'
+                            : 'This test suite writes ZERO documents and issues ZERO delete/update requests to your live Firebase database. Everything is safely served locally and can be wiped instantly with 1 click.')) +
+                    '</p>' +
+                '</div>' +
+            '</div>' +
+
+            '<!-- Main Action Buttons Grid -->' +
+            '<div class="test-suite-actions-grid">' +
+                '<button type="button" class="test-action-card test-action-card--inject" id="btnAdminInjectTestMenu">' +
+                    '<div class="test-action-icon">✨</div>' +
+                    '<div class="test-action-details">' +
+                        '<h4>' + (lang === 'ku' ? 'زیادکردنی مینیوی تاقیکاری' : (lang === 'ar' ? 'إضافة قائمة التجربة' : 'Add Test Menu')) + '</h4>' +
+                        '<p>' + (lang === 'ku' ? 'پیتزا، بەرگەر، خواردنەکان، سارد، گەرم، شیرینی، ئایسکرێم (٢٧ ئایتم)' : (lang === 'ar' ? 'بيتزا، برجر، مأكولات، مشروبات باردة، ساخنة، حلويات، آيس كريم' : 'Pizza, Burger, Foods, Cold/Hot Drinks, Desserts, Ice Cream (27 items)')) + '</p>' +
+                    '</div>' +
+                    '<span class="test-action-arrow">⚡</span>' +
+                '</button>' +
+
+                '<button type="button" class="test-action-card test-action-card--clear" id="btnAdminClearTestMenu">' +
+                    '<div class="test-action-icon">🗑️</div>' +
+                    '<div class="test-action-details">' +
+                        '<h4>' + (lang === 'ku' ? 'سڕینەوەی هەمووی بە یەک کلیک' : (lang === 'ar' ? 'حذف كافة البيانات بضغطة واحدة' : '1-Click Delete All Test Data')) + '</h4>' +
+                        '<p>' + (lang === 'ku' ? 'سڕینەوەی دەستبەجێی هەموو تاقیکارییەکان و گەڕانەوە بۆ مینیوی فەرمی' : (lang === 'ar' ? 'إزالة كافة الأصناف التجريبية فوراً واسترجاع المنيو الحقيقي' : 'Instantly purge mock items and revert menu.html to live database')) + '</p>' +
+                    '</div>' +
+                    '<span class="test-action-arrow">↺</span>' +
+                '</button>' +
+
+                '<a href="menu.html" target="_blank" class="test-action-card test-action-card--view">' +
+                    '<div class="test-action-icon">🌐</div>' +
+                    '<div class="test-action-details">' +
+                        '<h4>' + (lang === 'ku' ? 'کردنەوەی menu.html' : (lang === 'ar' ? 'فتح صفحة المنيو' : 'Open menu.html')) + '</h4>' +
+                        '<p>' + (lang === 'ku' ? 'سەردانی مێنوو و تاقیکردنەوەی ئەزموونی کڕیار' : (lang === 'ar' ? 'معاينة تجربة الضيوف في صفحة المنيو مباشرة' : 'Preview customer menu view and ordering experience')) + '</p>' +
+                    '</div>' +
+                    '<span class="test-action-arrow">↗</span>' +
+                '</a>' +
+            '</div>' +
+
+            '<!-- Category Chips Overview -->' +
+            '<div class="test-suite-preview-section">' +
+                '<div class="test-preview-header">' +
+                    '<h3>' + (lang === 'ku' ? 'بەشە تاقیکارییەکان (٧ بەش)' : (lang === 'ar' ? 'الفئات التجريبية المشمولة' : 'Included Test Categories (7 Categories)')) + '</h3>' +
+                    '<span class="test-cats-count">' + sampleCats.length + ' Categories • ' + sampleItems.length + ' Items</span>' +
+                '</div>' +
+                '<div class="test-cats-chips-bar" id="testCatFilterBar">' +
+                    '<button type="button" class="test-cat-chip ' + (activeCatFilter === 'all' ? 'active' : '') + '" data-cat="all">' +
+                        '<span>🍽️</span> <span>' + (lang === 'ku' ? 'هەمووی' : (lang === 'ar' ? 'الكل' : 'All')) + ' (' + sampleItems.length + ')</span>' +
+                    '</button>';
+
+        sampleCats.forEach(function (cat) {
+            var catName = cat['name_' + lang] || cat.name_ku || cat.name_en || cat.name_ar;
+            var count = sampleItems.filter(function (it) { return it.category === cat.id; }).length;
+            var icon = cat.id === 'cat_test_pizza' ? '🍕' :
+                cat.id === 'cat_test_burger' ? '🍔' :
+                cat.id === 'cat_test_foods' ? '🍝' :
+                cat.id === 'cat_test_cold' ? '🍹' :
+                cat.id === 'cat_test_hot' ? '☕' :
+                cat.id === 'cat_test_dessert' ? '🍰' :
+                cat.id === 'cat_test_icecream' ? '🍨' : '✨';
+
+            html += '<button type="button" class="test-cat-chip ' + (activeCatFilter === cat.id ? 'active' : '') + '" data-cat="' + escapeHtmlAttr(cat.id) + '">' +
+                '<span>' + icon + '</span> <span>' + escapeHtmlText(catName) + ' (' + count + ')</span>' +
+            '</button>';
+        });
+
+        html += '</div>';
+
+        // Filter items
+        var filteredItems = sampleItems.filter(function (it) {
+            if (activeCatFilter === 'all') return true;
+            return it.category === activeCatFilter;
+        });
+
+        html += '<div class="test-items-grid" id="testItemsGrid">';
+        filteredItems.forEach(function (item) {
+            var itemName = item['name_' + lang] || item.name_ku || item.name_en || item.name_ar;
+            var itemDesc = item['description_' + lang] || item.description_ku || item.description_en || item.description_ar || '';
+            var priceFmt = (item.price || 0).toLocaleString() + ' IQD';
+            var badgeHtml = item.badge ? '<span class="test-item-badge">' + escapeHtmlText(item.badge) + '</span>' : '';
+
+            html += '<div class="test-item-card">' +
+                '<div class="test-item-img-wrap">' +
+                    '<img src="' + escapeHtmlAttr(item.image) + '" alt="' + escapeHtmlAttr(itemName) + '" loading="lazy">' +
+                    badgeHtml +
+                '</div>' +
+                '<div class="test-item-body">' +
+                    '<div class="test-item-header">' +
+                        '<h4 class="test-item-title">' + escapeHtmlText(itemName) + '</h4>' +
+                        '<span class="test-item-price">' + priceFmt + '</span>' +
+                    '</div>' +
+                    '<p class="test-item-desc">' + escapeHtmlText(itemDesc) + '</p>' +
+                    '<div class="test-item-footer">' +
+                        '<span class="test-item-cat-tag">' + escapeHtmlText(item.category.replace('cat_test_', '').toUpperCase()) + '</span>' +
+                        '<span class="test-item-status-tag">✓ Available</span>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+
+        html += '</div>'; // End test-suite-preview-section
+        html += '</div>'; // End admin-test-menu-page
+
+        adminContent.innerHTML = html;
+
+        // Wire Event Listeners
+        var btnInject = document.getElementById('btnAdminInjectTestMenu');
+        if (btnInject) {
+            btnInject.addEventListener('click', function () {
+                if (window.TestMenu && typeof window.TestMenu.injectTestMenu === 'function') {
+                    var res = window.TestMenu.injectTestMenu();
+                    if (res && res.success) {
+                        if (typeof showAdminToast === 'function') {
+                            showAdminToast('✨ سەرکەوتووانە ٧ بەش و ٢٧ ئایتم بۆ مێنوو زیاد کران!');
+                        }
+                        renderView();
+                    } else {
+                        alert('Error: ' + (res ? res.error : 'Unknown error'));
+                    }
+                }
+            });
+        }
+
+        var btnClear = document.getElementById('btnAdminClearTestMenu');
+        if (btnClear) {
+            btnClear.addEventListener('click', function () {
+                if (window.TestMenu && typeof window.TestMenu.clearTestMenu === 'function') {
+                    window.TestMenu.clearTestMenu();
+                    if (typeof showAdminToast === 'function') {
+                        showAdminToast('🗑️ هەموو بەش و ئایتمە تاقیکارییەکان بە تەواوی سڕانەوە!');
+                    }
+                    renderView();
+                }
+            });
+        }
+
+        var filterBar = document.getElementById('testCatFilterBar');
+        if (filterBar) {
+            filterBar.addEventListener('click', function (e) {
+                var chip = e.target.closest('.test-cat-chip');
+                if (chip) {
+                    activeCatFilter = chip.getAttribute('data-cat') || 'all';
+                    renderView();
+                }
+            });
+        }
+    }
+
+    renderView();
+}
+
+window.loadTestMenuSuite = loadTestMenuSuite;
+
 
 
