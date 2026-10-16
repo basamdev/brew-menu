@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brew-v168';
+const CACHE_NAME = 'brew-v169';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
@@ -36,8 +36,7 @@ const STATIC_ASSETS = [
     './images/review-icons/gem.svg',
     './images/review-icons/speed.svg',
     './images/review-icons/staff.svg',
-    './images/review-icons/analytics.svg',
-    './js/test-menu.js'
+    './images/review-icons/analytics.svg'
 ];
 
 self.addEventListener('message', function (event) {

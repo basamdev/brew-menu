@@ -12,59 +12,19 @@
     var _lastItemsOnUpdate = null;
     var _lastCategoriesOnUpdate = null;
 
+    try {
+        localStorage.removeItem('brew_test_menu_mode');
+        localStorage.removeItem('brew_test_categories');
+        localStorage.removeItem('brew_test_items');
+    } catch (e) {}
+
     function getCombinedItems(baseItems) {
-        baseItems = baseItems || _items;
-        if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
-            var testItems = window.TestMenu.getTestItems() || [];
-            if (testItems.length) {
-                var map = {};
-                var combined = [];
-                baseItems.forEach(function (it) {
-                    if (it && it.id) { map[it.id] = true; combined.push(it); }
-                });
-                testItems.forEach(function (it) {
-                    if (it && it.id && !map[it.id]) { map[it.id] = true; combined.push(it); }
-                });
-                return combined;
-            }
-        }
-        return baseItems;
+        return baseItems || _items;
     }
 
     function getCombinedCategories(baseCats) {
-        baseCats = baseCats || _categories;
-        if (window.TestMenu && typeof window.TestMenu.isTestModeActive === 'function' && window.TestMenu.isTestModeActive()) {
-            var testCats = window.TestMenu.getTestCategories() || [];
-            if (testCats.length) {
-                var map = {};
-                var combined = [];
-                baseCats.forEach(function (c) {
-                    if (c && c.id) { map[c.id] = true; combined.push(c); }
-                });
-                testCats.forEach(function (tc) {
-                    if (tc && tc.id && !map[tc.id]) {
-                        map[tc.id] = true;
-                        combined.push({ id: tc.id, data: tc });
-                    }
-                });
-                return sortCategoriesList(combined);
-            }
-        }
-        return baseCats;
+        return baseCats || _categories;
     }
-
-    function syncTestMode() {
-        if (_lastItemsOnUpdate) {
-            _lastItemsOnUpdate(getCombinedItems(_items.slice()));
-        }
-        if (_lastCategoriesOnUpdate) {
-            _lastCategoriesOnUpdate(getCombinedCategories(_categories.slice()));
-        }
-    }
-
-    window.addEventListener('brew_test_menu_changed', function () {
-        syncTestMode();
-    });
 
     function isMobileBrowser() {
         return window.innerWidth <= 1024 ||
@@ -321,6 +281,6 @@
         getCategories: getCategories,
         filterItems: filterItems,
         unsubscribeAll: unsubscribeAll,
-        syncTestMode: syncTestMode
+        syncTestMode: function () {}
     };
 })();

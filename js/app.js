@@ -2880,13 +2880,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-
-    // Listen for test menu live mock updates
-    window.addEventListener('brew_test_menu_changed', function () {
-        if (window.location.pathname.includes('menu.html') && typeof loadMenuItems === 'function') {
-            loadMenuItems();
-        }
-    });
 });
 
 /* ========================================
