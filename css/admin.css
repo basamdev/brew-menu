@@ -4228,3 +4228,208 @@ body.admin-reordering-active {
     transform: translateY(0);
 }
 
+/* ==========================================================================
+   ADMIN CUSTOMER REVIEWS DASHBOARD STYLES
+   ========================================================================== */
+
+.admin-reviews-page {
+    animation: fadeIn 0.3s ease;
+}
+
+.btn-chip {
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-chip:hover {
+    border-color: var(--gold);
+    color: var(--text-primary);
+}
+
+.btn-chip.active {
+    background: linear-gradient(135deg, rgba(var(--gold-rgb), 0.25) 0%, rgba(var(--gold-rgb), 0.1) 100%);
+    border-color: var(--gold);
+    color: var(--gold-light);
+    box-shadow: 0 2px 10px rgba(var(--gold-rgb), 0.2);
+}
+
+.admin-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+.admin-review-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-hover) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+.admin-review-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+.admin-review-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.admin-review-author-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-review-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+    color: #000;
+    font-size: 0.95rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(var(--gold-rgb), 0.3);
+}
+
+.admin-review-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.25;
+}
+
+.admin-review-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 2px 0 0;
+}
+
+.admin-review-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(var(--gold-rgb), 0.12);
+    color: var(--gold);
+    border: 1px solid rgba(var(--gold-rgb), 0.25);
+    white-space: nowrap;
+}
+
+.admin-review-stars {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.admin-review-stars-icons {
+    color: #F59E0B;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+}
+
+.admin-review-score-pill {
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 1px 7px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.admin-review-comment {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 12px;
+    font-style: italic;
+    position: relative;
+    word-break: break-word;
+}
+
+.admin-review-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.admin-review-tag {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.admin-review-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+}
+
+.admin-review-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.admin-review-delete-btn {
+    background: rgba(198, 40, 40, 0.1);
+    color: #EF5350;
+    border: 1px solid rgba(198, 40, 40, 0.25);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.admin-review-delete-btn:hover {
+    background: #C62828;
+    color: #fff;
+    border-color: #C62828;
+    transform: scale(1.03);
+}
+
+

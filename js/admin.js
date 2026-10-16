@@ -1615,6 +1615,9 @@ function loadAdminSection(section) {
     if (section !== 'categories') {
         stopCategoriesListener();
     }
+    if (section !== 'reviews') {
+        stopCustomerReviewsListener();
+    }
     var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
     var adminContent = document.getElementById('adminContent');
     if (!adminContent) return;
@@ -1625,6 +1628,7 @@ function loadAdminSection(section) {
         else if (section === 'items') { loadManageItems(); }
         else if (section === 'categories') { loadManageCategories(); }
         else if (section === 'offers') { loadManageOffers(); }
+        else if (section === 'reviews') { loadCustomerReviews(); }
         else if (section === 'cashier') { loadCashier(); }
         else if (section === 'expenses') { loadExpenses(); }
         else if (section === 'settings') { loadSettings(); }
@@ -6977,6 +6981,7 @@ function loadSettings() {
 
 function handleLogout() {
     stopDashboardListeners();
+    stopCustomerReviewsListener();
     if (USE_LOCAL_API) {
         localStorage.removeItem('adminAuthToken');
         localStorage.removeItem('adminUser');
@@ -6995,4 +7000,390 @@ function handleLogout() {
         window.location.href = 'login.html';
     }
 }
+
+/* ==========================================================================
+   ADMIN CUSTOMER REVIEWS DASHBOARD
+   ========================================================================== */
+
+var _adminReviewsLiveUnsub = null;
+var _adminReviewsFilterCat = 'all';
+var _adminReviewsFilterRating = 'all';
+var _adminReviewsSearchQuery = '';
+var _adminReviewsCachedData = [];
+
+function stopCustomerReviewsListener() {
+    if (_adminReviewsLiveUnsub) {
+        try { _adminReviewsLiveUnsub(); } catch (e) {}
+        _adminReviewsLiveUnsub = null;
+    }
+}
+
+function loadCustomerReviews() {
+    var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
+    var adminContent = document.getElementById('adminContent');
+    if (!adminContent) return;
+
+    adminContent.innerHTML =
+        '<div class="admin-reviews-page">' +
+            '<div class="admin-section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">' +
+                '<div>' +
+                    '<h2 style="margin:0;font-size:1.45rem;display:flex;align-items:center;gap:8px;">' +
+                        '<span>⭐</span>' +
+                        '<span>' + (S.manageReviews || 'Customer Reviews') + '</span>' +
+                        '<span class="badge badge-accent" id="adminTotalReviewsBadge" style="font-size:0.8rem;padding:3px 10px;border-radius:999px;">0</span>' +
+                    '</h2>' +
+                    '<p style="color:var(--text-secondary);margin:4px 0 0;font-size:0.88rem;">' +
+                        'ڕا، پێشنیاز و سەرنجی کڕیاران لەسەر کواڵیتی قاوە، خواردن، خزمەتگوزاری و دیزاین' +
+                    '</p>' +
+                '</div>' +
+                '<div style="display:flex;gap:10px;">' +
+                    '<button type="button" class="btn-secondary" id="adminRefreshReviewsBtn" style="display:inline-flex;align-items:center;gap:6px;">' +
+                        '<span>🔄</span> <span>نوێکردنەوە / Refresh</span>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+
+            '<!-- Review KPI Stats -->' +
+            '<div class="admin-stats" id="adminReviewsStats" style="grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));margin-bottom:24px;">' +
+                '<div class="stat-card" style="border-color:rgba(var(--gold-rgb),0.35);">' +
+                    '<h3>⭐ تێکڕای بەها (Average Rating)</h3>' +
+                    '<div class="stat-value" id="statAvgRating" style="color:var(--gold);font-size:2rem;">5.0 ★</div>' +
+                    '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statTotalCount">لەسەر بنەمای 0 ڕا</p>' +
+                '</div>' +
+                '<div class="stat-card">' +
+                    '<h3>☕ خواردن و قاوە (Drinks & Food)</h3>' +
+                    '<div class="stat-value" id="statFoodScore" style="color:#60A5FA;">100%</div>' +
+                    '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statFoodCount">0 هەڵسەنگاندن</p>' +
+                '</div>' +
+                '<div class="stat-card">' +
+                    '<h3>🤝 خزمەتگوزاری (Service & Staff)</h3>' +
+                    '<div class="stat-value" id="statServiceScore" style="color:#34D399;">100%</div>' +
+                    '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statServiceCount">0 هەڵسەنگاندن</p>' +
+                '</div>' +
+                '<div class="stat-card">' +
+                    '<h3>🏛️ کەشوهەوا و دیزاین (Decor & Vibe)</h3>' +
+                    '<div class="stat-value" id="statDecorScore" style="color:#A78BFA;">100%</div>' +
+                    '<p style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 0;" id="statDecorCount">0 هەڵسەنگاندن</p>' +
+                '</div>' +
+            '</div>' +
+
+            '<!-- Toolbar: Search and Filter Chips -->' +
+            '<div class="card" style="margin-bottom:20px;padding:16px;">' +
+                '<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">' +
+                    '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:260px;">' +
+                        '<div class="input-with-icon" style="position:relative;width:100%;">' +
+                            '<input type="text" id="adminReviewSearchInput" placeholder="گەڕان بەپێی ناوی کڕیار، سەرنج، یان ژمارەی مێز..." style="width:100%;box-sizing:border-box;padding:10px 14px;padding-inline-start:36px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);font-size:0.88rem;">' +
+                            '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;">🔍</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">' +
+                        '<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">بابەت:</span>' +
+                        '<div class="filter-chips-group" id="adminReviewCatFilter" style="display:flex;gap:6px;">' +
+                            '<button type="button" class="btn-chip active" data-cat="all">گشتی (All)</button>' +
+                            '<button type="button" class="btn-chip" data-cat="drinks_food">☕ خواردن و قاوە</button>' +
+                            '<button type="button" class="btn-chip" data-cat="service">🤝 خزمەتگوزاری</button>' +
+                            '<button type="button" class="btn-chip" data-cat="decor">🏛️ دیزاین</button>' +
+                        '</div>' +
+                        '<span style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-inline-start:8px;">ئەستێرە:</span>' +
+                        '<select id="adminReviewRatingSelect" style="padding:8px 12px;border-radius:10px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);font-size:0.85rem;">' +
+                            '<option value="all">هەموو ئەستێرەکان (All Stars)</option>' +
+                            '<option value="5">5 ئەستێرە (★★★★★)</option>' +
+                            '<option value="4">4 ئەستێرە (★★★★☆)</option>' +
+                            '<option value="3">3 ئەستێرە (★★★☆☆)</option>' +
+                            '<option value="2">2 ئەستێرە (★★☆☆☆)</option>' +
+                            '<option value="1">1 ئەستێرە (★☆☆☆☆)</option>' +
+                        '</select>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
+            '<!-- Reviews Grid Container -->' +
+            '<div id="adminReviewsContainer"><div class="loading">' + (S.loading || 'Loading reviews...') + '</div></div>' +
+        '</div>';
+
+    wireAdminReviewsEvents();
+    subscribeAdminCustomerReviews();
+}
+
+function wireAdminReviewsEvents() {
+    var refreshBtn = document.getElementById('adminRefreshReviewsBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+            subscribeAdminCustomerReviews();
+            if (typeof showAdminToast === 'function') {
+                showAdminToast('نوێکرایەوە / Refreshed');
+            }
+        });
+    }
+
+    var searchInput = document.getElementById('adminReviewSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            _adminReviewsSearchQuery = this.value.trim().toLowerCase();
+            renderAdminReviewsUI(_adminReviewsCachedData);
+        });
+    }
+
+    var catFilterChips = document.querySelectorAll('#adminReviewCatFilter .btn-chip');
+    catFilterChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            catFilterChips.forEach(function (c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            _adminReviewsFilterCat = this.getAttribute('data-cat') || 'all';
+            renderAdminReviewsUI(_adminReviewsCachedData);
+        });
+    });
+
+    var ratingSelect = document.getElementById('adminReviewRatingSelect');
+    if (ratingSelect) {
+        ratingSelect.addEventListener('change', function () {
+            _adminReviewsFilterRating = this.value;
+            renderAdminReviewsUI(_adminReviewsCachedData);
+        });
+    }
+}
+
+function subscribeAdminCustomerReviews() {
+    stopCustomerReviewsListener();
+
+    function onData(list) {
+        _adminReviewsCachedData = list;
+        renderAdminReviewsUI(list);
+    }
+
+    function fetchLocalBackup() {
+        if (typeof localApiRequest === 'function') {
+            localApiRequest('reviews.php')
+                .then(function (res) {
+                    if (Array.isArray(res)) {
+                        onData(res);
+                        return;
+                    }
+                    readLocalReviewCache();
+                })
+                .catch(function () {
+                    readLocalReviewCache();
+                });
+        } else {
+            readLocalReviewCache();
+        }
+    }
+
+    function readLocalReviewCache() {
+        try {
+            var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
+            onData(cached);
+        } catch (e) {
+            onData([]);
+        }
+    }
+
+    if (window.db && window.collection && window.onSnapshot) {
+        try {
+            var q = window.query ? query(collection(db, 'customerReviews'), orderBy('createdAt', 'desc')) : collection(db, 'customerReviews');
+            _adminReviewsLiveUnsub = onSnapshot(q, function (snap) {
+                var list = [];
+                snap.forEach(function (doc) {
+                    var data = doc.data() || {};
+                    data.id = doc.id;
+                    list.push(data);
+                });
+                onData(list);
+            }, function (err) {
+                console.warn('Admin reviews onSnapshot error:', err);
+                fetchLocalBackup();
+            });
+            return;
+        } catch (e) {
+            console.warn('Admin reviews listener error:', e);
+        }
+    }
+
+    fetchLocalBackup();
+}
+
+function renderAdminReviewsUI(allReviews) {
+    var container = document.getElementById('adminReviewsContainer');
+    if (!container) return;
+    allReviews = allReviews || [];
+
+    // 1. Calculate KPIs from all reviews
+    var totalCount = allReviews.length;
+    var totalBadge = document.getElementById('adminTotalReviewsBadge');
+    if (totalBadge) totalBadge.textContent = totalCount;
+
+    var sumRating = 0;
+    var foodRatings = [];
+    var serviceRatings = [];
+    var decorRatings = [];
+
+    allReviews.forEach(function (r) {
+        var score = parseInt(r.rating || 5, 10);
+        sumRating += score;
+        var cat = r.category || 'all';
+        if (cat === 'drinks_food') foodRatings.push(score);
+        else if (cat === 'service') serviceRatings.push(score);
+        else if (cat === 'decor') decorRatings.push(score);
+    });
+
+    var avgRating = totalCount > 0 ? (sumRating / totalCount).toFixed(1) : '5.0';
+    var statAvgRating = document.getElementById('statAvgRating');
+    var statTotalCount = document.getElementById('statTotalCount');
+    if (statAvgRating) statAvgRating.textContent = avgRating + ' ★';
+    if (statTotalCount) statTotalCount.textContent = 'لەسەر بنەمای ' + totalCount + ' ڕا';
+
+    function calcScore(arr) {
+        if (!arr.length) return '100%';
+        var avg = arr.reduce(function (a, b) { return a + b; }, 0) / arr.length;
+        return Math.round((avg / 5) * 100) + '%';
+    }
+
+    var statFoodScore = document.getElementById('statFoodScore');
+    var statFoodCount = document.getElementById('statFoodCount');
+    if (statFoodScore) statFoodScore.textContent = calcScore(foodRatings);
+    if (statFoodCount) statFoodCount.textContent = foodRatings.length + ' هەڵسەنگاندن';
+
+    var statServiceScore = document.getElementById('statServiceScore');
+    var statServiceCount = document.getElementById('statServiceCount');
+    if (statServiceScore) statServiceScore.textContent = calcScore(serviceRatings);
+    if (statServiceCount) statServiceCount.textContent = serviceRatings.length + ' هەڵسەنگاندن';
+
+    var statDecorScore = document.getElementById('statDecorScore');
+    var statDecorCount = document.getElementById('statDecorCount');
+    if (statDecorScore) statDecorScore.textContent = calcScore(decorRatings);
+    if (statDecorCount) statDecorCount.textContent = decorRatings.length + ' هەڵسەنگاندن';
+
+    // 2. Filter reviews
+    var filtered = allReviews.filter(function (r) {
+        if (_adminReviewsFilterCat !== 'all' && (r.category || 'all') !== _adminReviewsFilterCat) {
+            return false;
+        }
+        if (_adminReviewsFilterRating !== 'all') {
+            if (String(r.rating || 5) !== _adminReviewsFilterRating) return false;
+        }
+        if (_adminReviewsSearchQuery) {
+            var hay = ((r.author || '') + ' ' + (r.comment || '') + ' ' + (r.table || '')).toLowerCase();
+            if (hay.indexOf(_adminReviewsSearchQuery) === -1) return false;
+        }
+        return true;
+    });
+
+    // 3. Render list/grid
+    if (!filtered.length) {
+        container.innerHTML =
+            '<div class="card" style="text-align:center;padding:48px 20px;">' +
+                '<div style="font-size:2.8rem;margin-bottom:12px;">💬</div>' +
+                '<h3 style="color:var(--text-primary);margin:0 0 6px;">هیچ هەڵسەنگاندنێک نەدۆزرایەوە</h3>' +
+                '<p style="color:var(--text-muted);font-size:0.88rem;margin:0;">هیچ ڕایەک بەپێی ئەم فلتەرانە تۆمار نەکراوە.</p>' +
+            '</div>';
+        return;
+    }
+
+    var catBadges = {
+        'all': '<span class="admin-review-badge" style="color:#D4AF37;background:rgba(212,175,55,0.12);border-color:rgba(212,175,55,0.3);">🌟 گشتی • Overall</span>',
+        'drinks_food': '<span class="admin-review-badge" style="color:#60A5FA;background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.3);">☕ خواردن و قاوە</span>',
+        'service': '<span class="admin-review-badge" style="color:#34D399;background:rgba(52,211,153,0.12);border-color:rgba(52,211,153,0.3);">🤝 خزمەتگوزاری</span>',
+        'decor': '<span class="admin-review-badge" style="color:#A78BFA;background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.3);">🏛️ کەشوهەوا و دیزاین</span>'
+    };
+
+    var html = '<div class="admin-reviews-grid">';
+    filtered.forEach(function (r) {
+        var rScore = parseInt(r.rating || 5, 10);
+        var starStr = '';
+        for (var s = 1; s <= 5; s++) {
+            starStr += s <= rScore ? '★' : '☆';
+        }
+
+        var author = (r.author || 'میوان').trim();
+        var initial = author.charAt(0) || 'B';
+        var tableMeta = r.table ? (' • ' + escapeHtmlText(r.table)) : '';
+        var dateFormatted = r.createdAt ? new Date(r.createdAt).toLocaleString() : 'ئەمڕۆ';
+        var categoryBadge = catBadges[r.category] || catBadges['all'];
+
+        var tagsHtml = '';
+        if (Array.isArray(r.tags) && r.tags.length) {
+            tagsHtml = '<div class="admin-review-tags">' + r.tags.map(function (t) {
+                return '<span class="admin-review-tag">' + escapeHtmlText(t) + '</span>';
+            }).join('') + '</div>';
+        }
+
+        html +=
+            '<div class="admin-review-card" data-id="' + escapeHtmlAttr(r.id) + '">' +
+                '<div class="admin-review-card-head">' +
+                    '<div class="admin-review-author-wrap">' +
+                        '<div class="admin-review-avatar">' + escapeHtmlText(initial) + '</div>' +
+                        '<div>' +
+                            '<h4 class="admin-review-name">' + escapeHtmlText(author) + '</h4>' +
+                            '<div class="admin-review-meta">' + dateFormatted + tableMeta + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    categoryBadge +
+                '</div>' +
+
+                '<div class="admin-review-stars">' +
+                    '<span class="admin-review-stars-icons">' + starStr + '</span>' +
+                    '<span class="admin-review-score-pill">' + rScore + '.0 ★</span>' +
+                '</div>' +
+
+                '<div class="admin-review-comment">' +
+                    '“' + escapeHtmlText(r.comment || '') + '”' +
+                '</div>' +
+
+                tagsHtml +
+
+                '<div class="admin-review-card-foot">' +
+                    '<span class="admin-review-date">ID: ' + escapeHtmlText((r.id || '').substring(0, 10)) + '</span>' +
+                    '<button type="button" class="admin-review-delete-btn" onclick="deleteCustomerReview(\'' + escapeHtmlAttr(r.id) + '\')">' +
+                        '<span>🗑️</span> <span>سڕینەوە / Delete</span>' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+    });
+    html += '</div>';
+
+    container.innerHTML = html;
+}
+
+window.deleteCustomerReview = function (reviewId) {
+    if (!reviewId) return;
+    if (!confirm('دڵنیایت لە سڕینەوەی ئەم هەڵسەنگاندنە؟ / Are you sure you want to delete this review?')) {
+        return;
+    }
+
+    if (window.db && window.doc && window.deleteDoc) {
+        deleteDoc(doc(db, 'customerReviews', reviewId))
+            .then(function () {
+                if (typeof showAdminToast === 'function') {
+                    showAdminToast('هەڵسەنگاندنەکە بە سەرکەوتوویی سڕایەوە / Review deleted');
+                }
+                _adminReviewsCachedData = _adminReviewsCachedData.filter(function (r) { return r.id !== reviewId; });
+                renderAdminReviewsUI(_adminReviewsCachedData);
+            })
+            .catch(function (err) {
+                console.error('Delete review error:', err);
+                fallbackDelete();
+            });
+    } else {
+        fallbackDelete();
+    }
+
+    function fallbackDelete() {
+        if (typeof localApiRequest === 'function') {
+            localApiRequest('reviews.php', { method: 'DELETE', body: { id: reviewId } }).catch(function () {});
+        }
+        try {
+            var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
+            cached = cached.filter(function (r) { return r.id !== reviewId; });
+            localStorage.setItem('cachedCustomerReviews', JSON.stringify(cached));
+        } catch (e) {}
+        _adminReviewsCachedData = _adminReviewsCachedData.filter(function (r) { return r.id !== reviewId; });
+        renderAdminReviewsUI(_adminReviewsCachedData);
+        if (typeof showAdminToast === 'function') {
+            showAdminToast('هەڵسەنگاندنەکە سڕایەوە');
+        }
+    }
+};
+
+window.loadCustomerReviews = loadCustomerReviews;
+
 

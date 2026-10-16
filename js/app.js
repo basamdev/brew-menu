@@ -207,6 +207,23 @@ const i18n = {
         offersHint: 'ئەم وێنانە لە سەرەوەی مێنوو دەردەکەون — هەر وێنەیەک ٣ چرکە.',
         reports: 'ڕاپۆرتەکان',
         cashier: 'کاشێر',
+        manageReviews: 'هەڵسەنگاندنەکان',
+        customerReviewsTitle: 'ڕا و بەهای کڕیار',
+        customerReviewsSubtitle: 'سەرنج و بەهای تۆ ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
+        reviewAspectLabel: 'بابەتی هەڵسەنگاندنەکە:',
+        aspectOverall: 'گشتی',
+        aspectFood: 'خواردنەوە و شیرینی',
+        aspectService: 'خزمەتگوزاری',
+        aspectDecor: 'کەشوهەوا و دیزاین',
+        reviewRatingLabel: 'ئاستی ڕازیبوون:',
+        reviewNamePlaceholder: 'ناوت (ئارەزوومەندانە):',
+        reviewTablePlaceholder: 'ژمارەی مێز یان تەلەفۆن:',
+        reviewCommentLabel: 'ڕا و پێشنیازەکەت:',
+        submitReviewBtn: 'ناردنی هەڵسەنگاندن • Submit Review',
+        reviewSuccessTitle: 'زۆر سوپاس بۆ ڕا و بەهایەکەت! ❤️',
+        reviewSuccessMsg: 'پێشنیاز و سەرنجەکەت بە سەرکەوتوویی گەیشتە بەڕێوەبەرایەتی کافێ. دەنگی تۆ باشترین پاڵنەرمانە.',
+        reviewAgainBtn: 'ناردنی هەڵسەنگاندنێکی تر',
+        recentGuestReviews: 'ڕاکانی کڕیارانی تر',
         settings: 'ڕێکخستنەکان',
         logout: 'دەرچوون',
         viewMenu: 'بینینی مێنوو',
@@ -462,6 +479,23 @@ const i18n = {
         offersHint: 'تظهر هذه الصور أعلى القائمة — كل صورة لمدة ٣ ثوانٍ.',
         reports: 'التقارير',
         cashier: 'الصندوق',
+        manageReviews: 'التقييمات والآراء',
+        customerReviewsTitle: 'آراء وتقييمات العملاء',
+        customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بخدماتنا وجودة القهوة',
+        reviewAspectLabel: 'موضوع التقييم:',
+        aspectOverall: 'عام',
+        aspectFood: 'المشروبات والأطعمة',
+        aspectService: 'الخدمة والضيافة',
+        aspectDecor: 'الأجواء والتصميم',
+        reviewRatingLabel: 'مستوى الرضا:',
+        reviewNamePlaceholder: 'الاسم (اختياري):',
+        reviewTablePlaceholder: 'رقم الطاولة أو الهاتف:',
+        reviewCommentLabel: 'رأيك وملاحظاتك:',
+        submitReviewBtn: 'إرسال التقييم • Submit Review',
+        reviewSuccessTitle: 'شكراً جزيلاً لرأيك اللطيف! ❤️',
+        reviewSuccessMsg: 'تم استلام ملاحظاتك بنجاح وستصل مباشرة لإدارة الكافيه.',
+        reviewAgainBtn: 'إرسال تقييم آخر',
+        recentGuestReviews: 'آراء وانطباعات الضيوف',
         settings: 'الإعدادات',
         logout: 'تسجيل الخروج',
         viewMenu: 'عرض القائمة',
@@ -717,6 +751,23 @@ const i18n = {
         offersHint: 'These images show at the top of the menu — each image for 3 seconds.',
         reports: 'Reports',
         cashier: 'Cashier',
+        manageReviews: 'Customer Reviews',
+        customerReviewsTitle: 'Guest Reviews & Feedback',
+        customerReviewsSubtitle: 'Your impressions inspire our hospitality and craft',
+        reviewAspectLabel: 'Review Aspect:',
+        aspectOverall: 'Overall',
+        aspectFood: 'Coffee & Food',
+        aspectService: 'Service',
+        aspectDecor: 'Decor & Vibe',
+        reviewRatingLabel: 'Your Rating:',
+        reviewNamePlaceholder: 'Your Name (Optional):',
+        reviewTablePlaceholder: 'Table # or Phone:',
+        reviewCommentLabel: 'Your Impressions & Thoughts:',
+        submitReviewBtn: 'Submit Review',
+        reviewSuccessTitle: 'Thank You For Your Feedback! ❤️',
+        reviewSuccessMsg: 'Your feedback has reached the cafe management successfully.',
+        reviewAgainBtn: 'Submit Another Review',
+        recentGuestReviews: 'Recent Guest Reviews',
         settings: 'Settings',
         logout: 'Logout',
         viewMenu: 'View Menu',
@@ -5191,6 +5242,280 @@ function setupCafeInfoPanel() {
 
     updateCafeInfoPanel();
     updateInstallHelpLabel();
+    initCustomerReviews();
+}
+
+/* ==========================================================================
+   CUSTOMER REVIEWS & FEEDBACK LOGIC
+   ========================================================================== */
+
+var _customerReviewsUnsub = null;
+var _currentReviewAspect = 'all';
+var _currentReviewScore = 5;
+var _selectedQuickTags = [];
+
+function escapeHtmlText(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function initCustomerReviews() {
+    var section = document.getElementById('cafeCustomerReviewsSection');
+    if (!section || section.dataset.initialized === '1') return;
+    section.dataset.initialized = '1';
+
+    var aspectChips = section.querySelectorAll('.aspect-chip');
+    var starBtns = section.querySelectorAll('.star-rating-btn');
+    var feedbackStarsBadge = document.getElementById('feedbackStarsBadge');
+    var feedbackText = document.getElementById('feedbackText');
+    var quickChips = section.querySelectorAll('.quick-chip');
+    var form = document.getElementById('cafeCustomerReviewForm');
+    var successBox = document.getElementById('reviewSuccessState');
+    var anotherBtn = document.getElementById('btnReviewAgain');
+    var authorInput = document.getElementById('reviewAuthorName');
+    var tableInput = document.getElementById('reviewTableOrPhone');
+    var commentInput = document.getElementById('reviewComment');
+    var submitBtn = document.getElementById('reviewSubmitButton');
+
+    var ratingFeedbackMap = {
+        5: { badge: '5.0 ★', text: 'نایاب و بێوێنە! • Excellent 🌟' },
+        4: { badge: '4.0 ★', text: 'زۆر باشە! • Very Good ✨' },
+        3: { badge: '3.0 ★', text: 'باشە • Good 👍' },
+        2: { badge: '2.0 ★', text: 'مامناوەند • Fair 😐' },
+        1: { badge: '1.0 ★', text: 'پێویستی بە چاککردنە • Needs Improvement 👎' }
+    };
+
+    // Aspect category selection
+    aspectChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            aspectChips.forEach(function (c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            _currentReviewAspect = chip.getAttribute('data-aspect') || 'all';
+        });
+    });
+
+    // Star rating buttons
+    function updateStarRating(score) {
+        _currentReviewScore = score;
+        starBtns.forEach(function (btn) {
+            var btnScore = parseInt(btn.getAttribute('data-score') || '1', 10);
+            btn.classList.toggle('active', btnScore <= score);
+        });
+        var feedback = ratingFeedbackMap[score] || ratingFeedbackMap[5];
+        if (feedbackStarsBadge) feedbackStarsBadge.textContent = feedback.badge;
+        if (feedbackText) feedbackText.textContent = feedback.text;
+    }
+
+    starBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var score = parseInt(btn.getAttribute('data-score') || '5', 10);
+            updateStarRating(score);
+        });
+    });
+
+    // Quick tags selection
+    quickChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            chip.classList.toggle('selected');
+            var tag = chip.getAttribute('data-tag') || chip.textContent.trim();
+            if (chip.classList.contains('selected')) {
+                if (_selectedQuickTags.indexOf(tag) === -1) _selectedQuickTags.push(tag);
+            } else {
+                _selectedQuickTags = _selectedQuickTags.filter(function (t) { return t !== tag; });
+            }
+        });
+    });
+
+    // Another review button
+    if (anotherBtn) {
+        anotherBtn.addEventListener('click', function () {
+            if (successBox) successBox.style.display = 'none';
+            if (form) form.style.display = 'block';
+            if (commentInput) {
+                commentInput.value = '';
+                commentInput.focus();
+            }
+        });
+    }
+
+    // Submit form
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var comment = (commentInput ? commentInput.value : '').trim();
+            if (!comment) {
+                if (commentInput) {
+                    commentInput.focus();
+                    commentInput.style.borderColor = '#ef4444';
+                    setTimeout(function () { commentInput.style.borderColor = ''; }, 2000);
+                }
+                return;
+            }
+
+            var author = (authorInput ? authorInput.value : '').trim() || 'میوانی بەڕێز • Guest';
+            var tableNum = (tableInput ? tableInput.value : '').trim();
+            var payload = {
+                author: author,
+                table: tableNum,
+                rating: _currentReviewScore,
+                category: _currentReviewAspect,
+                tags: _selectedQuickTags.slice(),
+                comment: comment,
+                status: 'active',
+                createdAt: new Date().toISOString()
+            };
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> دەپشکنرێت...';
+            }
+
+            function onSaveSuccess() {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span class="submit-text">ناردنی هەڵسەنگاندن • Submit Review</span> <i class="fa-solid fa-paper-plane"></i>';
+                }
+                if (form) form.style.display = 'none';
+                if (successBox) successBox.style.display = 'block';
+                // Cache locally
+                try {
+                    var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
+                    cached.unshift(Object.assign({ id: 'loc_' + Date.now() }, payload));
+                    localStorage.setItem('cachedCustomerReviews', JSON.stringify(cached.slice(0, 30)));
+                } catch (e) {}
+                loadCustomerReviewsFeed();
+            }
+
+            function onSaveError(err) {
+                console.warn('Customer review save warning:', err);
+                onSaveSuccess();
+            }
+
+            if (window.db && window.collection && window.addDoc) {
+                var docData = Object.assign({}, payload);
+                if (window.serverTimestamp) {
+                    docData.timestamp = window.serverTimestamp();
+                }
+                addDoc(collection(db, 'customerReviews'), docData)
+                    .then(onSaveSuccess)
+                    .catch(function (err) {
+                        if (typeof localApiRequest === 'function') {
+                            localApiRequest('reviews.php', { method: 'POST', body: payload })
+                                .then(onSaveSuccess)
+                                .catch(onSaveError);
+                        } else {
+                            onSaveError(err);
+                        }
+                    });
+            } else if (typeof localApiRequest === 'function') {
+                localApiRequest('reviews.php', { method: 'POST', body: payload })
+                    .then(onSaveSuccess)
+                    .catch(onSaveError);
+            } else {
+                onSaveSuccess();
+            }
+        });
+    }
+
+    loadCustomerReviewsFeed();
+}
+
+function loadCustomerReviewsFeed() {
+    var container = document.getElementById('feedCardsWrap');
+    var badge = document.getElementById('feedCountBadge');
+    if (!container) return;
+
+    function renderFeed(reviews) {
+        if (!container) return;
+        if (!reviews || !reviews.length) {
+            container.innerHTML = '<p style="text-align:center;font-size:0.75rem;color:rgba(250,248,245,0.45);padding:10px 0;">هێشتا هیچ ڕایەک تۆمار نەکراوە، یەکەم کەس بە بۆچوونت بنووسە! ✨</p>';
+            if (badge) badge.textContent = '0 ڕا';
+            return;
+        }
+
+        if (badge) badge.textContent = reviews.length + ' ڕا';
+
+        var catLabels = {
+            'all': '🌟 گشتی',
+            'drinks_food': '☕ خواردن و قاوە',
+            'service': '🤝 خزمەتگوزاری',
+            'decor': '🏛️ دیزاین و دیکۆر'
+        };
+
+        var html = '';
+        reviews.slice(0, 8).forEach(function (r) {
+            var stars = '';
+            var rScore = parseInt(r.rating || 5, 10);
+            for (var s = 1; s <= 5; s++) {
+                stars += s <= rScore ? '★' : '☆';
+            }
+            var author = (r.author || 'میوان').trim();
+            var initial = author.charAt(0) || 'B';
+            var catLabel = catLabels[r.category] || '🌟 گشتی';
+            var tagsHtml = '';
+            if (Array.isArray(r.tags) && r.tags.length) {
+                tagsHtml = '<div class="feed-tags">' + r.tags.map(function (t) {
+                    return '<span class="feed-tag">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(t) : t) + '</span>';
+                }).join('') + '</div>';
+            }
+
+            var safeComment = typeof escapeHtmlText === 'function' ? escapeHtmlText(r.comment || '') : (r.comment || '');
+            var safeAuthor = typeof escapeHtmlText === 'function' ? escapeHtmlText(author) : author;
+
+            html += '<div class="feed-card">' +
+                '<div class="feed-card-head">' +
+                    '<div class="feed-author">' +
+                        '<span class="feed-author-avatar">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(initial) : initial) + '</span>' +
+                        '<span>' + safeAuthor + '</span>' +
+                    '</div>' +
+                    '<span class="feed-stars">' + stars + '</span>' +
+                '</div>' +
+                '<div style="font-size:0.68rem;color:rgba(212,175,55,0.85);margin-bottom:4px;font-weight:600;">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(catLabel) : catLabel) + '</div>' +
+                '<p class="feed-comment">“' + safeComment + '”</p>' +
+                tagsHtml +
+            '</div>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    if (window.db && window.collection && window.onSnapshot) {
+        if (!_customerReviewsUnsub) {
+            try {
+                var q = window.query ? query(collection(db, 'customerReviews'), orderBy('createdAt', 'desc'), limit(15)) : collection(db, 'customerReviews');
+                _customerReviewsUnsub = onSnapshot(q, function (snap) {
+                    var items = [];
+                    snap.forEach(function (doc) {
+                        var data = doc.data() || {};
+                        data.id = doc.id;
+                        items.push(data);
+                    });
+                    renderFeed(items);
+                }, function () {
+                    renderFromCache();
+                });
+            } catch (e) {
+                renderFromCache();
+            }
+        }
+    } else {
+        renderFromCache();
+    }
+
+    function renderFromCache() {
+        try {
+            var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
+            renderFeed(cached);
+        } catch (e) {
+            renderFeed([]);
+        }
+    }
 }
 
 function openCartPanel() {
