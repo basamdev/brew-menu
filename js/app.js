@@ -380,9 +380,11 @@ const i18n = {
         remove: 'لابردن',
         cartEmpty: 'سەبەتە بەتاڵە',
         favorites: 'دڵخوازەکان',
-        favoritesEmpty: 'هیچ دڵخوازێک نییە',
+        favoritesEmpty: 'دڵخوازەکانت بەتاڵە',
         addToFavorites: 'زیادکردن بۆ دڵخوازەکان',
         removeFromFavorites: 'لابردن لە دڵخوازەکان',
+        addAllToCart: 'هەمووی زیادبکە بۆ سەبەتە',
+        clearAll: 'سڕینەوە',
         cartTotal: 'کۆی گشتی',
         sendWhatsApp: 'ناردن بە واتساپ',
         useCurrentLocation: '📍ناردن لینکی لۆکەیشن',
@@ -633,9 +635,11 @@ const i18n = {
         remove: 'إزالة',
         cartEmpty: 'السلة فارغة',
         favorites: 'المفضلة',
-        favoritesEmpty: 'لا توجد مفضلات',
+        favoritesEmpty: 'قائمتك المفضلة فارغة',
         addToFavorites: 'إضافة إلى المفضلة',
         removeFromFavorites: 'إزالة من المفضلة',
+        addAllToCart: 'إضافة الكل للسلة',
+        clearAll: 'مسح الكل',
         cartTotal: 'الإجمالي',
         sendWhatsApp: 'إرسال واتساب',
         useCurrentLocation: '📍 إرسال رابط الموقع',
@@ -831,6 +835,8 @@ const i18n = {
         favoritesEmpty: 'No favorites yet',
         addToFavorites: 'Add to favorites',
         removeFromFavorites: 'Remove from favorites',
+        addAllToCart: 'Add All to Cart',
+        clearAll: 'Clear All',
         rated: 'Rated',
         stars: 'stars',
         itemAddedToCart: 'Added to cart',
@@ -2001,16 +2007,26 @@ function setupCategoryScrollSpy() {
 
 var MENU_FEATURES = window.MENU_FEATURES || {
     getFavorites: function () {
-        try { return JSON.parse(localStorage.getItem('menu_favorites') || '[]'); } catch (e) { return []; }
+        try {
+            var raw = JSON.parse(localStorage.getItem('menu_favorites') || '[]');
+            if (Array.isArray(raw)) return raw.map(function(id) { return String(id); });
+            return [];
+        } catch (e) { return []; }
     },
     toggleFav: function (id) {
+        id = String(id);
         var favs = this.getFavorites();
         var idx = favs.indexOf(id);
         if (idx > -1) { favs.splice(idx, 1); } else { favs.push(id); }
         localStorage.setItem('menu_favorites', JSON.stringify(favs));
         return idx === -1;
     },
-    isFav: function (id) { return this.getFavorites().indexOf(id) > -1; }
+    isFav: function (id) {
+        return this.getFavorites().indexOf(String(id)) > -1;
+    },
+    clearAll: function () {
+        localStorage.setItem('menu_favorites', JSON.stringify([]));
+    }
 };
 window.MENU_FEATURES = MENU_FEATURES;
 
@@ -2652,8 +2668,17 @@ document.addEventListener('DOMContentLoaded', function () {
     var favOverlay = document.getElementById('favOverlay');
     if (favOverlay) {
         favOverlay.addEventListener('click', function (e) {
-            if (e.target === favOverlay) closeFavPanel();
+            if (e.target === favOverlay || (e.target && e.target.id === 'favBackdrop')) closeFavPanel();
         });
+    }
+
+    window.addEventListener('hashchange', function () {
+        if (location.hash === '#fav' || location.hash === '#favorites') {
+            openFavPanel();
+        }
+    });
+    if (location.hash === '#fav' || location.hash === '#favorites') {
+        setTimeout(openFavPanel, 350);
     }
 
     var cartClear = document.getElementById('cartClear');
@@ -2754,6 +2779,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeInstallTutorial();
                 closeCafeInfoPanel();
                 closeProductDetail();
+                closeFavPanel();
                 closeCartPanel();
             }
         }
@@ -5275,18 +5301,25 @@ function renderCartItems() {
     ======================================== */
 
 function updateFavBadge() {
-    var badge = document.getElementById('favBadge');
-    if (!badge) return;
-    var count = MENU_FEATURES.getFavorites().length;
-    badge.textContent = String(count);
-    badge.classList.toggle('show', count > 0);
+    var badges = document.querySelectorAll('#favBadge, .fav-badge');
+    var favs = MENU_FEATURES.getFavorites();
+    var count = Array.isArray(favs) ? favs.length : 0;
+    badges.forEach(function (badge) {
+        badge.textContent = String(count);
+        badge.classList.toggle('show', count > 0);
+        badge.style.display = count > 0 ? 'inline-flex' : 'none';
+    });
 }
 
 function findMenuItemById(itemId) {
-    if (!itemId) return null;
+    if (itemId == null || itemId === '') return null;
+    var targetStr = String(itemId).trim();
     if (Array.isArray(cachedMenuItems)) {
         for (var i = 0; i < cachedMenuItems.length; i++) {
-            if (cachedMenuItems[i] && cachedMenuItems[i].id === itemId) return cachedMenuItems[i];
+            var mItem = cachedMenuItems[i];
+            if (mItem && (String(mItem.id).trim() === targetStr || String(mItem._id).trim() === targetStr)) {
+                return mItem;
+            }
         }
     }
     if (window.MenuData && typeof MenuData.getItems === 'function') {
@@ -5294,8 +5327,10 @@ function findMenuItemById(itemId) {
         for (var j = 0; j < items.length; j++) {
             var row = items[j];
             var data = row && (row.data || row);
-            var id = row && row.id;
-            if (id === itemId) return Object.assign({ id: id }, typeof data === 'function' ? data() : data);
+            var id = row && (row.id || (typeof data === 'function' ? data().id : (data && data.id)));
+            if (id && String(id).trim() === targetStr) {
+                return Object.assign({ id: id }, typeof data === 'function' ? data() : data);
+            }
         }
     }
     return null;
@@ -5308,6 +5343,7 @@ function openFavPanel() {
         overlay.classList.add('open');
         document.body.classList.add('fav-open');
     }
+    updateFavBadge();
 }
 
 function closeFavPanel() {
@@ -5322,70 +5358,294 @@ function renderFavItems() {
     var container = document.getElementById('favItems');
     if (!container) return;
     var lang = localStorage.getItem('selectedLang') || 'ku';
-    var S = i18n[lang] || i18n.en;
+    var S = i18n[lang] || i18n.ku || i18n.en;
     var favIds = MENU_FEATURES.getFavorites();
-    var fallbackImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27%3E%3Crect fill=%231a1a1a width=%27100%27 height=%27100%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%2724%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%23C21807%27%3E%E2%99%A5%3C/text%3E%3C/svg%3E';
+    var fallbackImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27%3E%3Crect fill=%231a1a1a width=%27100%27 height=%27100%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%2724%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%23EF4444%27%3E%E2%99%A5%3C/text%3E%3C/svg%3E';
 
-    if (!favIds.length) {
-        container.innerHTML =
-            '<div class="fav-empty">' +
-                '<div class="fav-empty-icon">♡</div>' +
-                '<p>' + (S.favoritesEmpty || 'No favorites yet') + '</p>' +
-            '</div>';
-        return;
+    var clearBtn = document.getElementById('favClearBtn');
+    var favFooter = document.getElementById('favFooter');
+    var favFooterCount = document.getElementById('favFooterCount');
+    var favFooterTotal = document.getElementById('favFooterTotal');
+    var favSubtitle = document.getElementById('favSubtitle');
+
+    var subtitleTexts = {
+        ku: 'خواردنەوە و بەرهەمە دڵخوازەکانت',
+        ar: 'مشروباتك ومنتجاتك المفضلة',
+        en: 'Your saved favorite drinks & dishes'
+    };
+    if (favSubtitle) {
+        favSubtitle.textContent = subtitleTexts[lang] || subtitleTexts.ku;
     }
 
-    var html = '';
+    // Filter valid items
+    var validItems = [];
+    var totalPrice = 0;
     favIds.forEach(function (id) {
         var item = findMenuItemById(id);
-        if (!item) return;
-        var name = item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || 'Item';
-        var price = item.price ? Number(item.price).toLocaleString() : '0';
-        var img = normalizeImageUrl(item.image) || fallbackImage;
-        html +=
-            '<div class="fav-item" data-id="' + id + '">' +
-                '<div class="fav-item-img"><img src="' + img + '" alt="" onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'"></div>' +
-                '<div class="fav-item-info">' +
-                    '<span class="fav-item-name">' + name + '</span>' +
-                    '<span class="fav-item-price">' + price + ' IQD</span>' +
-                '</div>' +
-                '<div class="fav-item-actions">' +
-                    '<button type="button" class="fav-item-cart" data-id="' + id + '" aria-label="' + (S.addToCart || 'Add to cart') + '">' +
-                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>' +
-                    '</button>' +
-                    '<button type="button" class="fav-item-remove" data-id="' + id + '" aria-label="' + (S.removeFromFavorites || 'Remove') + '">✕</button>' +
-                '</div>' +
-            '</div>';
+        if (item) {
+            validItems.push(item);
+            totalPrice += parseItemPrice(item.price);
+        }
     });
 
-    if (!html) {
+    if (!validItems.length) {
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (favFooter) favFooter.style.display = 'none';
+
+        var emptyTitles = {
+            ku: 'دڵخوازەکانت بەتاڵە',
+            ar: 'قائمتك المفضلة فارغة',
+            en: 'No Favorites Yet'
+        };
+        var emptyHints = {
+            ku: 'هەر خواردنەوە یان شیرینیەکت بەدڵ بوو لەسەر نیشانەی دڵ 🤍 دابگرە تاوەکو لێرە بیبینیتەوە و بە خێرایی داوای بکەیت',
+            ar: 'اضغط على رمز القلب 🤍 على أي صنف لتجده هنا وتطلبه بنقرة واحدة',
+            en: 'Tap the heart icon 🤍 on any item to save it here for instant ordering'
+        };
+        var exploreTexts = {
+            ku: 'گەڕان لە مێنیو',
+            ar: 'تصفح المنيو',
+            en: 'Explore Menu'
+        };
+
         container.innerHTML =
             '<div class="fav-empty">' +
-                '<div class="fav-empty-icon">♡</div>' +
-                '<p>' + (S.favoritesEmpty || 'No favorites yet') + '</p>' +
+                '<div class="fav-empty-emblem">' +
+                    '<div class="fav-empty-glow"></div>' +
+                    '<div class="fav-empty-icon-wrap">' +
+                        '<svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">' +
+                            '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+                        '</svg>' +
+                    '</div>' +
+                '</div>' +
+                '<h3 class="fav-empty-title">' + (emptyTitles[lang] || emptyTitles.ku) + '</h3>' +
+                '<p class="fav-empty-desc">' + (emptyHints[lang] || emptyHints.ku) + '</p>' +
+                '<button type="button" class="fav-explore-btn" id="favExploreBtn">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+                        '<circle cx="11" cy="11" r="8"></circle>' +
+                        '<line x1="21" y1="21" x2="16.65" y2="16.65"></line>' +
+                    '</svg>' +
+                    '<span>' + (exploreTexts[lang] || exploreTexts.ku) + '</span>' +
+                '</button>' +
             '</div>';
+
+        var exploreBtn = document.getElementById('favExploreBtn');
+        if (exploreBtn) {
+            exploreBtn.onclick = function () {
+                closeFavPanel();
+                var grid = document.getElementById('menuGrid') || document.getElementById('categoriesNav');
+                if (grid) {
+                    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            };
+        }
         return;
     }
 
-    container.innerHTML = html;
-
-    container.querySelectorAll('.fav-item-cart').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            var item = findMenuItemById(this.getAttribute('data-id'));
-            if (item) addToCart(item);
-        });
-    });
-
-    container.querySelectorAll('.fav-item-remove').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            MENU_FEATURES.toggleFav(this.getAttribute('data-id'));
+    // Has items: Show clear button & footer
+    if (clearBtn) {
+        clearBtn.style.display = 'inline-flex';
+        var clearLabels = { ku: 'سڕینەوە', ar: 'مسح', en: 'Clear' };
+        var clearTextEl = clearBtn.querySelector('.fav-clear-text');
+        if (clearTextEl) clearTextEl.textContent = clearLabels[lang] || clearLabels.ku;
+        clearBtn.onclick = function (e) {
+            e.stopPropagation();
+            MENU_FEATURES.clearAll();
             updateFavBadge();
             renderFavItems();
-            document.querySelectorAll('.menu-card-fav[data-item-id="' + this.getAttribute('data-id') + '"]').forEach(function (cardBtn) {
+            document.querySelectorAll('.menu-card-fav').forEach(function (cardBtn) {
                 cardBtn.classList.remove('is-fav');
                 var svg = cardBtn.querySelector('svg');
                 if (svg) svg.setAttribute('fill', 'none');
             });
+        };
+    }
+
+    if (favFooter) {
+        favFooter.style.display = 'flex';
+        if (favFooterCount) {
+            var countWord = {
+                ku: validItems.length + ' بەرهەم',
+                ar: validItems.length + ' أصناف',
+                en: validItems.length + ' Items'
+            };
+            favFooterCount.textContent = countWord[lang] || countWord.ku;
+        }
+        if (favFooterTotal) {
+            favFooterTotal.textContent = (totalPrice > 0 ? totalPrice.toLocaleString() : '0') + ' IQD';
+        }
+        var addAllBtn = document.getElementById('favAddAllBtn');
+        var addAllText = document.getElementById('favAddAllText');
+        if (addAllText) {
+            var addAllLabels = {
+                ku: 'هەمووی زیادبکە بۆ سەبەتە 🛒',
+                ar: 'إضافة الكل للسلة 🛒',
+                en: 'Add All to Cart 🛒'
+            };
+            addAllText.textContent = addAllLabels[lang] || addAllLabels.ku;
+        }
+        if (addAllBtn) {
+            addAllBtn.onclick = function (e) {
+                e.stopPropagation();
+                validItems.forEach(function (itm) {
+                    addToCart(itm);
+                });
+                addAllBtn.classList.add('added');
+                if (addAllText) {
+                    var addedAllMap = {
+                        ku: 'هەمووی زیادکرا! ✓',
+                        ar: 'تمت إضافة الكل! ✓',
+                        en: 'All Added! ✓'
+                    };
+                    addAllText.textContent = addedAllMap[lang] || addedAllMap.ku;
+                }
+                setTimeout(function () {
+                    addAllBtn.classList.remove('added');
+                    if (addAllText) {
+                        var addAllLabels = {
+                            ku: 'هەمووی زیادبکە بۆ سەبەتە 🛒',
+                            ar: 'إضافة الكل للسلة 🛒',
+                            en: 'Add All to Cart 🛒'
+                        };
+                        addAllText.textContent = addAllLabels[lang] || addAllLabels.ku;
+                    }
+                }, 1600);
+            };
+        }
+    }
+
+    var addCartLabels = {
+        ku: '+ زیادکردن',
+        ar: '+ إضافة',
+        en: '+ Add to Cart'
+    };
+    var removeLabels = {
+        ku: 'لابردن',
+        ar: 'إزالة',
+        en: 'Remove'
+    };
+    var sizeWords = {
+        ku: 'قەبارە',
+        ar: 'أحجام',
+        en: 'sizes'
+    };
+    var viewDetailsHint = {
+        ku: 'دەست لێبدە بۆ بینینی هەڵبژاردەکان',
+        ar: 'اضغط لعرض التفاصيل والأحجام',
+        en: 'Tap to view details & options'
+    };
+
+    var html = '';
+    validItems.forEach(function (item) {
+        var id = String(item.id);
+        var name = item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || item.name || 'Item';
+        var price = parseItemPrice(item.price);
+        var priceFormatted = price > 0 ? price.toLocaleString() : '0';
+        var img = normalizeImageUrl(item.image) || fallbackImage;
+        var hasSizes = item.sizes && Array.isArray(item.sizes) && item.sizes.length > 0;
+        var categoryName = item.category ? (item['category_' + lang] || item.category) : '';
+
+        var sizeBadge = '';
+        if (hasSizes) {
+            sizeBadge = '<span class="fav-item-size-badge">' + item.sizes.length + ' ' + (sizeWords[lang] || sizeWords.ku) + '</span>';
+        }
+
+        html +=
+            '<div class="fav-item" data-id="' + id + '">' +
+                '<div class="fav-item-media" data-open-id="' + id + '" title="' + (viewDetailsHint[lang] || viewDetailsHint.ku) + '">' +
+                    '<img src="' + img + '" alt="' + name + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'">' +
+                    sizeBadge +
+                '</div>' +
+                '<div class="fav-item-info" data-open-id="' + id + '" title="' + (viewDetailsHint[lang] || viewDetailsHint.ku) + '">' +
+                    (categoryName ? '<span class="fav-item-cat-label">' + categoryName + '</span>' : '') +
+                    '<h4 class="fav-item-name">' + name + '</h4>' +
+                    '<div class="fav-item-pricing">' +
+                        '<span class="fav-item-price">' + priceFormatted + ' IQD</span>' +
+                        (hasSizes ? '<span class="fav-item-sizes-hint">✨ ' + (lang === 'ku' ? 'چەندین قەبارە' : (lang === 'ar' ? 'خيارات متعددة' : 'Size choices')) + '</span>' : '') +
+                    '</div>' +
+                '</div>' +
+                '<div class="fav-item-actions">' +
+                    '<button type="button" class="fav-item-cart-btn" data-id="' + id + '" aria-label="' + (addCartLabels[lang] || addCartLabels.ku) + '">' +
+                        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+                            '<line x1="12" y1="5" x2="12" y2="19"></line>' +
+                            '<line x1="5" y1="12" x2="19" y2="12"></line>' +
+                        '</svg>' +
+                        '<span class="fav-cart-text">' + (addCartLabels[lang] || addCartLabels.ku) + '</span>' +
+                    '</button>' +
+                    '<button type="button" class="fav-item-remove-btn" data-id="' + id + '" title="' + (removeLabels[lang] || removeLabels.ku) + '" aria-label="' + (removeLabels[lang] || removeLabels.ku) + '">' +
+                        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                            '<polyline points="3 6 5 6 21 6"></polyline>' +
+                            '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' +
+                        '</svg>' +
+                    '</button>' +
+                '</div>' +
+            '</div>';
+    });
+
+    container.innerHTML = html;
+
+    // Attach click on image/info to open detail
+    container.querySelectorAll('[data-open-id]').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var targetId = this.getAttribute('data-open-id');
+            var item = findMenuItemById(targetId);
+            if (item) {
+                closeFavPanel();
+                openProductDetail(item);
+            }
+        });
+    });
+
+    // Attach click on Add to Cart button
+    container.querySelectorAll('.fav-item-cart-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var itemId = this.getAttribute('data-id');
+            var item = findMenuItemById(itemId);
+            if (!item) return;
+
+            var cartTextEl = this.querySelector('.fav-cart-text');
+            btn.classList.add('added');
+            if (cartTextEl) {
+                var addedTextMap = {
+                    ku: 'زیادکرا! ✓',
+                    ar: 'تمت الإضافة! ✓',
+                    en: 'Added! ✓'
+                };
+                cartTextEl.textContent = addedTextMap[lang] || addedTextMap.ku;
+            }
+
+            addToCart(item);
+
+            setTimeout(function () {
+                btn.classList.remove('added');
+                if (cartTextEl) {
+                    cartTextEl.textContent = addCartLabels[lang] || addCartLabels.ku;
+                }
+            }, 1200);
+        });
+    });
+
+    // Attach click on remove button
+    container.querySelectorAll('.fav-item-remove-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var itemId = this.getAttribute('data-id');
+            var card = this.closest('.fav-item');
+            if (card) {
+                card.classList.add('removing');
+            }
+            setTimeout(function () {
+                MENU_FEATURES.toggleFav(itemId);
+                updateFavBadge();
+                renderFavItems();
+                document.querySelectorAll('.menu-card-fav[data-item-id="' + itemId + '"]').forEach(function (cardBtn) {
+                    cardBtn.classList.remove('is-fav');
+                    var svg = cardBtn.querySelector('svg');
+                    if (svg) svg.setAttribute('fill', 'none');
+                });
+            }, 220);
         });
     });
 }
