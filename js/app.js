@@ -2161,6 +2161,7 @@ function createMenuCard(item, lang, strings) {
             <div class="menu-card-img-wrapper">
                 <img src="${imageUrl}" alt="${name}" class="menu-card-img" loading="lazy"
                      onerror="this.onerror=null;this.src='${fallbackImage}';">
+                ${favBtnHtml}
                 <button class="menu-card-cart menu-card-add grid-add-btn" data-item-id="${item.id}" aria-label="Add to Cart" type="button">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
                         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -2173,9 +2174,6 @@ function createMenuCard(item, lang, strings) {
                     ${descHtml}
                     <span class="menu-card-price menu-card-foot-price">${priceText}</span>
                 </div>
-                <div class="menu-card-actions menu-card-foot-actions">
-                    ${favBtnHtml}
-                </div>
             </div>
         `;
     } else {
@@ -2183,6 +2181,7 @@ function createMenuCard(item, lang, strings) {
             <div class="menu-card-img-wrapper">
                 <img src="${imageUrl}" alt="${name}" class="menu-card-img" loading="lazy"
                      onerror="this.onerror=null;this.src='${fallbackImage}';">
+                ${favBtnHtml}
                 <div class="menu-card-badge">${categoryName}</div>
             </div>
             <div class="menu-card-body">
@@ -2193,7 +2192,6 @@ function createMenuCard(item, lang, strings) {
                         ${priceText}
                     </div>
                     <div class="menu-card-foot-actions">
-                        ${favBtnHtml}
                         <button class="menu-card-cart" data-item-id="${item.id}" aria-label="Add to Cart">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="9" cy="21" r="1"></circle>
