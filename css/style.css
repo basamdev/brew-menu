@@ -6110,7 +6110,7 @@ body.emenu-layout .menu-fab-cart .cart-badge {
 
 body.emenu-layout .category-btn.active {
     background: var(--emenu-brown, #9B6135) !important;
-    color: #FFFFFF !important;
+    color: var(--emenu-on-accent, #FFFFFF) !important;
 }
 
 /* Cart panel */
@@ -6469,7 +6469,7 @@ body.emenu-layout .menu-hero-typewriter {
     font-weight: 600;
     letter-spacing: 0;
     white-space: nowrap;
-    color: #ffffff;
+    color: var(--emenu-text, #ffffff);
 }
 
 body.emenu-layout .menu-hero-typewriter[dir="rtl"] {
@@ -7665,8 +7665,8 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card {
     width: 100% !important;
     min-height: 255px !important;
     border-radius: 18px !important;
-    background: var(--emenu-card-bg, #4A271B) !important;
-    background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+    background: var(--emenu-card-bg, #14253D) !important;
+    background: linear-gradient(180deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 82%, #000) 100%) !important;
     border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
@@ -7696,7 +7696,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
     position: relative !important;
     overflow: hidden !important;
     border-radius: 17px 17px 0 0 !important;
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 80%, #000) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -7828,7 +7828,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
     font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
     font-size: 0.98rem !important;
     font-weight: 700 !important;
-    color: #FFFFFF !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -7893,9 +7893,9 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-fav {
     min-width: 38px !important;
     min-height: 38px !important;
     border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #FFFFFF !important;
+    background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 8%, transparent) !important;
+    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.12)) !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     cursor: pointer !important;
     padding: 0 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
@@ -7965,7 +7965,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card {
     padding: 7px 12px !important;
     border-radius: 16px !important;
     background: rgba(255, 255, 255, 0.05) !important;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #4A271B) !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%), var(--emenu-card-bg, #14253D) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
@@ -8029,7 +8029,7 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-img-wrapper {
     max-height: 90px !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 80%, #000) !important;
     position: relative !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -8167,9 +8167,9 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-fav {
     min-height: 36px !important;
     flex-shrink: 0 !important;
     border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 8%, transparent) !important;
+    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.12)) !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     cursor: pointer !important;
     padding: 0 !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
@@ -8189,9 +8189,9 @@ body.emenu-layout .menu-grid.layout-vertical .menu-card-fav svg {
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:hover {
     transform: scale(1.08) !important;
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.22) !important;
-    color: #FFFFFF !important;
+    background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 14%, transparent) !important;
+    border-color: var(--emenu-border, rgba(255, 255, 255, 0.22)) !important;
+    color: var(--emenu-accent, #FFFFFF) !important;
 }
 
 body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:active {
@@ -8693,7 +8693,7 @@ body.emenu-layout .header-brand {
 }
 
 body.emenu-layout .header-title-stack .menu-hero-typewriter {
-    color: #FFFFFF !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     text-shadow: none !important;
     font-size: clamp(1rem, 3.2vw, 1.25rem) !important;
     font-weight: 700 !important;
@@ -8835,7 +8835,7 @@ body.emenu-layout .category-btn .cat-label {
     margin-top: 0 !important;
     font-size: 0.72rem !important;
     font-weight: 600 !important;
-    color: rgba(244, 255, 249, 0.72) !important;
+    color: var(--emenu-text, rgba(244, 255, 249, 0.72)) !important;
     white-space: nowrap;
     text-align: center;
 }
@@ -8946,8 +8946,8 @@ body.emenu-layout .menu-grid.layout-horizontal {
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
 body.emenu-layout .menu-grid.layout-horizontal .menu-card {
-    background: var(--emenu-card-bg, #4A271B) !important;
-    background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+    background: var(--emenu-card-bg, #14253D) !important;
+    background: linear-gradient(180deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 82%, #000) 100%) !important;
     border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
     border-radius: 18px !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
@@ -8970,7 +8970,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-img-wrapper {
     max-height: 168px !important;
     border-radius: 17px 17px 0 0 !important;
     overflow: hidden !important;
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 80%, #000) !important;
 }
 
 body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card-img,
@@ -9051,7 +9051,7 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot-title {
     font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
     font-size: 0.98rem !important;
     font-weight: 700 !important;
-    color: #FFFFFF !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     line-height: 1.3 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -9081,9 +9081,9 @@ body.emenu-layout .menu-grid.layout-horizontal .menu-card-foot .menu-card-fav {
     min-width: 38px !important;
     min-height: 38px !important;
     border-radius: 12px !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    color: #FFFFFF !important;
+    background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 8%, transparent) !important;
+    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.12)) !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
@@ -10738,8 +10738,8 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         width: 100% !important;
         min-height: 255px !important;
         border-radius: 18px !important;
-        background: var(--emenu-card-bg, #4A271B) !important;
-        background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+        background: var(--emenu-card-bg, #14253D) !important;
+        background: linear-gradient(180deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 82%, #000) 100%) !important;
         border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
@@ -10769,7 +10769,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         position: relative !important;
         overflow: hidden !important;
         border-radius: 17px 17px 0 0 !important;
-        background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
+        background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 80%, #000) !important;
         margin: 0 !important;
         padding: 0 !important;
     }
@@ -10901,7 +10901,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif) !important;
         font-size: 0.98rem !important;
         font-weight: 700 !important;
-        color: #FFFFFF !important;
+        color: var(--emenu-text, #FFFFFF) !important;
         white-space: nowrap !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
@@ -10966,9 +10966,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         min-width: 38px !important;
         min-height: 38px !important;
         border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.06) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        color: #FFFFFF !important;
+        background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 8%, transparent) !important;
+        border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.12)) !important;
+        color: var(--emenu-text, #FFFFFF) !important;
         cursor: pointer !important;
         padding: 0 !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
@@ -11089,8 +11089,8 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-height: 104px !important;
         padding: 7px 12px !important;
         border-radius: 16px !important;
-        background: var(--emenu-card-bg, #4A271B) !important;
-        background: linear-gradient(180deg, var(--emenu-card-bg, #4A271B) 0%, color-mix(in srgb, var(--emenu-card-bg, #4A271B) 82%, #000) 100%) !important;
+        background: var(--emenu-card-bg, #14253D) !important;
+        background: linear-gradient(180deg, var(--emenu-card-bg, #14253D) 0%, color-mix(in srgb, var(--emenu-card-bg, #14253D) 82%, #000) 100%) !important;
         border: 1px solid var(--emenu-accent-soft, rgba(92, 64, 51, 0.22)) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
@@ -11165,7 +11165,7 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         max-height: 90px !important;
         border-radius: 12px !important;
         overflow: hidden !important;
-        background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 80%, #000) !important;
+        background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 80%, #000) !important;
         position: relative !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -11303,9 +11303,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
         min-height: 36px !important;
         flex-shrink: 0 !important;
         border-radius: 12px !important;
-        background: rgba(255, 255, 255, 0.06) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        color: rgba(255, 255, 255, 0.9) !important;
+        background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 8%, transparent) !important;
+        border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.12)) !important;
+        color: var(--emenu-text, #FFFFFF) !important;
         cursor: pointer !important;
         padding: 0 !important;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
@@ -11325,9 +11325,9 @@ html[dir="ltr"] body.emenu-layout .menu-section-head .active-category-title {
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:hover {
         transform: scale(1.08) !important;
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-color: rgba(255, 255, 255, 0.22) !important;
-        color: #FFFFFF !important;
+        background: color-mix(in srgb, var(--emenu-text, #FFFFFF) 14%, transparent) !important;
+        border-color: var(--emenu-border, rgba(255, 255, 255, 0.22)) !important;
+        color: var(--emenu-accent, #FFFFFF) !important;
     }
 
     body.emenu-layout .menu-grid.layout-vertical .menu-card-fav:active {
@@ -11593,10 +11593,10 @@ body.menu-expired .menu-expired-overlay {
    FINAL: "+" & HEART BUTTONS — colors follow the active menu theme
    - Card / footer: --emenu-card-bg, border: --emenu-accent-line
    - "+": --emenu-accent circle on image lower-left, --emenu-on-accent plus
-   - Heart: darker shade of the card color, white outline
+   - Heart: theme-aware favorite button
    ========================================================================== */
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot {
-    background: var(--emenu-card-bg, #4A271B) !important;
+    background: var(--emenu-card2, var(--emenu-card-bg, #14253D)) !important;
     border-top: none !important;
 }
 
@@ -11612,8 +11612,8 @@ html body.emenu-layout .menu-grid:not(.layout-vertical) .menu-card,
 html body.emenu-layout .menu-grid:not(.layout-vertical) .category-section > .menu-card {
     min-height: 0 !important;
     height: auto !important;
-    background: var(--emenu-card-bg, #4A271B) !important;
-    border: 1px solid var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
+    background: var(--emenu-card-bg, #14253D) !important;
+    border: 1px solid var(--emenu-accent-line, rgba(96, 165, 250, 0.38)) !important;
     border-radius: 14px !important;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35) !important;
 }
@@ -11640,9 +11640,9 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-bt
     margin: 0 !important;
     border-radius: 50% !important;
     border: none !important;
-    background: var(--emenu-accent, #5C4033) !important;
+    background: var(--emenu-accent, #60A5FA) !important;
     background-image: none !important;
-    color: var(--emenu-on-accent, #FFFFFF) !important;
+    color: var(--emenu-on-accent, #0B1626) !important;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35) !important;
     z-index: 6 !important;
     transform: none;
@@ -11658,13 +11658,13 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-bt
 html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn svg {
     width: 20px !important;
     height: 20px !important;
-    stroke: var(--emenu-on-accent, #FFFFFF) !important;
+    stroke: var(--emenu-on-accent, #0B1626) !important;
     stroke-width: 2.6 !important;
     fill: none !important;
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn:hover {
-    background: color-mix(in srgb, var(--emenu-accent, #5C4033) 82%, #fff) !important;
+    background: color-mix(in srgb, var(--emenu-accent, #60A5FA) 82%, #fff) !important;
     transform: scale(1.06) !important;
 }
 
@@ -11685,10 +11685,10 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav {
     padding: 0 !important;
     margin: 0 !important;
     border-radius: 11px !important;
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 62%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 62%, #000) !important;
     background-image: none !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
-    color: #FFFFFF !important;
+    border: 1px solid var(--emenu-border, rgba(255, 255, 255, 0.07)) !important;
+    color: var(--emenu-text, #FFFFFF) !important;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 2px 6px rgba(0, 0, 0, 0.25) !important;
     transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease !important;
 }
@@ -11702,13 +11702,13 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav svg 
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav:hover {
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 74%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 74%, #000) !important;
     transform: scale(1.05) !important;
 }
 
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot .menu-card-fav.is-fav {
     color: #EF4444 !important;
-    background: color-mix(in srgb, var(--emenu-card-bg, #4A271B) 62%, #000) !important;
+    background: color-mix(in srgb, var(--emenu-card-bg, #14253D) 62%, #000) !important;
     border-color: rgba(239, 68, 68, 0.35) !important;
 }
 
@@ -11725,7 +11725,7 @@ html body.emenu-layout .menu-grid .menu-card .menu-card-foot-title {
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price,
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price .card-price-range,
 html body.emenu-layout .menu-grid .menu-card .menu-card-foot-price .card-price-single {
-    color: var(--emenu-price, #F5B53A) !important;
+    color: var(--emenu-price, #FBBF24) !important;
     font-weight: 700 !important;
 }
 
@@ -11737,9 +11737,9 @@ html body.emenu-layout .menu-grid .menu-card .list-add-btn {
 /* List view: same button look, scaled for the smaller image */
 html body.emenu-layout .menu-grid.layout-vertical .menu-card,
 html body.emenu-layout .menu-grid.layout-vertical .category-section > .menu-card {
-    background: var(--emenu-card-bg, #4A271B) !important;
+    background: var(--emenu-card-bg, #14253D) !important;
     background-image: none !important;
-    border: 1px solid var(--emenu-accent-line, rgba(92, 64, 51, 0.4)) !important;
+    border: 1px solid var(--emenu-accent-line, rgba(96, 165, 250, 0.38)) !important;
 }
 
 html body.emenu-layout .menu-grid.layout-vertical .menu-card .menu-card-foot {
@@ -11753,6 +11753,109 @@ html body.emenu-layout .menu-grid.layout-vertical .menu-card .menu-card-img-wrap
     height: 32px !important;
     min-width: 32px !important;
     min-height: 32px !important;
+}
+
+/* ==========================================================================
+   MOCHA & LIGHT-MODE SPECIFIC OVERRIDES FOR CARDS & BUTTONS
+   - Cards have soft mocha background (#FAF5EF), NOT dark brown!
+   - Icons & Text are rich brown (#5C4033 / #2A1810), NEVER WHITE!
+   ========================================================================== */
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid:not(.layout-vertical) .menu-card,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid.layout-horizontal .menu-card,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid.layout-vertical .menu-card,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid.layout-vertical .category-section > .menu-card,
+html body.emenu-layout.light-mode .menu-grid .menu-card,
+body.emenu-layout[data-menu-theme="mocha"] .menu-card {
+    background: #FAF5EF !important;
+    background-image: none !important;
+    border: 1px solid rgba(92, 64, 51, 0.18) !important;
+    box-shadow: 0 4px 16px rgba(92, 64, 51, 0.08) !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid:not(.layout-vertical) .menu-card .menu-card-foot,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid.layout-horizontal .menu-card .menu-card-foot,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot,
+body.emenu-layout[data-menu-theme="mocha"] .menu-card-foot {
+    background: #F4EAE1 !important;
+    border-top: 1px solid rgba(92, 64, 51, 0.12) !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card-img-wrapper,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-img-wrapper {
+    background: #EDE1D5 !important;
+}
+
+/* Mocha "+" button: mocha background with rich brown icon */
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn,
+html body.emenu-layout[data-menu-theme="mocha"] .grid-add-btn,
+body.emenu-layout[data-menu-theme="mocha"] .grid-add-btn {
+    background: #EDE1D5 !important;
+    background-image: none !important;
+    color: #5C4033 !important;
+    border: 1.5px solid rgba(92, 64, 51, 0.35) !important;
+    box-shadow: 0 4px 12px rgba(92, 64, 51, 0.16) !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn svg,
+html body.emenu-layout[data-menu-theme="mocha"] .grid-add-btn svg,
+body.emenu-layout[data-menu-theme="mocha"] .grid-add-btn svg {
+    stroke: #5C4033 !important;
+    color: #5C4033 !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-img-wrapper .grid-add-btn:hover,
+html body.emenu-layout[data-menu-theme="mocha"] .grid-add-btn:hover {
+    background: #E2D3C4 !important;
+    border-color: #5C4033 !important;
+}
+
+/* Mocha Heart button: soft mocha tint with rich brown icon */
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot .menu-card-fav,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav:not(.is-fav),
+body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav:not(.is-fav) {
+    background: rgba(92, 64, 51, 0.08) !important;
+    background-image: none !important;
+    border: 1px solid rgba(92, 64, 51, 0.22) !important;
+    color: #5C4033 !important;
+    box-shadow: none !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot .menu-card-fav svg,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav:not(.is-fav) svg,
+body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav:not(.is-fav) svg {
+    stroke: #5C4033 !important;
+    color: #5C4033 !important;
+    fill: none !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot .menu-card-fav.is-fav,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav.is-fav {
+    background: rgba(239, 68, 68, 0.12) !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    color: #EF4444 !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot .menu-card-fav.is-fav svg,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-fav.is-fav svg {
+    stroke: #EF4444 !important;
+    fill: #EF4444 !important;
+}
+
+/* Mocha Card Titles & Prices */
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot-title,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-title,
+body.emenu-layout[data-menu-theme="mocha"] .menu-card-title {
+    color: #2A1810 !important;
+    -webkit-text-fill-color: #2A1810 !important;
+}
+
+html body.emenu-layout[data-menu-theme="mocha"] .menu-grid .menu-card .menu-card-foot-price,
+html body.emenu-layout[data-menu-theme="mocha"] .menu-card-price,
+body.emenu-layout[data-menu-theme="mocha"] .menu-card-price {
+    color: #A05212 !important;
+    -webkit-text-fill-color: #A05212 !important;
 }
 
 html body.emenu-layout .menu-grid.layout-vertical .menu-card .menu-card-img-wrapper .grid-add-btn svg {

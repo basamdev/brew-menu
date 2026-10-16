@@ -95,8 +95,10 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.classList.remove('install-tutorial-open');
 
         const urlLang = new URLSearchParams(window.location.search).get('lang');
-        const savedLang = urlLang || localStorage.getItem('selectedLang') || 'ku';
-        if (urlLang) localStorage.setItem('selectedLang', urlLang);
+        var sessionLang = null;
+        try { sessionLang = sessionStorage.getItem('selectedLang'); } catch (e) {}
+        const savedLang = urlLang || sessionLang || 'ku';
+        try { localStorage.setItem('selectedLang', savedLang); } catch (e) {}
         setActiveLanguage(savedLang);
         applyLanguageUI(savedLang);
         setupThemeToggle();
@@ -989,8 +991,8 @@ function categoryPreferredIndex(cat) {
         });
     }
     
-    var lang = localStorage.getItem('selectedLang') || 'en';
-    var order = PREFERRED_CATEGORY_ORDER[lang] || PREFERRED_CATEGORY_ORDER.en;
+    var lang = localStorage.getItem('selectedLang') || 'ku';
+    var order = PREFERRED_CATEGORY_ORDER[lang] || PREFERRED_CATEGORY_ORDER.ku || PREFERRED_CATEGORY_ORDER.en;
     
     for (var i = 0; i < order.length; i++) {
         var p = order[i].trim();
@@ -2697,6 +2699,7 @@ document.addEventListener('DOMContentLoaded', function () {
    ======================================== */
 
 function setActiveLanguage(lang) {
+    try { sessionStorage.setItem('selectedLang', lang); } catch (e) {}
     localStorage.setItem('selectedLang', lang);
 
     if (window.location.pathname.includes('menu.html')) {
@@ -3227,8 +3230,8 @@ var MENU_THEMES = window.MENU_THEMES || {
     rose:     { id: 'rose',     light: false, meta: '#120A0E', brown: '#FB7185', price: '#FCD34D', muted: '#C9A0A9', bg: '#120A0E', sticky: '#120A0E', action: '#2E1820', surface: '#3A1F2A', card: '#3A1B28', card2: '#563040', cat: '#2E1820', pill: '#2E1820', fab: '#3A1F2A', text: '#FFF1F4', border: 'rgba(251,113,133,0.16)', fabText: '#FFF1F4', modalBg: '#26111B' },
     gold:     { id: 'gold',     light: false, meta: '#0E0B06', brown: '#F2C659', price: '#F2C659', muted: '#B9A67A', bg: '#0E0B06', sticky: '#0E0B06', action: '#241C10', surface: '#2E2414', card: '#352410', card2: '#45361C', cat: '#241C10', pill: '#241C10', fab: '#2E2414', text: '#FFF8E7', border: 'rgba(242,198,89,0.18)', fabText: '#FFF8E7', modalBg: '#24180A' },
     olive:    { id: 'olive',    light: false, meta: '#10160C', brown: '#B8C26A', price: '#E4D48A', muted: '#A3A88F', bg: '#10160C', sticky: '#10160C', action: '#1A2414', surface: '#222E1A', card: '#26341C', card2: '#334428', cat: '#1A2414', pill: '#1A2414', fab: '#222E1A', text: '#F4F7EC', border: 'rgba(184,194,106,0.16)', fabText: '#F4F7EC', modalBg: '#1A2413' },
-    cream:    { id: 'cream',    light: true,  meta: '#E4D4A4', brown: '#B8891E', price: '#E8C56A', muted: '#7A6A48', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#DCC890', surface: '#E8D9AE', card: '#442F1A', card2: '#D6C288', cat: '#D2BC80', pill: '#DCC890', fab: '#E0CE98', text: '#FFF8E7', border: 'rgba(184,137,30,0.18)', fabText: '#6B5A32', modalBg: '#362413' },
-    mocha:    { id: 'mocha',    light: true,  meta: '#EFE4DA', brown: '#5C4033', price: '#E8C56A', muted: '#6B5A50', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#F0E6DC', surface: '#F3EBE3', card: '#4A271B', card2: '#E8DCCF', cat: '#E0D3C7', pill: '#F0E6DC', fab: '#F0E6DC', text: '#FAF0E6', border: 'rgba(255,255,255,0.08)', fabText: '#6B5A50', modalBg: '#3A1F15' },
+    cream:    { id: 'cream',    light: true,  meta: '#E4D4A4', brown: '#B8891E', price: '#9E6B08', muted: '#7A6438', bg: '#E4D4A4', sticky: '#E4D4A4', action: '#D8C68E', surface: '#E2D29E', card: '#FFFFFF', card2: '#F4ECD2', cat: '#CEBA7C', pill: '#D8C68E', fab: '#DC9C72', text: '#2C220E', border: 'rgba(184,137,30,0.22)', fabText: '#2C220E', modalBg: '#FAF6EA' },
+    mocha:    { id: 'mocha',    light: true,  meta: '#EFE4DA', brown: '#5C4033', price: '#A05212', muted: '#6B5446', bg: '#EFE4DA', sticky: '#EFE4DA', action: '#E6D7C8', surface: '#EDE1D5', card: '#FAF5EF', card2: '#F4EAE1', cat: '#E2D4C5', pill: '#EADECF', fab: '#E6D7C8', text: '#2A1810', border: 'rgba(92,64,51,0.18)', fabText: '#2A1810', modalBg: '#FAF5EF' },
     dark:     { id: 'dark',     light: false, meta: '#090909', brown: '#C4956A', price: '#E2C08A', muted: '#9A9590', bg: '#090909', sticky: '#090909', action: '#171717', surface: '#1F1F1F', card: '#222222', card2: '#323232', cat: '#171717', pill: '#171717', fab: '#1F1F1F', text: '#F0F0F0', border: 'rgba(255,255,255,0.1)', fabText: '#CFCFCF', modalBg: '#151515' }
 };
 
@@ -3246,7 +3249,7 @@ function emenuBrownRing(hex, alpha) {
 
 function applyMenuTheme(themeId) {
     if (window.MENU_THEMES) MENU_THEMES = window.MENU_THEMES;
-    if (!MENU_THEMES[themeId]) themeId = 'mocha';
+    if (!MENU_THEMES[themeId]) themeId = 'midnight';
     var theme = MENU_THEMES[themeId];
     theme.id = themeId;
     var body = document.body;
@@ -3275,9 +3278,16 @@ function applyMenuTheme(themeId) {
         body.style.setProperty('--emenu-muted', theme.muted || '#A9C2B5');
         body.style.setProperty('--emenu-sticky', theme.sticky || theme.bg);
         body.style.setProperty('--emenu-action', theme.action || theme.surface);
-        body.style.setProperty('--emenu-card2', theme.card2 || theme.card);
         body.style.setProperty('--bg', theme.bg);
         body.style.setProperty('--bg-card', theme.card);
+        body.style.setProperty('--color-bg', theme.bg);
+        body.style.setProperty('--text-primary', theme.text);
+        body.style.setProperty('--color-text', theme.text);
+        body.style.setProperty('--color-text-secondary', theme.muted || (theme.light ? '#6B5446' : '#A9C2B5'));
+        body.style.setProperty('--color-text-muted', theme.muted || (theme.light ? '#8C7565' : '#8FA3BF'));
+        body.style.setProperty('--color-surface', theme.card || '#FFFFFF');
+        body.style.setProperty('--color-surface-2', theme.card2 || '#F7F0E8');
+        body.style.setProperty('--color-border', theme.border);
         body.style.backgroundColor = theme.bg;
     }
 
@@ -3296,7 +3306,10 @@ function applyMenuTheme(themeId) {
         preview.style.background = 'linear-gradient(135deg, ' + theme.brown + ', ' + (theme.price || theme.brown) + ')';
     }
 
-    localStorage.setItem('menuTheme', themeId);
+    try {
+        sessionStorage.setItem('menuTheme', themeId);
+        localStorage.setItem('menuTheme', themeId);
+    } catch (e) {}
 
     // Keep language pill + header cart/search synced with theme
     var langBtn = document.getElementById('langDropdownBtn');
@@ -3312,13 +3325,27 @@ function applyMenuTheme(themeId) {
         var chev = langBtn.querySelector('.lang-pill-chevron');
         if (chev) chev.style.setProperty('color', theme.muted || theme.text, 'important');
     }
-    ['cartBtn', 'headerSearchBtn'].forEach(function (id) {
+    ['cartBtn', 'headerSearchBtn', 'favBtn', 'cafeInfoBtn', 'themeDropdownBtn'].forEach(function (id) {
         var el = document.getElementById(id);
         if (!el) return;
         el.style.setProperty('background', theme.action || theme.surface, 'important');
         el.style.setProperty('border-color', theme.border, 'important');
         el.style.setProperty('color', theme.text, 'important');
     });
+    var heroTitle = document.getElementById('heroTitleTyped');
+    if (heroTitle) {
+        heroTitle.style.setProperty('color', theme.text, 'important');
+    }
+    var heroCursor = document.getElementById('heroTitleCursor');
+    if (heroCursor) {
+        heroCursor.style.setProperty('background', theme.brown, 'important');
+    }
+    var layoutBtn = document.getElementById('layoutToggleBtn');
+    if (layoutBtn) {
+        layoutBtn.style.setProperty('background', theme.action || theme.surface, 'important');
+        layoutBtn.style.setProperty('border-color', theme.border, 'important');
+        layoutBtn.style.setProperty('color', theme.text, 'important');
+    }
 }
 
 function positionThemeMenu() {
@@ -3393,27 +3420,13 @@ function closeThemeMenu() {
 
 function setupMenuThemePicker() {
     if (window.MENU_THEMES) MENU_THEMES = window.MENU_THEMES;
-    var saved = localStorage.getItem('menuTheme');
-    try {
-        if (!localStorage.getItem('menuThemeMigratedToMocha')) {
-            saved = 'mocha';
-            localStorage.setItem('menuTheme', saved);
-            localStorage.setItem('menuThemeMigratedToMocha', '1');
-        }
-    } catch (e) {}
-    if (saved === 'light' || saved === 'coffee' || saved === 'red' || saved === 'ocean') {
-        saved = 'olive';
-        try { localStorage.setItem('menuTheme', saved); } catch (e) {}
-    }
-    if (saved === 'slate') {
-        saved = 'cream';
-        try { localStorage.setItem('menuTheme', saved); } catch (e) {}
-    }
-    if (saved === 'ember') {
-        saved = 'mocha';
-        try { localStorage.setItem('menuTheme', saved); } catch (e) {}
-    }
-    if (!saved || !MENU_THEMES[saved]) saved = 'mocha';
+    var urlTheme = (new URLSearchParams(window.location.search || '')).get('theme');
+    var sessionTheme = null;
+    try { sessionTheme = sessionStorage.getItem('menuTheme'); } catch (e) {}
+    // Default brand theme is ALWAYS Midnight Dark for all customers on open!
+    var saved = urlTheme || sessionTheme || 'midnight';
+    if (!saved || !MENU_THEMES[saved]) saved = 'midnight';
+    try { localStorage.setItem('menuTheme', saved); } catch (e) {}
     applyMenuTheme(saved);
 
     var themeDropdown = document.getElementById('themeDropdown');
@@ -3482,9 +3495,9 @@ function setupMenuThemePicker() {
 }
 
 var HERO_TYPE_PHRASES = [
-    { text: 'BREW CAFE & REST', dir: 'ltr', lang: 'en' },
+    { text: 'بریو کافێ', dir: 'rtl', lang: 'ku' },
     { text: 'بریو کوفي', dir: 'rtl', lang: 'ar' },
-    { text: 'بریو کافێ', dir: 'rtl', lang: 'ku' }
+    { text: 'BREW CAFE & REST', dir: 'ltr', lang: 'en' }
 ];
 
 function heroTypeChars(str) {
@@ -3752,8 +3765,8 @@ function getCartFormLabels(lang) {
 }
 
 function sendWhatsAppOrder() {
-    // Default brand theme is gold (one-time migrate from old default "red").
-    var id = localStorage.getItem('menuTheme') || 'gold';
+    var id = localStorage.getItem('menuTheme') || 'midnight';
+    var lang = localStorage.getItem('selectedLang') || 'ku';
     var cafeInfo = getCafeInfo();
     var cafeName = cafeInfo.name;
     var phone = normalizeWhatsAppPhone(cafeInfo.phone);

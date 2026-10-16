@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zayed-v151';
+const CACHE_NAME = 'brew-v156';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
@@ -10,14 +10,20 @@ const FIREBASE_SDK_URLS = [
 // so root-absolute paths like '/index.html' would 404 and break install.
 const STATIC_ASSETS = [
     './manifest.json',
-    './images/zayed-logo.png',
+    './favicon.ico',
     './images/Brew-logo.png',
+    './images/Brew-logo-raw.jpg',
+    './images/Brew-app-icon.png',
     './images/smart-serve-logo.png',
     './images/brew-cafe-bg.jpg',
     './assets/icon-192.png',
     './assets/icon-512.png',
+    './assets/icon-1024.png',
+    './assets/icon-192-maskable.png',
     './assets/icon-512-maskable.png',
     './assets/apple-touch-icon.png',
+    './assets/favicon-32x32.png',
+    './assets/favicon-16x16.png',
     './assets/logo.svg',
     './images/flag-kurdistan.svg',
     './images/flag-iraq.svg',

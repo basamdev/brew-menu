@@ -15,3 +15,6 @@ js/favicon.ico
 css/style.css.bak
 netlify.toml
 vercel.json
+scratch/
+generate_icons.py
+

@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>BREW CAFE & REST</title>
-    <link rel="manifest" href="manifest.json?v=125">
-    <link rel="icon" type="image/png" href="images/Brew-logo.png?v=25">
-    <link rel="shortcut icon" type="image/png" href="images/Brew-logo.png?v=25">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/Brew-logo.png?v=25">
+    <link rel="manifest" href="manifest.json?v=130">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png?v=30">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?v=30">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png?v=30">
+    <link rel="shortcut icon" href="favicon.ico?v=30">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=30">
     <meta name="application-name" content="BREW CAFE & REST">
-    <meta name="msapplication-TileColor" content="#00D2FF">
+    <meta name="msapplication-TileColor" content="#060A12">
+    <meta name="msapplication-TileImage" content="assets/icon-512.png?v=30">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BREW CAFE & REST">
-    <meta name="theme-color" content="#12100E">
+    <meta name="theme-color" content="#060A12">
     
     <!-- Google Fonts: Luxury Kurdish (Noto Kufi Arabic, Vazirmatn, Noto Sans Arabic) & Modern Latin (Outfit, Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -798,7 +801,7 @@
         }
     </style>
 </head>
-<body class="index-page">
+<body class="index-page" data-lang="ku">
 
     <!-- Fullscreen Authentic Brew Cafe Photo Background -->
     <div class="landing-bg-container">
@@ -816,8 +819,8 @@
             <div class="lang-dropdown-wrapper" id="langDropdownWrapper">
                 <button type="button" class="lang-trigger-btn live-light-btn" id="langTriggerBtn" aria-haspopup="true" aria-expanded="false" title="Change Language">
                     <!-- Dynamic Active Flag (Kurdish, Iraq, or British) -->
-                    <img src="images/flag-uk.svg" alt="Language" class="lang-trigger-flag-img" id="currentLangFlag">
-                    <span class="lang-trigger-text" id="currentLangLabel">English</span>
+                    <img src="images/flag-kurdistan.svg" alt="کوردی" class="lang-trigger-flag-img" id="currentLangFlag">
+                    <span class="lang-trigger-text" id="currentLangLabel">کوردی</span>
                     <span class="lang-chevron-triangle" aria-hidden="true">▼</span>
                 </button>
 
@@ -853,11 +856,11 @@
             <!-- Brand Group (Right side: Text on left, Logo on right) -->
             <div class="top-brand-group" id="indexLogoWrap" title="Double click for Admin">
                 <div class="top-title-typewriter" id="topTitleTypewriter" aria-live="polite">
-                    <span class="typewriter-text" id="typewriterText">BREW CAFE & REST</span><span class="typewriter-cursor">|</span>
+                    <span class="typewriter-text" id="typewriterText">بریو کافێ</span><span class="typewriter-cursor">|</span>
                 </div>
                 <div class="top-logo-badge">
-                    <img src="images/Brew-logo.png?v=25" alt="BREW CAFE & REST" class="top-logo-img" id="indexLogo"
-                         onerror="this.onerror=null; this.src='images/zayed-logo.png?v=25';">
+                    <img src="images/Brew-logo.png?v=30" alt="BREW CAFE & REST" class="top-logo-img" id="indexLogo"
+                         onerror="this.onerror=null; this.src='images/Brew-app-icon.png';">
                 </div>
             </div>
         </header>
@@ -868,8 +871,8 @@
         <!-- BOTTOM CONTROLS DOCK (BREW THEME WITH LIVE LIGHT BORDER) -->
         <section class="bottom-dock">
             <!-- Primary "Menu" Button with Live Moving Light -->
-            <a href="menu.html" class="menu-main-cta live-light-btn" id="menuMainCta" aria-label="Open Menu">
-                <span id="menuBtnLabel">Menu</span>
+            <a href="menu.html?lang=ku" class="menu-main-cta live-light-btn" id="menuMainCta" aria-label="Open Menu">
+                <span id="menuBtnLabel">مێنوو</span>
             </a>
 
             <!-- Quick Action Row: Location & Instagram Squircles with Live Moving Light -->
@@ -894,7 +897,7 @@
 
             <!-- Powered by on top, Logo + Smart Serve on bottom -->
             <div class="powered-by-section" id="poweredBySection">
-                <span class="powered-by-text" id="poweredByLabel">Powered by</span>
+                <span class="powered-by-text" id="poweredByLabel">پشتگیری کراوە لەلایەن</span>
                 <div class="powered-by-brand-row">
                     <div class="smart-serve-emblem-wrap" title="Smart Serve">
                         <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="smart-serve-emblem-img">
@@ -907,7 +910,7 @@
     </main>
 
     <!-- Core App Logic & Settings -->
-    <script src="js/app.js?v=156"></script>
+    <script src="js/app.js?v=187"></script>
     <script>
         (function () {
             'use strict';
@@ -940,9 +943,15 @@
                 }
             };
 
-            // Read current language or fallback to English or Kurdish
-            var currentLang = localStorage.getItem('selectedLang') || 'en';
-            if (!I18N[currentLang]) currentLang = 'en';
+            // Read current language or default to Kurdish for all customers on open!
+            var urlLang = (new URLSearchParams(window.location.search || '')).get('lang');
+            var sessionLang = null;
+            try { sessionLang = sessionStorage.getItem('selectedLang'); } catch (e) {}
+            var currentLang = urlLang || sessionLang || 'ku';
+            if (!I18N[currentLang]) currentLang = 'ku';
+            try {
+                localStorage.setItem('selectedLang', currentLang);
+            } catch (e) {}
 
             // DOM Elements
             var htmlEl = document.documentElement;
@@ -964,9 +973,12 @@
 
             // Apply selected language
             function applyLanguage(lang) {
-                if (!I18N[lang]) lang = 'en';
+                if (!I18N[lang]) lang = 'ku';
                 currentLang = lang;
-                try { localStorage.setItem('selectedLang', lang); } catch (e) {}
+                try {
+                    sessionStorage.setItem('selectedLang', lang);
+                    localStorage.setItem('selectedLang', lang);
+                } catch (e) {}
 
                 var data = I18N[lang];
                 htmlEl.setAttribute('lang', lang);
@@ -1043,9 +1055,9 @@
             // ----------------------------------------------------
             (function initTitleTypewriter() {
                 var words = [
-                    { text: 'BREW CAFE & REST', lang: 'en' },
+                    { text: 'بریو کافێ', lang: 'ku' },
                     { text: 'بریو کوفي', lang: 'ar' },
-                    { text: 'بریو کافێ', lang: 'ku' }
+                    { text: 'BREW CAFE & REST', lang: 'en' }
                 ];
                 var textEl = document.getElementById('typewriterText');
                 if (!textEl) return;

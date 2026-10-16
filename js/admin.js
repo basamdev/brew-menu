@@ -1439,9 +1439,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var LOGO_CANDIDATES = [
         'images/Brew-logo.png',
-        'images/zayed-logo.png',
+        'images/Brew-app-icon.png',
         'assets/icon-512.png',
-        'assets/logo.svg'
+        'images/Brew-logo-raw.jpg'
     ];
     window.fallbackLogo = function (img) {
         if (!img || !(img instanceof HTMLImageElement)) return;
