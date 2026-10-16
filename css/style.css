@@ -12758,37 +12758,40 @@ body.emenu-layout[data-menu-theme="mocha"] .cart-toast-action {
 }
 
 /* ==========================================================================
-   ULTRA LUXURY CUSTOMER REVIEWS COMPONENT (CAFE INFO PANEL)
+   ULTRA LUXURY CUSTOMER REVIEWS SUITE (CAFE INFO PANEL)
    ========================================================================== */
 
 .cafe-info-block--reviews {
-    background: linear-gradient(145deg, rgba(20, 26, 38, 0.75) 0%, rgba(8, 12, 20, 0.95) 100%);
-    border: 1px solid rgba(212, 175, 55, 0.22);
-    border-radius: 20px;
-    padding: 18px 16px;
-    margin-top: 14px;
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+    background: linear-gradient(155deg, rgba(22, 28, 42, 0.88) 0%, rgba(10, 14, 24, 0.98) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.28);
+    border-radius: 22px;
+    padding: 20px 18px;
+    margin-top: 16px;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     position: relative;
     overflow: hidden;
 }
 
 body[data-menu-theme="mocha"] .cafe-info-block--reviews {
-    background: linear-gradient(145deg, rgba(62, 40, 28, 0.85) 0%, rgba(38, 24, 16, 0.95) 100%);
-    border-color: rgba(184, 134, 11, 0.3);
+    background: linear-gradient(155deg, rgba(68, 44, 30, 0.92) 0%, rgba(36, 22, 14, 0.98) 100%);
+    border-color: rgba(184, 134, 11, 0.35);
+    box-shadow: 0 18px 45px rgba(28, 16, 10, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .cafe-review-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
 }
 
 .cafe-review-header-icon {
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.05) 100%);
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.06) 100%);
     border: 1px solid rgba(212, 175, 55, 0.45);
     display: flex;
     align-items: center;
@@ -12796,13 +12799,18 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     color: #D4AF37;
     font-size: 1.25rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.18);
+    box-shadow: 0 6px 16px rgba(212, 175, 55, 0.22);
+}
+
+.cafe-review-header-text {
+    flex: 1;
+    min-width: 160px;
 }
 
 .cafe-review-title {
     margin: 0;
     font-family: var(--font-display, 'Cinzel', serif);
-    font-size: 1.05rem;
+    font-size: 1.08rem;
     font-weight: 700;
     color: #FAF8F5;
     display: flex;
@@ -12811,22 +12819,52 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 }
 
 .review-sparkle {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     animation: sparkleSpin 3s infinite ease-in-out;
 }
 
 @keyframes sparkleSpin {
     0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
-    50% { transform: scale(1.2) rotate(15deg); opacity: 1; }
+    50% { transform: scale(1.22) rotate(15deg); opacity: 1; }
 }
 
 .cafe-review-subtitle {
     margin: 3px 0 0;
-    font-size: 0.78rem;
-    color: rgba(250, 248, 245, 0.65);
+    font-size: 0.76rem;
+    color: rgba(250, 248, 245, 0.7);
     line-height: 1.35;
 }
 
+.cafe-review-header-rating {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.header-rating-stars {
+    color: #F59E0B;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+}
+
+.header-rating-score {
+    color: #FAF8F5;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+.header-rating-count {
+    color: rgba(250, 248, 245, 0.55);
+    font-size: 0.65rem;
+}
+
+/* Aspect selector chips (Drinks, Foods, Service, Decor, All) */
 .review-aspects-wrap {
     margin-bottom: 16px;
 }
@@ -12835,52 +12873,60 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    color: rgba(212, 175, 55, 0.92);
-    margin-bottom: 8px;
+    color: rgba(212, 175, 55, 0.95);
+    margin-bottom: 9px;
 }
 
 .review-aspect-chips {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
 .aspect-chip {
+    flex: 1 1 calc(50% - 6px);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 9px 10px;
+    padding: 9px 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(250, 248, 245, 0.9);
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.22s ease;
+    transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
     white-space: nowrap;
+}
+
+.aspect-chip[data-aspect="all"] {
+    flex: 1 1 100%;
 }
 
 .aspect-chip:hover {
     border-color: rgba(212, 175, 55, 0.45);
-    background: rgba(212, 175, 55, 0.08);
+    background: rgba(212, 175, 55, 0.1);
+    transform: translateY(-1px);
 }
 
 .aspect-chip.active {
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.3) 0%, rgba(212, 175, 55, 0.12) 100%);
     border-color: #D4AF37;
     color: #FAF8F5;
-    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.22);
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.25);
+    font-weight: 700;
 }
 
+/* Star rating box */
 .review-rating-box {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.28);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
-    padding: 14px 12px;
+    padding: 16px 14px;
     margin-bottom: 16px;
     text-align: center;
 }
@@ -12889,50 +12935,53 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    margin: 10px 0;
+    gap: 10px;
+    margin: 12px 0 10px;
 }
 
 .star-rating-btn {
     background: none;
     border: none;
-    font-size: 1.85rem;
+    font-size: 2.1rem;
     color: rgba(255, 255, 255, 0.18);
     cursor: pointer;
-    padding: 4px;
+    padding: 2px 4px;
     line-height: 1;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.2s ease;
 }
 
 .star-rating-btn:hover {
-    transform: scale(1.22);
+    transform: scale(1.25) translateY(-2px);
+    color: #FBBF24;
 }
 
 .star-rating-btn.active {
     color: #F59E0B;
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.55));
+    filter: drop-shadow(0 0 12px rgba(245, 158, 11, 0.7));
 }
 
 .rating-feedback-badge {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: rgba(245, 158, 11, 0.12);
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.38);
     border-radius: 999px;
-    padding: 5px 14px;
+    padding: 5px 16px;
     font-size: 0.78rem;
     font-weight: 700;
     color: #FBBF24;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
 }
 
 .feedback-stars-badge {
-    background: rgba(245, 158, 11, 0.25);
-    padding: 2px 7px;
+    background: rgba(245, 158, 11, 0.28);
+    padding: 2px 8px;
     border-radius: 6px;
     font-size: 0.75rem;
 }
 
+/* Quick compliment chips */
 .review-quick-compliments {
     display: flex;
     flex-wrap: wrap;
@@ -12944,9 +12993,9 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 600;
-    padding: 6px 11px;
+    padding: 6px 12px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -12957,16 +13006,18 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 
 .quick-chip:hover {
     border-color: rgba(212, 175, 55, 0.5);
-    background: rgba(212, 175, 55, 0.08);
+    background: rgba(212, 175, 55, 0.1);
+    transform: translateY(-1px);
 }
 
 .quick-chip.selected {
-    background: rgba(212, 175, 55, 0.22);
+    background: rgba(212, 175, 55, 0.24);
     border-color: #D4AF37;
     color: #FAF8F5;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
+    box-shadow: 0 2px 10px rgba(212, 175, 55, 0.28);
 }
 
+/* Form */
 .review-form-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -12999,10 +13050,10 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 .review-input-box textarea {
     width: 100%;
     box-sizing: border-box;
-    background: rgba(6, 10, 18, 0.65);
+    background: rgba(6, 10, 18, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
-    padding: 10px 12px;
+    padding: 10px 14px;
     color: #FAF8F5;
     font-size: 0.85rem;
     font-family: inherit;
@@ -13013,8 +13064,8 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 .review-input-box textarea:focus {
     outline: none;
     border-color: #D4AF37;
-    background: rgba(10, 15, 26, 0.9);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+    background: rgba(10, 15, 26, 0.95);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25);
 }
 
 .review-input-box input::placeholder,
@@ -13023,36 +13074,67 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 }
 
 .review-comment-box {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
+    position: relative;
 }
 
 .review-comment-box textarea {
     resize: vertical;
-    min-height: 72px;
-    line-height: 1.4;
+    min-height: 78px;
+    line-height: 1.45;
 }
 
+.review-comment-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.review-char-count {
+    font-size: 0.68rem;
+    color: rgba(250, 248, 245, 0.45);
+}
+
+/* Luxury Submit Button with Shimmer Sweep */
 .review-submit-button {
+    position: relative;
     width: 100%;
-    padding: 13px 20px;
-    border-radius: 12px;
+    padding: 14px 20px;
+    border-radius: 14px;
     border: none;
-    background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 50%, #B8860B 100%);
+    background: linear-gradient(135deg, #D4AF37 0%, #F4E4BA 48%, #C59A27 100%);
     color: #060A12;
-    font-size: 0.9rem;
-    font-weight: 700;
+    font-size: 0.92rem;
+    font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.28);
+    box-shadow: 0 6px 22px rgba(212, 175, 55, 0.32);
     transition: all 0.25s ease;
+    overflow: hidden;
+}
+
+.btn-shimmer-sweep {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-25deg);
+    animation: shimmerSweep 3.5s infinite;
+}
+
+@keyframes shimmerSweep {
+    0% { left: -100%; }
+    40%, 100% { left: 160%; }
 }
 
 .review-submit-button:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(212, 175, 55, 0.45);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
     filter: brightness(1.05);
 }
 
@@ -13068,17 +13150,17 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 /* Success state */
 .review-success-state {
     text-align: center;
-    padding: 22px 16px;
+    padding: 24px 18px;
     background: rgba(16, 185, 129, 0.08);
     border: 1px solid rgba(16, 185, 129, 0.32);
-    border-radius: 16px;
+    border-radius: 18px;
     margin: 12px 0;
     animation: fadeIn 0.35s ease;
 }
 
 .success-heart-halo {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     margin: 0 auto 12px;
     border-radius: 50%;
     background: rgba(16, 185, 129, 0.16);
@@ -13086,12 +13168,12 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     align-items: center;
     justify-content: center;
     color: #10B981;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     animation: pulseHalo 1.8s infinite;
 }
 
 @keyframes pulseHalo {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
     50% { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
 }
 
@@ -13105,7 +13187,7 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 .review-success-state p {
     margin: 0 0 14px;
     font-size: 0.8rem;
-    color: rgba(250, 248, 245, 0.82);
+    color: rgba(250, 248, 245, 0.85);
     line-height: 1.45;
 }
 
@@ -13116,7 +13198,7 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     color: #D4AF37;
     font-size: 0.8rem;
     font-weight: 600;
-    padding: 7px 16px;
+    padding: 7px 18px;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -13127,11 +13209,11 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     color: #FAF8F5;
 }
 
-/* Guest reviews feed */
+/* Live Guest Reviews Feed with Filter Chips */
 .guest-reviews-feed {
-    margin-top: 18px;
+    margin-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding-top: 14px;
+    padding-top: 16px;
 }
 
 .feed-header {
@@ -13143,7 +13225,7 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
 
 .feed-header h4 {
     margin: 0;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: #FAF8F5;
     display: flex;
@@ -13164,25 +13246,71 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     font-weight: 700;
 }
 
+.feed-filter-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    scrollbar-width: none;
+}
+
+.feed-filter-chips::-webkit-scrollbar {
+    display: none;
+}
+
+.feed-filter-chip {
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(250, 248, 245, 0.75);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.feed-filter-chip:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    color: #FAF8F5;
+}
+
+.feed-filter-chip.active {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: #D4AF37;
+    color: #FAF8F5;
+    font-weight: 700;
+}
+
 .feed-cards-wrap {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 240px;
+    gap: 10px;
+    max-height: 280px;
     overflow-y: auto;
     padding-right: 2px;
 }
 
+.feed-empty-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: rgba(250, 248, 245, 0.5);
+    padding: 16px 8px;
+    margin: 0;
+}
+
 .feed-card {
-    background: rgba(0, 0, 0, 0.28);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 12px;
-    padding: 12px;
+    background: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 12px 14px;
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .feed-card:hover {
-    border-color: rgba(212, 175, 55, 0.3);
+    border-color: rgba(212, 175, 55, 0.35);
     transform: translateY(-1px);
 }
 
@@ -13190,41 +13318,123 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
 .feed-author {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #FAF8F5;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .feed-author-avatar {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: linear-gradient(135deg, #D4AF37, #B8860B);
     color: #060A12;
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.feed-author-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.feed-author-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #FAF8F5;
+    line-height: 1.2;
+}
+
+.feed-author-meta {
+    font-size: 0.68rem;
+    color: rgba(250, 248, 245, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.feed-verified-badge {
+    color: #10B981;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.feed-cat-pill {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+}
+
+.feed-cat-pill.cat-all {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+
+.feed-cat-pill.cat-drinks {
+    color: #38BDF8;
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.25);
+}
+
+.feed-cat-pill.cat-foods {
+    color: #FB923C;
+    background: rgba(251, 146, 60, 0.12);
+    border-color: rgba(251, 146, 60, 0.25);
+}
+
+.feed-cat-pill.cat-service {
+    color: #34D399;
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.25);
+}
+
+.feed-cat-pill.cat-decor {
+    color: #C084FC;
+    background: rgba(192, 132, 252, 0.12);
+    border-color: rgba(192, 132, 252, 0.25);
+}
+
+.feed-rating-stars-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
 }
 
 .feed-stars {
     color: #F59E0B;
-    font-size: 0.72rem;
+    font-size: 0.76rem;
     letter-spacing: 1px;
 }
 
+.feed-score-badge {
+    background: rgba(245, 158, 11, 0.15);
+    color: #FBBF24;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
 .feed-comment {
-    font-size: 0.78rem;
-    color: rgba(250, 248, 245, 0.82);
-    line-height: 1.4;
+    font-size: 0.8rem;
+    color: rgba(250, 248, 245, 0.88);
+    line-height: 1.45;
     margin: 0;
     word-break: break-word;
 }
@@ -13233,15 +13443,17 @@ body[data-menu-theme="mocha"] .cafe-info-block--reviews {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    margin-top: 6px;
+    margin-top: 8px;
 }
 
 .feed-tag {
     font-size: 0.68rem;
-    padding: 2px 7px;
-    border-radius: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
     background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.22);
     color: #D4AF37;
     font-weight: 600;
 }
+
 

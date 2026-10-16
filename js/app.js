@@ -209,10 +209,11 @@ const i18n = {
         cashier: 'کاشێر',
         manageReviews: 'هەڵسەنگاندنەکان',
         customerReviewsTitle: 'ڕا و بەهای کڕیار',
-        customerReviewsSubtitle: 'سەرنج و بەهای تۆ ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
+        customerReviewsSubtitle: 'سەرنج و بۆچوونی بەڕێزتان ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
         reviewAspectLabel: 'بابەتی هەڵسەنگاندنەکە:',
         aspectOverall: 'گشتی',
-        aspectFood: 'خواردنەوە و شیرینی',
+        aspectDrinks: 'خواردنەوەکان',
+        aspectFoods: 'خواردنەکان',
         aspectService: 'خزمەتگوزاری',
         aspectDecor: 'کەشوهەوا و دیزاین',
         reviewRatingLabel: 'ئاستی ڕازیبوون:',
@@ -221,7 +222,7 @@ const i18n = {
         reviewCommentLabel: 'ڕا و پێشنیازەکەت:',
         submitReviewBtn: 'ناردنی هەڵسەنگاندن • Submit Review',
         reviewSuccessTitle: 'زۆر سوپاس بۆ ڕا و بەهایەکەت! ❤️',
-        reviewSuccessMsg: 'پێشنیاز و سەرنجەکەت بە سەرکەوتوویی گەیشتە بەڕێوەبەرایەتی کافێ. دەنگی تۆ باشترین پاڵنەرمانە.',
+        reviewSuccessMsg: 'پێشنیاز و سەرنجەکەت بە سەرکەوتوویی گەیشتە بەڕێوەبەرایەتی. دەنگی تۆ باشترین پاڵنەرمانە.',
         reviewAgainBtn: 'ناردنی هەڵسەنگاندنێکی تر',
         recentGuestReviews: 'ڕاکانی کڕیارانی تر',
         settings: 'ڕێکخستنەکان',
@@ -480,11 +481,12 @@ const i18n = {
         reports: 'التقارير',
         cashier: 'الصندوق',
         manageReviews: 'التقييمات والآراء',
-        customerReviewsTitle: 'آراء وتقييمات العملاء',
-        customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بخدماتنا وجودة القهوة',
+        customerReviewsTitle: 'آراء وانطباعات الضيوف',
+        customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بأعلى معايير الجودة والضيافة',
         reviewAspectLabel: 'موضوع التقييم:',
         aspectOverall: 'عام',
-        aspectFood: 'المشروبات والأطعمة',
+        aspectDrinks: 'المشروبات',
+        aspectFoods: 'المأكولات',
         aspectService: 'الخدمة والضيافة',
         aspectDecor: 'الأجواء والتصميم',
         reviewRatingLabel: 'مستوى الرضا:',
@@ -492,8 +494,8 @@ const i18n = {
         reviewTablePlaceholder: 'رقم الطاولة أو الهاتف:',
         reviewCommentLabel: 'رأيك وملاحظاتك:',
         submitReviewBtn: 'إرسال التقييم • Submit Review',
-        reviewSuccessTitle: 'شكراً جزيلاً لرأيك اللطيف! ❤️',
-        reviewSuccessMsg: 'تم استلام ملاحظاتك بنجاح وستصل مباشرة لإدارة الكافيه.',
+        reviewSuccessTitle: 'شكراً جزيلاً لرأيك وتجربتك! ❤️',
+        reviewSuccessMsg: 'تم استلام ملاحظاتك بنجاح ووصلت مباشرة للإدارة لتحسين خدماتنا.',
         reviewAgainBtn: 'إرسال تقييم آخر',
         recentGuestReviews: 'آراء وانطباعات الضيوف',
         settings: 'الإعدادات',
@@ -753,10 +755,11 @@ const i18n = {
         cashier: 'Cashier',
         manageReviews: 'Customer Reviews',
         customerReviewsTitle: 'Guest Reviews & Feedback',
-        customerReviewsSubtitle: 'Your impressions inspire our hospitality and craft',
-        reviewAspectLabel: 'Review Aspect:',
+        customerReviewsSubtitle: 'Your impressions inspire our culinary craft and hospitality',
+        reviewAspectLabel: 'Review Category:',
         aspectOverall: 'Overall',
-        aspectFood: 'Coffee & Food',
+        aspectDrinks: 'Drinks',
+        aspectFoods: 'Foods',
         aspectService: 'Service',
         aspectDecor: 'Decor & Vibe',
         reviewRatingLabel: 'Your Rating:',
@@ -765,7 +768,7 @@ const i18n = {
         reviewCommentLabel: 'Your Impressions & Thoughts:',
         submitReviewBtn: 'Submit Review',
         reviewSuccessTitle: 'Thank You For Your Feedback! ❤️',
-        reviewSuccessMsg: 'Your feedback has reached the cafe management successfully.',
+        reviewSuccessMsg: 'Your review has reached the management team directly. Thank you for helping us excel!',
         reviewAgainBtn: 'Submit Another Review',
         recentGuestReviews: 'Recent Guest Reviews',
         settings: 'Settings',
@@ -5246,13 +5249,15 @@ function setupCafeInfoPanel() {
 }
 
 /* ==========================================================================
-   CUSTOMER REVIEWS & FEEDBACK LOGIC
+   CUSTOMER REVIEWS & FEEDBACK LOGIC (ULTRA LUXURY SUITE)
    ========================================================================== */
 
 var _customerReviewsUnsub = null;
 var _currentReviewAspect = 'all';
 var _currentReviewScore = 5;
 var _selectedQuickTags = [];
+var _currentFeedFilter = 'all';
+var _cachedAllGuestReviews = [];
 
 function escapeHtmlText(str) {
     if (str == null) return '';
@@ -5280,17 +5285,19 @@ function initCustomerReviews() {
     var authorInput = document.getElementById('reviewAuthorName');
     var tableInput = document.getElementById('reviewTableOrPhone');
     var commentInput = document.getElementById('reviewComment');
+    var charCountEl = document.getElementById('reviewCharCount');
     var submitBtn = document.getElementById('reviewSubmitButton');
+    var feedFilterChips = section.querySelectorAll('.feed-filter-chip');
 
     var ratingFeedbackMap = {
-        5: { badge: '5.0 ★', text: 'نایاب و بێوێنە! • Excellent 🌟' },
-        4: { badge: '4.0 ★', text: 'زۆر باشە! • Very Good ✨' },
-        3: { badge: '3.0 ★', text: 'باشە • Good 👍' },
-        2: { badge: '2.0 ★', text: 'مامناوەند • Fair 😐' },
-        1: { badge: '1.0 ★', text: 'پێویستی بە چاککردنە • Needs Improvement 👎' }
+        5: { badge: '5.0 ★', text: '👑 نایاب و شاهانە! • Flawless & Luxury' },
+        4: { badge: '4.0 ★', text: '✨ زۆر باش و دڵخۆشکەر • Very Good' },
+        3: { badge: '3.0 ★', text: '👍 باش و پەسەندکراو • Good' },
+        2: { badge: '2.0 ★', text: '💬 مامناوەند • Fair' },
+        1: { badge: '1.0 ★', text: '⚠️ پێویست بە باشترکردن • Needs Improvement' }
     };
 
-    // Aspect category selection
+    // Aspect category selection (Drinks, Foods, Service, Decor, All)
     aspectChips.forEach(function (chip) {
         chip.addEventListener('click', function () {
             aspectChips.forEach(function (c) { c.classList.remove('active'); });
@@ -5299,7 +5306,7 @@ function initCustomerReviews() {
         });
     });
 
-    // Star rating buttons
+    // Star rating buttons with glow feedback
     function updateStarRating(score) {
         _currentReviewScore = score;
         starBtns.forEach(function (btn) {
@@ -5318,7 +5325,7 @@ function initCustomerReviews() {
         });
     });
 
-    // Quick tags selection
+    // Quick compliment tags selection
     quickChips.forEach(function (chip) {
         chip.addEventListener('click', function () {
             chip.classList.toggle('selected');
@@ -5331,6 +5338,17 @@ function initCustomerReviews() {
         });
     });
 
+    // Character counter for comment
+    if (commentInput) {
+        commentInput.addEventListener('input', function () {
+            var len = this.value.length;
+            if (charCountEl) {
+                charCountEl.textContent = len + ' / 300';
+                charCountEl.style.color = len >= 280 ? '#F59E0B' : '';
+            }
+        });
+    }
+
     // Another review button
     if (anotherBtn) {
         anotherBtn.addEventListener('click', function () {
@@ -5338,10 +5356,23 @@ function initCustomerReviews() {
             if (form) form.style.display = 'block';
             if (commentInput) {
                 commentInput.value = '';
+                if (charCountEl) charCountEl.textContent = '0 / 300';
                 commentInput.focus();
             }
+            _selectedQuickTags = [];
+            quickChips.forEach(function (c) { c.classList.remove('selected'); });
         });
     }
+
+    // Feed category filtering
+    feedFilterChips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            feedFilterChips.forEach(function (c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            _currentFeedFilter = chip.getAttribute('data-feed-cat') || 'all';
+            renderGuestReviewsFiltered();
+        });
+    });
 
     // Submit form
     if (form) {
@@ -5367,6 +5398,7 @@ function initCustomerReviews() {
                 category: _currentReviewAspect,
                 tags: _selectedQuickTags.slice(),
                 comment: comment,
+                likes: 0,
                 status: 'active',
                 createdAt: new Date().toISOString()
             };
@@ -5379,7 +5411,7 @@ function initCustomerReviews() {
             function onSaveSuccess() {
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<span class="submit-text">ناردنی هەڵسەنگاندن • Submit Review</span> <i class="fa-solid fa-paper-plane"></i>';
+                    submitBtn.innerHTML = '<span class="btn-shimmer-sweep"></span><span class="submit-text">ناردنی هەڵسەنگاندن • Submit Review</span> <i class="fa-solid fa-paper-plane"></i>';
                 }
                 if (form) form.style.display = 'none';
                 if (successBox) successBox.style.display = 'block';
@@ -5387,7 +5419,7 @@ function initCustomerReviews() {
                 try {
                     var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
                     cached.unshift(Object.assign({ id: 'loc_' + Date.now() }, payload));
-                    localStorage.setItem('cachedCustomerReviews', JSON.stringify(cached.slice(0, 30)));
+                    localStorage.setItem('cachedCustomerReviews', JSON.stringify(cached.slice(0, 40)));
                 } catch (e) {}
                 loadCustomerReviewsFeed();
             }
@@ -5427,68 +5459,16 @@ function initCustomerReviews() {
 }
 
 function loadCustomerReviewsFeed() {
-    var container = document.getElementById('feedCardsWrap');
-    var badge = document.getElementById('feedCountBadge');
-    if (!container) return;
-
-    function renderFeed(reviews) {
-        if (!container) return;
-        if (!reviews || !reviews.length) {
-            container.innerHTML = '<p style="text-align:center;font-size:0.75rem;color:rgba(250,248,245,0.45);padding:10px 0;">هێشتا هیچ ڕایەک تۆمار نەکراوە، یەکەم کەس بە بۆچوونت بنووسە! ✨</p>';
-            if (badge) badge.textContent = '0 ڕا';
-            return;
-        }
-
-        if (badge) badge.textContent = reviews.length + ' ڕا';
-
-        var catLabels = {
-            'all': '🌟 گشتی',
-            'drinks_food': '☕ خواردن و قاوە',
-            'service': '🤝 خزمەتگوزاری',
-            'decor': '🏛️ دیزاین و دیکۆر'
-        };
-
-        var html = '';
-        reviews.slice(0, 8).forEach(function (r) {
-            var stars = '';
-            var rScore = parseInt(r.rating || 5, 10);
-            for (var s = 1; s <= 5; s++) {
-                stars += s <= rScore ? '★' : '☆';
-            }
-            var author = (r.author || 'میوان').trim();
-            var initial = author.charAt(0) || 'B';
-            var catLabel = catLabels[r.category] || '🌟 گشتی';
-            var tagsHtml = '';
-            if (Array.isArray(r.tags) && r.tags.length) {
-                tagsHtml = '<div class="feed-tags">' + r.tags.map(function (t) {
-                    return '<span class="feed-tag">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(t) : t) + '</span>';
-                }).join('') + '</div>';
-            }
-
-            var safeComment = typeof escapeHtmlText === 'function' ? escapeHtmlText(r.comment || '') : (r.comment || '');
-            var safeAuthor = typeof escapeHtmlText === 'function' ? escapeHtmlText(author) : author;
-
-            html += '<div class="feed-card">' +
-                '<div class="feed-card-head">' +
-                    '<div class="feed-author">' +
-                        '<span class="feed-author-avatar">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(initial) : initial) + '</span>' +
-                        '<span>' + safeAuthor + '</span>' +
-                    '</div>' +
-                    '<span class="feed-stars">' + stars + '</span>' +
-                '</div>' +
-                '<div style="font-size:0.68rem;color:rgba(212,175,55,0.85);margin-bottom:4px;font-weight:600;">' + (typeof escapeHtmlText === 'function' ? escapeHtmlText(catLabel) : catLabel) + '</div>' +
-                '<p class="feed-comment">“' + safeComment + '”</p>' +
-                tagsHtml +
-            '</div>';
-        });
-
-        container.innerHTML = html;
+    function onReviewsReceived(items) {
+        _cachedAllGuestReviews = items || [];
+        updateLiveRatingHeader(_cachedAllGuestReviews);
+        renderGuestReviewsFiltered();
     }
 
     if (window.db && window.collection && window.onSnapshot) {
         if (!_customerReviewsUnsub) {
             try {
-                var q = window.query ? query(collection(db, 'customerReviews'), orderBy('createdAt', 'desc'), limit(15)) : collection(db, 'customerReviews');
+                var q = window.query ? query(collection(db, 'customerReviews'), orderBy('createdAt', 'desc'), limit(30)) : collection(db, 'customerReviews');
                 _customerReviewsUnsub = onSnapshot(q, function (snap) {
                     var items = [];
                     snap.forEach(function (doc) {
@@ -5496,26 +5476,126 @@ function loadCustomerReviewsFeed() {
                         data.id = doc.id;
                         items.push(data);
                     });
-                    renderFeed(items);
+                    onReviewsReceived(items);
                 }, function () {
-                    renderFromCache();
+                    readFromCache();
                 });
             } catch (e) {
-                renderFromCache();
+                readFromCache();
             }
         }
     } else {
-        renderFromCache();
+        readFromCache();
     }
 
-    function renderFromCache() {
+    function readFromCache() {
         try {
             var cached = JSON.parse(localStorage.getItem('cachedCustomerReviews') || '[]');
-            renderFeed(cached);
+            onReviewsReceived(cached);
         } catch (e) {
-            renderFeed([]);
+            onReviewsReceived([]);
         }
     }
+}
+
+function updateLiveRatingHeader(reviews) {
+    var scoreVal = document.getElementById('cafeLiveScoreVal');
+    var scoreCount = document.getElementById('cafeLiveScoreCount');
+    var badge = document.getElementById('feedCountBadge');
+    reviews = reviews || [];
+
+    var total = reviews.length;
+    if (badge) badge.textContent = total + ' ڕا';
+
+    if (!total) {
+        if (scoreVal) scoreVal.textContent = '5.0 ★';
+        if (scoreCount) scoreCount.textContent = '(0 ڕا)';
+        return;
+    }
+
+    var sum = reviews.reduce(function (acc, r) { return acc + parseInt(r.rating || 5, 10); }, 0);
+    var avg = (sum / total).toFixed(1);
+    if (scoreVal) scoreVal.textContent = avg + ' ★';
+    if (scoreCount) scoreCount.textContent = '(' + total + ' ڕا)';
+}
+
+function renderGuestReviewsFiltered() {
+    var container = document.getElementById('feedCardsWrap');
+    if (!container) return;
+
+    var all = _cachedAllGuestReviews || [];
+    var filtered = all.filter(function (r) {
+        if (_currentFeedFilter === 'all') return true;
+        var c = r.category || 'all';
+        if (_currentFeedFilter === 'drinks') return c === 'drinks' || c === 'drinks_food';
+        if (_currentFeedFilter === 'foods') return c === 'foods';
+        return c === _currentFeedFilter;
+    });
+
+    if (!filtered.length) {
+        container.innerHTML = '<p class="feed-empty-hint">هێشتا ڕایەک لەم بەشە تۆمار نەکراوە، یەکەم کەس بە بۆچوونت بنووسە! ✨</p>';
+        return;
+    }
+
+    var catMeta = {
+        'all': { label: '🌟 گشتی', cls: 'cat-all' },
+        'drinks': { label: '🍹 خواردنەوەکان', cls: 'cat-drinks' },
+        'foods': { label: '🍽️ خواردنەکان', cls: 'cat-foods' },
+        'drinks_food': { label: '🍹 خواردنەوەکان', cls: 'cat-drinks' },
+        'service': { label: '🤝 خزمەتگوزاری', cls: 'cat-service' },
+        'decor': { label: '🏛️ کەشوهەوا و دیزاین', cls: 'cat-decor' }
+    };
+
+    var html = '';
+    filtered.slice(0, 10).forEach(function (r) {
+        var stars = '';
+        var rScore = parseInt(r.rating || 5, 10);
+        for (var s = 1; s <= 5; s++) {
+            stars += s <= rScore ? '★' : '☆';
+        }
+
+        var author = (r.author || 'میوانی بەڕێز').trim();
+        var initial = author.charAt(0) || 'G';
+        var meta = catMeta[r.category] || catMeta['all'];
+
+        var tagsHtml = '';
+        if (Array.isArray(r.tags) && r.tags.length) {
+            tagsHtml = '<div class="feed-tags">' + r.tags.map(function (t) {
+                return '<span class="feed-tag">' + escapeHtmlText(t) + '</span>';
+            }).join('') + '</div>';
+        }
+
+        var tableStr = r.table ? (' • مێز: ' + escapeHtmlText(r.table)) : '';
+
+        html +=
+            '<div class="feed-card" data-id="' + escapeHtmlText(r.id || '') + '">' +
+                '<div class="feed-card-head">' +
+                    '<div class="feed-author">' +
+                        '<span class="feed-author-avatar">' + escapeHtmlText(initial) + '</span>' +
+                        '<div class="feed-author-details">' +
+                            '<span class="feed-author-name">' + escapeHtmlText(author) + '</span>' +
+                            '<span class="feed-author-meta">' +
+                                '<span class="feed-verified-badge"><i class="fa-solid fa-circle-check"></i> میوانی پەسەندکراو</span>' +
+                                tableStr +
+                            '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="feed-card-badge-wrap">' +
+                        '<span class="feed-cat-pill ' + meta.cls + '">' + meta.label + '</span>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="feed-rating-stars-row">' +
+                    '<span class="feed-stars">' + stars + '</span>' +
+                    '<span class="feed-score-badge">' + rScore + '.0</span>' +
+                '</div>' +
+
+                '<p class="feed-comment">“' + escapeHtmlText(r.comment || '') + '”</p>' +
+                tagsHtml +
+            '</div>';
+    });
+
+    container.innerHTML = html;
 }
 
 function openCartPanel() {

@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css?v=209">
+    <link rel="stylesheet" href="css/style.css?v=210">
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -1951,18 +1951,23 @@
             <section class="cafe-info-block cafe-info-block--reviews" id="cafeCustomerReviewsSection">
                 <div class="cafe-review-header">
                     <div class="cafe-review-header-icon">
-                        <i class="fa-solid fa-star-half-stroke"></i>
+                        <i class="fa-solid fa-gem"></i>
                     </div>
                     <div class="cafe-review-header-text">
                         <h3 class="cafe-review-title" id="cafeReviewTitle">
                             <span data-i18n="customerReviewsTitle">ڕا و بەهای کڕیار</span>
                             <span class="review-sparkle">✨</span>
                         </h3>
-                        <p class="cafe-review-subtitle" id="cafeReviewSubtitle" data-i18n="customerReviewsSubtitle">سەرنج و بەهای تۆ ئاستی خزمەتگوزاریمان بەرز دەکاتەوە</p>
+                        <p class="cafe-review-subtitle" id="cafeReviewSubtitle" data-i18n="customerReviewsSubtitle">سەرنج و بۆچوونی بەڕێزتان ئاستی خزمەتگوزاریمان بەرز دەکاتەوە</p>
+                    </div>
+                    <div class="cafe-review-header-rating" id="cafeReviewHeaderRating">
+                        <div class="header-rating-stars">★★★★★</div>
+                        <div class="header-rating-score" id="cafeLiveScoreVal">5.0 ★</div>
+                        <div class="header-rating-count" id="cafeLiveScoreCount">(0 ڕا)</div>
                     </div>
                 </div>
 
-                <!-- Aspect Selector: Service, Food, Decor, Overall -->
+                <!-- Aspect Selector: Drinks, Foods, Service, Decor, Overall -->
                 <div class="review-aspects-wrap">
                     <span class="review-field-label">
                         <i class="fa-solid fa-layer-group"></i>
@@ -1973,9 +1978,13 @@
                             <span class="aspect-chip-icon">🌟</span>
                             <span class="aspect-chip-text" data-i18n="aspectOverall">گشتی</span>
                         </button>
-                        <button type="button" class="aspect-chip" data-aspect="drinks_food">
-                            <span class="aspect-chip-icon">☕</span>
-                            <span class="aspect-chip-text" data-i18n="aspectFood">خواردنەوە و شیرینی</span>
+                        <button type="button" class="aspect-chip" data-aspect="drinks">
+                            <span class="aspect-chip-icon">🍹</span>
+                            <span class="aspect-chip-text" data-i18n="aspectDrinks">خواردنەوەکان</span>
+                        </button>
+                        <button type="button" class="aspect-chip" data-aspect="foods">
+                            <span class="aspect-chip-icon">🍽️</span>
+                            <span class="aspect-chip-text" data-i18n="aspectFoods">خواردنەکان</span>
                         </button>
                         <button type="button" class="aspect-chip" data-aspect="service">
                             <span class="aspect-chip-icon">🤝</span>
@@ -2003,17 +2012,18 @@
                     </div>
                     <div class="rating-feedback-badge" id="ratingFeedbackBadge">
                         <span class="feedback-stars-badge" id="feedbackStarsBadge">5.0 ★</span>
-                        <span class="feedback-text" id="feedbackText">نایاب و بێوێنە! • Excellent</span>
+                        <span class="feedback-text" id="feedbackText">👑 نایاب و شاهانە! • Flawless & Luxury</span>
                     </div>
                 </div>
 
-                <!-- Quick Compliments Chips -->
+                <!-- Luxury Quick Compliments Chips -->
                 <div class="review-quick-compliments" id="reviewQuickCompliments">
-                    <span class="quick-chip" data-tag="خزمەتگوزاری خێرا ⚡">⚡ خزمەتگوزاری خێرا</span>
-                    <span class="quick-chip" data-tag="قاوەی نایاب ☕">☕ قاوەی نایاب</span>
-                    <span class="quick-chip" data-tag="کەشێکی ئارام و لوکس 🏛️">🏛️ کەشێکی ئارام و لوکس</span>
-                    <span class="quick-chip" data-tag="کارمەندی ڕووخۆش 😊">😊 کارمەندی ڕووخۆش</span>
-                    <span class="quick-chip" data-tag="دیزاینی مۆدێرن ✨">✨ دیزاینی مۆدێرن</span>
+                    <span class="quick-chip" data-tag="خواردنەوەی بەتام و تایبەت 🍹">🍹 خواردنەوەی بەتام و تایبەت</span>
+                    <span class="quick-chip" data-tag="خواردنی کواڵیتی باڵا و فرێش 🍽️">🍽️ خواردنی کواڵیتی باڵا و فرێش</span>
+                    <span class="quick-chip" data-tag="خزمەتگوزاری بێوێنە و خێرا ⚡">⚡ خزمەتگوزاری بێوێنە و خێرا</span>
+                    <span class="quick-chip" data-tag="کارمەندی ڕووخۆش و میواندۆست 😊">😊 کارمەندی ڕووخۆش و میواندۆست</span>
+                    <span class="quick-chip" data-tag="دیزاینی لوکس و ئارامبەخش 🏛️">🏛️ دیزاینی لوکس و ئارامبەخش</span>
+                    <span class="quick-chip" data-tag="پێشوازی شایستە و بەڕێز 💎">💎 پێشوازی شایستە و بەڕێز</span>
                 </div>
 
                 <!-- Form -->
@@ -2040,10 +2050,14 @@
                             <i class="fa-regular fa-comment-dots"></i>
                             <span data-i18n="reviewCommentLabel">ڕا و پێشنیازەکەت:</span>
                         </label>
-                        <textarea id="reviewComment" rows="3" placeholder="تێبینی، ستایش، یان ڕەخنەی بنیاتنەر دەربارەی خواردن، خزمەتگوزاری، یان دیزاین بنووسە..." required></textarea>
+                        <textarea id="reviewComment" rows="3" maxlength="300" placeholder="سەرنج، ستایش، یان پێشنیاز دەربارەی خواردن، خواردنەوەکان، خزمەتگوزاری یان دیزاین بنووسە..." required></textarea>
+                        <div class="review-comment-footer">
+                            <span class="review-char-count" id="reviewCharCount">0 / 300</span>
+                        </div>
                     </div>
 
                     <button type="submit" class="review-submit-button" id="reviewSubmitButton">
+                        <span class="btn-shimmer-sweep"></span>
                         <span class="submit-text" data-i18n="submitReviewBtn">ناردنی هەڵسەنگاندن • Submit Review</span>
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
@@ -2055,11 +2069,11 @@
                         <i class="fa-solid fa-heart"></i>
                     </div>
                     <h4 data-i18n="reviewSuccessTitle">زۆر سوپاس بۆ ڕا و بەهایەکەت! ❤️</h4>
-                    <p data-i18n="reviewSuccessMsg">پێشنیاز و سەرنجەکەت بە سەرکەوتوویی گەیشتە بەڕێوەبەرایەتی کافێ. دەنگی تۆ باشترین پاڵنەرمانە.</p>
+                    <p data-i18n="reviewSuccessMsg">پێشنیاز و سەرنجەکەت بە سەرکەوتوویی گەیشتە بەڕێوەبەرایەتی. دەنگی تۆ باشترین پاڵنەرمانە.</p>
                     <button type="button" class="btn-review-again" id="btnReviewAgain" data-i18n="reviewAgainBtn">ناردنی هەڵسەنگاندنێکی تر</button>
                 </div>
 
-                <!-- Live Guest Reviews Feed -->
+                <!-- Live Guest Reviews Feed with Filter Tabs -->
                 <div class="guest-reviews-feed" id="guestReviewsFeed">
                     <div class="feed-header">
                         <h4>
@@ -2068,6 +2082,15 @@
                         </h4>
                         <span class="feed-count-badge" id="feedCountBadge">0 ڕا</span>
                     </div>
+
+                    <div class="feed-filter-chips" id="feedFilterChips">
+                        <button type="button" class="feed-filter-chip active" data-feed-cat="all">🌟 گشتی</button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="drinks">🍹 خواردنەوەکان</button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="foods">🍽️ خواردنەکان</button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="service">🤝 خزمەتگوزاری</button>
+                        <button type="button" class="feed-filter-chip" data-feed-cat="decor">🏛️ دیزاین</button>
+                    </div>
+
                     <div class="feed-cards-wrap" id="feedCardsWrap">
                         <!-- Real-time reviews loaded here -->
                     </div>
@@ -2129,7 +2152,7 @@
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=131"></script>
-    <script src="js/app.js?v=192"></script>
+    <script src="js/app.js?v=193"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

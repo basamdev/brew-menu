@@ -4342,6 +4342,45 @@ body.admin-reordering-active {
     white-space: nowrap;
 }
 
+.admin-review-badge.badge-cat-all {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.admin-review-badge.badge-cat-drinks {
+    color: #38BDF8;
+    background: rgba(56, 189, 248, 0.12);
+    border-color: rgba(56, 189, 248, 0.3);
+}
+
+.admin-review-badge.badge-cat-foods {
+    color: #FB923C;
+    background: rgba(251, 146, 60, 0.12);
+    border-color: rgba(251, 146, 60, 0.3);
+}
+
+.admin-review-badge.badge-cat-service {
+    color: #34D399;
+    background: rgba(52, 211, 153, 0.12);
+    border-color: rgba(52, 211, 153, 0.3);
+}
+
+.admin-review-badge.badge-cat-decor {
+    color: #C084FC;
+    background: rgba(192, 132, 252, 0.12);
+    border-color: rgba(192, 132, 252, 0.3);
+}
+
+.admin-verified-tick {
+    color: #10B981;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.72rem;
+}
+
 .admin-review-stars {
     display: flex;
     align-items: center;
