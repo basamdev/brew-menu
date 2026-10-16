@@ -44,13 +44,6 @@
     var currentUser = null;
     var isSuperAdminUser = false;
 
-    // Designated master superadmin emails (fallback bootstrap before custom claim is set)
-    var BOOTSTRAP_SUPERADMIN_EMAILS = [
-        'smartserve@admin.com',
-        'superadmin@smartserve.com',
-        'admin@smartserve.com'
-    ];
-
     function showAuthError(msg) {
         if (!loginError) return;
         loginError.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + msg;
@@ -85,20 +78,17 @@
                 return;
             }
 
-            // Verify Super Admin Authorization via Custom Claims
+            // Verify Super Admin Authorization strictly via `superadmin === true` custom claim
             user.getIdTokenResult(true).then(function (tokenResult) {
                 var claims = tokenResult.claims || {};
-                var email = (user.email || '').toLowerCase().trim();
+                var isSuperAdmin = (claims.superadmin === true);
 
-                var hasClaim = (claims.superadmin === true || claims.admin === true);
-                var isBootstrapEmail = BOOTSTRAP_SUPERADMIN_EMAILS.indexOf(email) !== -1;
-
-                if (hasClaim || isBootstrapEmail) {
+                if (isSuperAdmin) {
                     // Authorized Super Admin
                     isSuperAdminUser = true;
                     authGate.style.display = 'none';
                     mainLayout.style.display = 'block';
-                    if (userEmailEl) userEmailEl.textContent = user.email || 'SmartServe Admin';
+                    if (userEmailEl) userEmailEl.textContent = user.email || 'SmartServe Super Admin';
                     loadSubscriptions();
                     loadAuditLogs();
                 } else {
@@ -106,11 +96,11 @@
                     isSuperAdminUser = false;
                     authGate.style.display = 'flex';
                     mainLayout.style.display = 'none';
-                    showAuthError('⛔ <b>Access Denied:</b> Account <i>' + escapeHtml(user.email) + '</i> does not have SmartServe Super Admin privileges.<br><br>Restaurant owners can only access <a href="login.html" style="color:#D4AF37;">login.html</a>.');
+                    showAuthError('⛔ <b>ڕێگەپێنەدراو:</b> ئەم ئەکاونتە <i>' + escapeHtml(user.email) + '</i> خاوەنی مۆڵەتی باوەڕپێکراوی <code>superadmin: true</code> نییە.<br><br>خاوەن ڕێستۆرانتەکان تەنها دەتوانن بچنە پەیجی <a href="login.html" style="color:#D4AF37; font-weight:600;">login.html</a>.');
                 }
             }).catch(function (err) {
                 console.error('Error fetching token claims:', err);
-                showAuthError('Error checking security credentials: ' + (err.message || err));
+                showAuthError('هەڵە لە پشکنینی مۆڵەت: ' + (err.message || err));
             });
         });
     }
@@ -123,7 +113,7 @@
             var password = loginPassword.value || '';
 
             if (!email || !password) {
-                showAuthError('Please enter both email and password.');
+                showAuthError('تکایە ئیمەیڵ و وشەی نهێنی بنووسە.');
                 return;
             }
 
@@ -134,9 +124,9 @@
                 setLoginLoading(false);
                 var code = err.code || '';
                 if (code === 'auth/wrong-password' || code === 'auth/user-not-found' || code === 'auth/invalid-credential') {
-                    showAuthError('Incorrect Super Admin email or password.');
+                    showAuthError('ئیمەیڵ یان وشەی نهێنی سوپەر ئەدمین هەڵەیە.');
                 } else {
-                    showAuthError('Authentication error: ' + (err.message || code));
+                    showAuthError('هەڵە لە چوونەژوورەوە: ' + (err.message || code));
                 }
             });
         });
@@ -268,17 +258,17 @@
             var rName = sub.restaurantName || rId;
 
             var badge = st.isExpired
-                ? '<span class="ss-badge expired">🔴 EXPIRED</span>'
+                ? '<span class="ss-badge expired">🔴 بەسەرچووە (Expired)</span>'
                 : (st.isExpiringSoon
-                    ? '<span class="ss-badge warning">🟡 EXPIRING SOON</span>'
-                    : '<span class="ss-badge active">🟢 ACTIVE</span>');
+                    ? '<span class="ss-badge warning">🟡 نزیک لە بەسەرچوون</span>'
+                    : '<span class="ss-badge active">🟢 چالاکە (Active)</span>');
 
             var remainingText = '—';
             if (st.daysDiff != null) {
                 if (st.daysDiff > 0) {
-                    remainingText = '<span style="color:' + (st.daysDiff <= 30 ? '#F59E0B' : '#FAF8F5') + '; font-weight:700;">' + st.daysDiff + ' days left</span>';
+                    remainingText = '<span style="color:' + (st.daysDiff <= 30 ? '#F59E0B' : '#FAF8F5') + '; font-weight:700;">' + st.daysDiff + ' ڕۆژ ماوە</span>';
                 } else {
-                    remainingText = '<span style="color:#EF4444; font-weight:700;">Expired ' + Math.abs(st.daysDiff) + 'd ago</span>';
+                    remainingText = '<span style="color:#EF4444; font-weight:700;">بەسەرچووە (' + Math.abs(st.daysDiff) + ' ڕۆژ پێشتر)</span>';
                 }
             }
 
@@ -296,19 +286,19 @@
                 '<td>' + remainingText + '</td>' +
                 '<td>' +
                     '<div class="ss-action-btns">' +
-                        '<button type="button" class="ss-btn-sm renew btn-action-renew" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="Renew for 1 full calendar year">' +
-                            '<i class="fa-solid fa-bolt"></i> +1 Year' +
+                        '<button type="button" class="ss-btn-sm renew btn-action-renew" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="نوێکردنەوە بۆ ١ ساڵی تەواو">' +
+                            '<i class="fa-solid fa-bolt"></i> +١ ساڵ' +
                         '</button>' +
-                        '<button type="button" class="ss-btn-sm link btn-action-custom" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="Custom years or date">' +
-                            '<i class="fa-solid fa-calendar-days"></i> Custom' +
+                        '<button type="button" class="ss-btn-sm link btn-action-custom" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="دیاریکردنی ساڵ یان بەروار">' +
+                            '<i class="fa-solid fa-calendar-days"></i> دیاریکراو' +
                         '</button>' +
-                        '<button type="button" class="ss-btn-sm danger btn-action-expire" data-rid="' + escapeHtml(rId) + '" title="Deactivate / Mark Expired">' +
+                        '<button type="button" class="ss-btn-sm danger btn-action-expire" data-rid="' + escapeHtml(rId) + '" title="ناچالاککردن / بەسەرچواندن">' +
                             '<i class="fa-solid fa-ban"></i>' +
                         '</button>' +
-                        '<a href="' + previewUrl + '" target="_blank" class="ss-btn-sm link" title="Preview Expired Screen">' +
+                        '<a href="' + previewUrl + '" target="_blank" class="ss-btn-sm link" title="پێشبینینی شاشەی بەسەرچوون">' +
                             '<i class="fa-regular fa-eye"></i>' +
                         '</a>' +
-                        '<a href="' + liveUrl + '" target="_blank" class="ss-btn-sm link" title="Open Customer Menu">' +
+                        '<a href="' + liveUrl + '" target="_blank" class="ss-btn-sm link" title="کردنەوەی مێنیوی کڕیار">' +
                             '<i class="fa-solid fa-arrow-up-right-from-square"></i>' +
                         '</a>' +
                     '</div>' +
@@ -354,17 +344,17 @@
                 restaurantName: rName
             });
 
-            alert('✨ Success! Subscription for ' + rId + ' activated/renewed until ' + targetExp.toLocaleDateString() + '.');
+            alert('✨ پیرۆزە! بەشداری بۆ ڕێستۆرانتی ' + rId + ' نوێکرایەوە تا بەرواری ' + targetExp.toLocaleDateString('ku-IQ') + '.');
             closeModal();
             loadSubscriptions();
         }).catch(function (err) {
             console.error('Error saving subscription:', err);
-            alert('⚠️ Error saving subscription: ' + (err.message || err));
+            alert('⚠️ کێشە ڕوویدا لە نوێکردنەوە: ' + (err.message || err));
         });
     }
 
     function expireSubscription(rId) {
-        if (!confirm('Are you sure you want to immediately expire/deactivate menu subscription for: ' + rId + '?\n\nCustomers will immediately see the luxury expired screen.')) return;
+        if (!confirm('ئایا دڵنیایت لە بەسەرچواندنی دەستبەجێ بۆ مێنیوی: ' + rId + '؟\n\nکڕیاران دەستبەجێ شاشەی بەسەرچوونی مێنیو دەبینن.')) return;
 
         var now = new Date();
         var yesterday = new Date(now.getTime() - (86400000 * 2));
@@ -381,10 +371,10 @@
 
         setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
             logAuditAction(rId, 'DEACTIVATED_EXPIRED', prevExpiry, yesterday.toISOString(), {});
-            alert('⚠️ Subscription for ' + rId + ' has been set to EXPIRED.');
+            alert('⚠️ مۆڵەتی مێنیو بۆ ' + rId + ' بەسەرچوێندرا.');
             loadSubscriptions();
         }).catch(function (err) {
-            alert('Error expiring subscription: ' + (err.message || err));
+            alert('کێشە لە بەسەرچواندن: ' + (err.message || err));
         });
     }
 
@@ -397,7 +387,7 @@
             previousExpiry: String(prevExp || ''),
             newExpiry: String(newExp || ''),
             metadata: metadata || {},
-            adminEmail: (currentUser && currentUser.email) || 'superadmin@smartserve.com',
+            adminEmail: (currentUser && currentUser.email) || 'SmartServe Super Admin',
             adminUid: (currentUser && currentUser.uid) || 'unknown',
             timestamp: serverTimestamp ? serverTimestamp() : new Date().toISOString()
         };
@@ -435,7 +425,7 @@
                     '<td>' + actionBadge + '</td>' +
                     '<td><i class="fa-solid fa-user-shield" style="font-size:0.75rem; color:#D4AF37;"></i> ' + escapeHtml(d.adminEmail || 'admin') + '</td>' +
                     '<td style="color:#A8A29E; font-size:0.78rem;">' +
-                        'Prev: ' + escapeHtml(String(d.previousExpiry).substring(0, 10)) + ' ➔ New: <span style="color:#FAF8F5;">' + escapeHtml(String(d.newExpiry).substring(0, 10)) + '</span>' +
+                        'پێشتر: ' + escapeHtml(String(d.previousExpiry).substring(0, 10)) + ' ➔ نوێ: <span style="color:#FAF8F5;">' + escapeHtml(String(d.newExpiry).substring(0, 10)) + '</span>' +
                     '</td>' +
                 '</tr>';
             });
@@ -495,12 +485,12 @@
             var customDate = modalCustomDate ? modalCustomDate.value : '';
 
             if (!rId) {
-                alert('Please enter a Restaurant ID.');
+                alert('تکایە ناسنامەی ڕێستۆرانت (Restaurant ID) بنووسە.');
                 return;
             }
 
             if (period === 'custom' && !customDate) {
-                alert('Please select a specific expiration date.');
+                alert('تکایە بەرواری دیاریکراوی بەسەرچوون دیاری بکە.');
                 return;
             }
 

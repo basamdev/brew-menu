@@ -1,75 +1,132 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper function to check if request is authenticated
+
+    // ===============================================================
+    // AUTHENTICATION & ROLE HELPERS
+    // ===============================================================
+
+    // Check if the request is from an authenticated user
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper function to verify SmartServe Super Administrator custom claim
+    // Verify SmartServe Super Administrator:
+    // Requires strictly the dedicated `superadmin == true` custom claim.
+    // Does NOT accept regular `admin == true` or client-stored roles.
     function isSuperAdmin() {
-      return request.auth != null && (
-        request.auth.token.superadmin == true ||
-        request.auth.token.admin == true
-      );
+      return isAuthenticated() && request.auth.token.superadmin == true;
     }
 
-    // Subscriptions collection:
-    // Anyone (customers, restaurant owners) can read subscription status to verify validity
-    // ONLY SmartServe Super Admin with trusted custom claim can create, update, or renew
+    // Validate customer review submission schema and boundaries to prevent abuse
+    function isValidReviewCreate() {
+      let data = request.resource.data;
+      return data.rating is int
+          && data.rating >= 1
+          && data.rating <= 5
+          && data.comment is string
+          && data.comment.size() > 0
+          && data.comment.size() <= 1500
+          && (!('author' in data) || (data.author is string && data.author.size() <= 100))
+          && (!('table' in data) || (data.table is string && data.table.size() <= 30))
+          && (!('category' in data) || (data.category is string && data.category.size() <= 50))
+          && (!('status' in data) || (data.status in ['active', 'pending']))
+          && (!('likes' in data) || data.likes == 0);
+    }
+
+    // ===============================================================
+    // 1. SUBSCRIPTIONS (Super Admin Managed)
+    // ===============================================================
+    // Public read: QR menu visitors, cashier, and restaurant owners must check expiration status.
+    // Write: Strictly restricted to SmartServe Super Admin via trusted custom claim.
     match /subscriptions/{restaurantId} {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
 
-    // Subscription audit logs: Super Admin only
+    // ===============================================================
+    // 2. SUBSCRIPTION AUDIT LOGS (Super Admin Only, Append-Only)
+    // ===============================================================
+    // Private audit trail tracking who changed a subscription and when.
+    // Read & Create: Strictly restricted to SmartServe Super Admin.
+    // Update & Delete: Disallowed (Audit logs are immutable).
     match /subscription_audit_logs/{logId} {
-      allow read, write: if isSuperAdmin();
+      allow read, create: if isSuperAdmin();
+      allow update, delete: if false;
     }
 
-    // Settings (cafe info, hours, contacts)
+    // ===============================================================
+    // 3. SETTINGS (Public Cafe Info & Private Config)
+    // ===============================================================
+    // Public read: Only for the public cafe profile document ('cafe': name, logo, phone, hours, wifi).
+    // Private read: Any other settings document requires authentication.
+    // Write: Authenticated restaurant staff/admin.
     match /settings/{docId} {
-      allow read: if true;
+      allow read: if docId == 'cafe' || isAuthenticated();
       allow write: if isAuthenticated();
     }
 
-    // Menu items & categories
+    // ===============================================================
+    // 4. MENU ITEMS (Public View / Restaurant Staff Edit)
+    // ===============================================================
+    // Public read: Anonymous customers scanning QR code read menu items.
+    // Write: Authenticated restaurant staff/admin.
     match /menuItems/{itemId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
 
+    // ===============================================================
+    // 5. CATEGORIES (Public View / Restaurant Staff Edit)
+    // ===============================================================
+    // Public read: Anonymous customers scanning QR code read categories.
+    // Write: Authenticated restaurant staff/admin.
     match /categories/{catId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
 
+    // ===============================================================
+    // 6. MENU OFFERS (Public View / Restaurant Staff Edit)
+    // ===============================================================
+    // Public read: Anonymous customers read active promotional banners.
+    // Write: Authenticated restaurant staff/admin.
     match /menuOffers/{offerId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
 
-    // Customer reviews (public can submit, authenticated admins can moderate)
+    // ===============================================================
+    // 7. CUSTOMER REVIEWS (Public View & Validated Submission)
+    // ===============================================================
+    // Public read: Customers and owners can view testimonials.
+    // Public create: Allowed ONLY with strict data validation (rating, bounds, status).
+    // Update & Delete: Authenticated restaurant staff/admin (moderation & spam deletion).
     match /customerReviews/{reviewId} {
       allow read: if true;
-      allow create: if true;
+      allow create: if isValidReviewCreate();
       allow update, delete: if isAuthenticated();
     }
 
-    // Sales & expenses: authenticated admins only
+    // ===============================================================
+    // 8. SALES (POS Private Records)
+    // ===============================================================
+    // STRICTLY PRIVATE: Customers have ZERO read or write access.
+    // Read & Write: Authenticated restaurant staff/admin only.
     match /sales/{saleId} {
       allow read, write: if isAuthenticated();
     }
 
+    // ===============================================================
+    // 9. EXPENSES (Restaurant Accounting)
+    // ===============================================================
+    // STRICTLY PRIVATE: Customers have ZERO read or write access.
+    // Read & Write: Authenticated restaurant staff/admin only.
     match /expenses/{expenseId} {
       allow read, write: if isAuthenticated();
     }
 
-    // Default fallback
-    match /{document=**} {
-      allow read: if true;
-      allow write: if isAuthenticated();
-    }
+    // NOTE: The catch-all rule (`match /{document=**}`) is intentionally REMOVED.
+    // In Firestore rules, any unspecified path defaults to DENY ALL.
   }
 }
-

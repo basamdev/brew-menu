@@ -1308,7 +1308,7 @@
     document.body.classList.add('is-lang-' + l);
 })();
 </script>
-<script src="js/menu-license.js?v=2"></script>
+<script src="js/menu-license.js?v=3"></script>
 <!-- Premium SmartServe Expiration Screen (Requirements 4, 5, 6, 7) -->
 <div id="menuExpiredOverlay" class="menu-expired-overlay" hidden role="alertdialog" aria-modal="true" aria-labelledby="menuExpiredTitle" aria-hidden="true">
     <div class="menu-expired-backdrop"></div>
@@ -1352,7 +1352,141 @@
     </div>
 </div>
 <script>
+window.isMenuExpirePreviewRequested = function () {
+    try {
+        var params = new URLSearchParams(window.location.search || '');
+        var flag = (params.get('expired') || params.get('preview') || '').toLowerCase();
+        return flag === '1' || flag === 'true' || flag === 'expired' || flag === 'yes';
+    } catch (e) {
+        return false;
+    }
+};
+var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
+
 (function () {
+    var SMARTSERVE_EXPIRY_I18N = {
+        ku: {
+            title: 'بەسەرچوونی ماوەی مێنیو',
+            lead: 'تکایە بۆ نوێکردنەوەی مێنیوەکەت پەیوەندی بە SmartServe بکە.',
+            contact: 'پەیوەندی بە SmartServe بکە',
+            badge: 'سمارت سێرڤ • مێنیوی دیجیتاڵی',
+            msg: function (rName, rId) {
+                return 'سڵاو SmartServe، دەمەوێت مۆڵەتی مێنیوی ' + rName + ' (' + rId + ') نوێ بکەمەوە.';
+            }
+        },
+        ar: {
+            title: 'انتهت صلاحية الاشتراك في القائمة',
+            lead: 'يرجى التواصل مع SmartServe لتجديد القائمة.',
+            contact: 'تواصل مع SmartServe',
+            badge: 'سمارت سيرف • قائمة طعام رقمية',
+            msg: function (rName, rId) {
+                return 'مرحباً SmartServe، أود تجديد اشتراك قائمة ' + rName + ' (' + rId + ').';
+            }
+        },
+        en: {
+            title: 'Menu Subscription Expired',
+            lead: 'Please contact SmartServe to renew your menu.',
+            contact: 'Contact SmartServe',
+            badge: 'SMARTSERVE • DIGITAL MENU',
+            msg: function (rName, rId) {
+                return 'Hello SmartServe, I want to renew the menu subscription for ' + rName + ' (' + rId + ').';
+            }
+        }
+    };
+
+    function renderMenuExpiredOverlay(lang) {
+        if (!lang || (lang !== 'ku' && lang !== 'ar' && lang !== 'en')) {
+            try { lang = localStorage.getItem('selectedLang') || 'ku'; } catch (e) { lang = 'ku'; }
+        }
+        if (lang !== 'ku' && lang !== 'ar' && lang !== 'en') lang = 'ku';
+
+        var dict = SMARTSERVE_EXPIRY_I18N[lang] || SMARTSERVE_EXPIRY_I18N.ku;
+        var overlay = document.getElementById('menuExpiredOverlay');
+        if (!overlay) return;
+
+        var titleEl = document.getElementById('menuExpiredTitle');
+        var leadEl = document.getElementById('menuExpiredLead');
+        var ctaTextEl = document.getElementById('menuExpiredCtaText');
+        var ctaBtn = document.getElementById('menuExpiredCtaBtn');
+        var badgeEl = overlay.querySelector('.menu-expired-badge');
+        var restNameEl = document.getElementById('menuExpiredRestName');
+
+        if (titleEl) titleEl.textContent = dict.title;
+        if (leadEl) leadEl.textContent = dict.lead;
+        if (ctaTextEl) ctaTextEl.textContent = dict.contact;
+        if (badgeEl) badgeEl.textContent = dict.badge;
+
+        var isRtl = (lang === 'ku' || lang === 'ar');
+        overlay.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+        overlay.setAttribute('lang', lang);
+
+        var rId = window._currentRestaurantId || 'brew-coffee';
+        var rName = (window._currentSubData && window._currentSubData.restaurantName) ||
+                    (function () { try { return localStorage.getItem('cafeName'); } catch (e) { return null; } })() ||
+                    'BREW CAFE & REST';
+        if (restNameEl) {
+            restNameEl.textContent = rName + ' (' + rId + ')';
+        }
+
+        if (ctaBtn) {
+            var phone = '9647506454656';
+            var text = dict.msg(rName, rId);
+            ctaBtn.href = 'https://wa.me/' + phone + '?text=' + encodeURIComponent(text);
+        }
+
+        var pills = overlay.querySelectorAll('.menu-expired-lang-pill');
+        for (var i = 0; i < pills.length; i++) {
+            var pLang = pills[i].getAttribute('data-lang');
+            if (pLang === lang) {
+                pills[i].classList.add('active');
+            } else {
+                pills[i].classList.remove('active');
+            }
+        }
+    }
+
+    function setExpiryLanguage(targetLang) {
+        if (targetLang !== 'ku' && targetLang !== 'ar' && targetLang !== 'en') return;
+        try {
+            localStorage.setItem('selectedLang', targetLang);
+            sessionStorage.setItem('selectedLang', targetLang);
+        } catch (e) {}
+
+        var isRtl = (targetLang === 'ku' || targetLang === 'ar');
+        document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+        document.documentElement.lang = targetLang;
+        document.body.setAttribute('data-lang', targetLang);
+        document.body.className = document.body.className.replace(/\bis-lang-\w+\b/g, '').trim() + ' is-lang-' + targetLang;
+
+        renderMenuExpiredOverlay(targetLang);
+
+        if (typeof window.setActiveLanguage === 'function') {
+            try { window.setActiveLanguage(targetLang); } catch (e) {}
+        }
+        if (typeof window.applyLanguageUI === 'function') {
+            try { window.applyLanguageUI(targetLang); } catch (e) {}
+        }
+    }
+
+    window.renderMenuExpiredOverlay = renderMenuExpiredOverlay;
+    window.setExpiryLanguage = setExpiryLanguage;
+    window.updateMenuExpiredOverlayText = function (lang, subData) {
+        if (subData) window._currentSubData = subData;
+        renderMenuExpiredOverlay(lang);
+    };
+
+    // Attach click listeners to language bar immediately
+    document.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.menu-expired-lang-pill') : null;
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var targetLang = btn.getAttribute('data-lang');
+        if (targetLang) {
+            setExpiryLanguage(targetLang);
+        }
+    });
+
     try {
         var params = new URLSearchParams(window.location.search || '');
         var flag = (params.get('expired') || params.get('preview') || '').toLowerCase();
@@ -1374,6 +1508,9 @@
                 }
             } catch (e) {}
         }
+
+        var curLang = localStorage.getItem('selectedLang') || 'ku';
+        renderMenuExpiredOverlay(curLang);
 
         if (forceExpired || cachedExpired) {
             document.body.classList.add('menu-expired');
@@ -2290,7 +2427,7 @@
     <script src="js/firebase.js?v=126"></script>
     <script src="js/test-menu.js?v=132"></script>
     <script src="js/menu-data.js?v=132"></script>
-    <script src="js/app.js?v=194"></script>
+    <script src="js/app.js?v=196"></script>
     <script src="js/local-api.js?v=120"></script>
     <script>
         (function () {

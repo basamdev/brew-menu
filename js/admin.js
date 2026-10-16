@@ -1498,6 +1498,7 @@ function wireAdminLangButtons() {
             if (window.applyLanguageUI) applyLanguageUI(l);
         });
     });
+    if (window.applyLanguageUI) applyLanguageUI(lang);
 }
 
 function initSidebar() {
@@ -7892,19 +7893,13 @@ function loadManageSubscriptions() {
                 '</h3>' +
                 '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; align-items:end;">' +
                     '<div>' +
-                        '<label style="display:block; font-size:0.82rem; color:#A8A29E; margin-bottom:6px; font-weight:600;">Restaurant ID (Firebase Document ID):</label>' +
-                        '<input type="text" id="adminSubRestaurantIdInput" value="' + escapeHtmlAttr(currentRestaurantId) + '" placeholder="e.g. brew-coffee" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:10px; color:#FAF8F5; font-family:monospace; font-size:0.95rem;">' +
+                        '<label style="display:block; font-size:0.82rem; color:#A8A29E; margin-bottom:6px; font-weight:600;">Restaurant ID:</label>' +
+                        '<input type="text" id="adminSubRestaurantIdInput" value="brew-coffee" readonly style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.4); border:1px solid rgba(212,175,55,0.3); border-radius:10px; color:#D4AF37; font-family:monospace; font-size:0.95rem; cursor:default;">' +
                     '</div>' +
                     '<div>' +
                         '<label style="display:block; font-size:0.82rem; color:#A8A29E; margin-bottom:6px; font-weight:600;">' + escapeHtmlText(T.restaurantName) + ':</label>' +
-                        '<input type="text" id="adminSubRestaurantNameInput" value="' + escapeHtmlAttr(currentRestaurantName) + '" placeholder="Brew Cafe & Rest" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:#FAF8F5; font-size:0.95rem;">' +
+                        '<input type="text" id="adminSubRestaurantNameInput" value="' + escapeHtmlAttr(currentRestaurantName) + '" readonly style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#FAF8F5; font-size:0.95rem; cursor:default;">' +
                     '</div>' +
-                '</div>' +
-                '<div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
-                    '<span style="font-size:0.78rem; color:#78716C;">Quick Select:</span>' +
-                    '<button type="button" class="btn-chip active" data-rid="brew-coffee" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">brew-coffee</button>' +
-                    '<button type="button" class="btn-chip" data-rid="demo-restaurant" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">demo-restaurant</button>' +
-                    '<button type="button" class="btn-chip" data-rid="luxury-cafe" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">luxury-cafe</button>' +
                 '</div>' +
             '</div>' +
 
@@ -8043,7 +8038,7 @@ function loadManageSubscriptions() {
                                 'چالاککردن و نوێکردنەوەی ساڵانە لەلایەن ستافی فەرمی SmartServe بەڕێوەدەبرێت. بۆ نوێکردنەوە یان درێژکردنەوەی مۆڵەت پەیوەندی بکە.' +
                             '</div>' +
                         '</div>' +
-                        '<a href="https://wa.me/' + (localStorage.getItem('whatsappPhone') || '9647501234567').replace(/[^0-9]/g, '') + '?text=' + encodeURIComponent('سڵاو، دەمەوێت مۆڵەتی مێنیوی SmartServe بۆ ڕێستۆرانتی ' + rId + ' نوێ بکەمەوە.') + '" target="_blank" style="background:#25D366; color:#FFF; font-weight:700; font-size:0.88rem; padding:10px 18px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(37,211,102,0.3);">' +
+                        '<a href="https://wa.me/9647506454656?text=' + encodeURIComponent('سڵاو، دەمەوێت مۆڵەتی مێنیوی SmartServe بۆ ڕێستۆرانتی ' + rId + ' نوێ بکەمەوە.') + '" target="_blank" style="background:#25D366; color:#FFF; font-weight:700; font-size:0.88rem; padding:10px 18px; border-radius:10px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(37,211,102,0.3);">' +
                             '<i class="fa-brands fa-whatsapp" style="font-size:1.1rem;"></i> پەیوەندی بە SmartServe بکە' +
                         '</a>' +
                     '</div>' +
@@ -8054,7 +8049,7 @@ function loadManageSubscriptions() {
                             '<span>🌐</span> ' + escapeHtmlText(T.openLiveMenuBtn) +
                         '</a>' +
                         '<a href="smartserve-admin.html" target="_blank" style="color:#D4AF37; font-size:0.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">' +
-                            '<i class="fa-solid fa-lock"></i> SmartServe Super Admin Portal ➔' +
+                            '<i class="fa-solid fa-shield-halved"></i> پۆرتالی سوپەر ئەدمینی SmartServe ➔' +
                         '</a>' +
                     '</div>' +
                 '</div>' +

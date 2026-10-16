@@ -6,6 +6,38 @@ window.openMenu = function (lang) {
     window.location.href = 'menu.html?lang=' + lang;
 };
 
+function getMenuLicenseExpireDate() {
+    try { localStorage.removeItem('menuExpireDate'); } catch (e) { /* ignore */ }
+    var license = window.MENU_LICENSE || {};
+    return String(license.expireDate || '').trim();
+}
+
+function isMenuExpirePreviewRequested() {
+    try {
+        var params = new URLSearchParams(window.location.search || '');
+        var flag = (params.get('expired') || params.get('preview') || '').toLowerCase();
+        return flag === '1' || flag === 'true' || flag === 'expired' || flag === 'yes';
+    } catch (e) {
+        return false;
+    }
+}
+
+function getMenuExpireEndMs(dateStr) {
+    var raw = String(dateStr || '').trim();
+    if (!raw) return null;
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) {
+        var parsed = Date.parse(raw);
+        return isNaN(parsed) ? null : parsed;
+    }
+    var end = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999);
+    return end.getTime();
+}
+
+window.getMenuLicenseExpireDate = getMenuLicenseExpireDate;
+window.isMenuExpirePreviewRequested = isMenuExpirePreviewRequested;
+window.getMenuExpireEndMs = getMenuExpireEndMs;
+
 function safeSetItem(key, value) {
     try {
         localStorage.setItem(key, value);
@@ -105,6 +137,9 @@ document.addEventListener('DOMContentLoaded', function () {
         setupOfflineDetection();
 
         if (document.getElementById('menuGrid')) {
+            if (typeof initRestaurantSubscriptionSystem === 'function') {
+                initRestaurantSubscriptionSystem();
+            }
             if (typeof enforceMenuExpiry === 'function' && enforceMenuExpiry()) {
                 // Still load settings so admin changes / live expire updates work.
                 loadCafeSettingsFromFirestore(function () {
@@ -123,9 +158,6 @@ document.addEventListener('DOMContentLoaded', function () {
             setupLanguageButtons();
             initHeroTitleSequence();
             setupInstallTutorial();
-            if (typeof initRestaurantSubscriptionSystem === 'function') {
-                initRestaurantSubscriptionSystem();
-            }
         } else if (document.getElementById('heroTypewriter')) {
             initHeroTitleSequence();
         }
@@ -212,7 +244,8 @@ const i18n = {
         cashier: 'کاشێر',
         manageReviews: 'هەڵسەنگاندنەکان',
         manageTestMenu: 'مینیوی تاقیکاری',
-        manageSubscription: 'بەشداریکردن (SmartServe)',
+        manageSubscription: 'بەشداری و مۆڵەت (SmartServe)',
+        superAdmin: 'سوپەر ئەدمین (SmartServe)',
         customerReviewsTitle: 'ڕا و بەهای کڕیار',
         customerReviewsSubtitle: 'سەرنج و بۆچوونی بەڕێزتان ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
         reviewAspectLabel: 'بابەتی هەڵسەنگاندنەکە:',
@@ -487,7 +520,8 @@ const i18n = {
         cashier: 'الصندوق',
         manageReviews: 'التقييمات والآراء',
         manageTestMenu: 'موك التجربة (Test Menu)',
-        manageSubscription: 'الاشتراك (SmartServe)',
+        manageSubscription: 'الاشتراك والترخيص (SmartServe)',
+        superAdmin: 'سوبر أدمن (SmartServe)',
         customerReviewsTitle: 'آراء وانطباعات الضيوف',
         customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بأعلى معايير الجودة والضيافة',
         reviewAspectLabel: 'موضوع التقييم:',
@@ -762,7 +796,8 @@ const i18n = {
         cashier: 'Cashier',
         manageReviews: 'Customer Reviews',
         manageTestMenu: 'Test Menu Suite',
-        manageSubscription: 'Subscription (SmartServe)',
+        manageSubscription: 'Subscription & License (SmartServe)',
+        superAdmin: 'Super Admin (SmartServe)',
         customerReviewsTitle: 'Guest Reviews & Feedback',
         customerReviewsSubtitle: 'Your impressions inspire our culinary craft and hospitality',
         reviewAspectLabel: 'Review Category:',
@@ -2977,12 +3012,18 @@ function updateAdminPanelText(strings) {
         offers: strings.manageOffers,
         reviews: strings.manageReviews,
         testmenu: strings.manageTestMenu,
-        subscriptions: strings.manageSubscription || 'Subscription',
+        subscriptions: strings.manageSubscription || 'بەشداری و مۆڵەت (SmartServe)',
+        superadmin: strings.superAdmin || 'سوپەر ئەدمین (SmartServe)',
         cashier: strings.cashier,
         expenses: strings.expenses,
         settings: strings.settings,
         logout: strings.logout
     };
+    var superAdminLink = document.getElementById('adminSuperAdminLink');
+    if (superAdminLink) {
+        var saLabel = superAdminLink.querySelector('span:last-child');
+        if (saLabel && strings.superAdmin) saLabel.textContent = strings.superAdmin;
+    }
     var activeBtn = document.querySelector('.admin-nav-btn.active');
     var adminHeader = document.querySelector('.admin-header h1');
     if (adminHeader && activeBtn) {
@@ -4761,6 +4802,11 @@ var SMARTSERVE_EXPIRY_I18N = {
 window._currentSubData = null;
 
 function updateMenuExpiredOverlayText(lang, subData) {
+    if (subData) window._currentSubData = subData;
+    if (typeof window.renderMenuExpiredOverlay === 'function') {
+        window.renderMenuExpiredOverlay(lang);
+        return;
+    }
     if (lang !== 'ku' && lang !== 'ar' && lang !== 'en') lang = 'ku';
     var strings = SMARTSERVE_EXPIRY_I18N[lang] || SMARTSERVE_EXPIRY_I18N.ku;
     var overlay = document.getElementById('menuExpiredOverlay');
@@ -4775,6 +4821,11 @@ function updateMenuExpiredOverlayText(lang, subData) {
     if (leadEl) leadEl.textContent = strings.lead;
     if (ctaTextEl) ctaTextEl.textContent = strings.contact;
 
+    var badgeEl = overlay.querySelector('.menu-expired-badge');
+    if (badgeEl && strings.badge) {
+        badgeEl.textContent = strings.badge;
+    }
+
     var isRtl = (lang === 'ku' || lang === 'ar');
     overlay.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
     overlay.setAttribute('lang', lang);
@@ -4786,6 +4837,18 @@ function updateMenuExpiredOverlayText(lang, subData) {
                 'BREW CAFE & REST';
     if (restNameEl) {
         restNameEl.textContent = rName + ' (' + rId + ')';
+    }
+
+    // Set WhatsApp contact link with user's phone number: 0750 645 46 56 (9647506454656)
+    var ctaBtn = document.getElementById('menuExpiredCtaBtn');
+    if (ctaBtn) {
+        var waPhone = '9647506454656';
+        var waMsg = lang === 'ku'
+            ? ('سڵاو SmartServe، دەمەوێت مۆڵەتی مێنیوی ' + rName + ' (' + rId + ') نوێ بکەمەوە.')
+            : (lang === 'ar'
+                ? ('مرحباً SmartServe، أود تجديد اشتراك قائمة ' + rName + ' (' + rId + ').')
+                : ('Hello SmartServe, I want to renew the menu subscription for ' + rName + ' (' + rId + ').'));
+        ctaBtn.href = 'https://wa.me/' + waPhone + '?text=' + encodeURIComponent(waMsg);
     }
 
     // Update active state on language pills
@@ -4830,6 +4893,38 @@ function parseExpireTimestampMs(expiresAt) {
     var parsed = Date.parse(expiresAt);
     return isNaN(parsed) ? 0 : parsed;
 }
+
+function getMenuLicenseExpireDate() {
+    try { localStorage.removeItem('menuExpireDate'); } catch (e) { /* ignore */ }
+    var license = window.MENU_LICENSE || {};
+    return String(license.expireDate || '').trim();
+}
+
+function isMenuExpirePreviewRequested() {
+    try {
+        var params = new URLSearchParams(window.location.search || '');
+        var flag = (params.get('expired') || params.get('preview') || '').toLowerCase();
+        return flag === '1' || flag === 'true' || flag === 'expired' || flag === 'yes';
+    } catch (e) {
+        return false;
+    }
+}
+
+function getMenuExpireEndMs(dateStr) {
+    var raw = String(dateStr || '').trim();
+    if (!raw) return null;
+    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) {
+        var parsed = Date.parse(raw);
+        return isNaN(parsed) ? null : parsed;
+    }
+    var end = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999);
+    return end.getTime();
+}
+
+window.getMenuLicenseExpireDate = getMenuLicenseExpireDate;
+window.isMenuExpirePreviewRequested = isMenuExpirePreviewRequested;
+window.getMenuExpireEndMs = getMenuExpireEndMs;
 
 function checkRestaurantSubscription(restaurantId, callback) {
     if (isMenuExpirePreviewRequested()) {

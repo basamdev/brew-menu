@@ -17,4 +17,9 @@ netlify.toml
 vercel.json
 scratch/
 generate_icons.py
+serviceAccountKey.json
+*serviceAccount*.json
+node_modules/
+*.bak
+
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>BREW CAFE & REST - Admin Panel</title>
+    <title>BREW CAFE & REST - داشبۆردی بەڕێوەبردن</title>
     <link rel="manifest" href="manifest.json?v=130">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png?v=30">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png?v=30">
@@ -20,7 +20,7 @@
     <meta name="theme-color" content="#060A12">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/admin.css?v=131">
     <script>
@@ -83,7 +83,7 @@
     <div class="admin-auth-guard" id="adminAuthGuard">
         <img src="images/Brew-logo.png?v=25" alt="BREW CAFE & REST" class="admin-auth-guard-logo">
         <div class="admin-auth-spinner"></div>
-        <div class="admin-auth-text">پشکنینی چوونەژوورەوە... / Verifying access...</div>
+        <div class="admin-auth-text">پشکنینی چوونەژوورەوە...</div>
     </div>
     <div class="admin-container admin-layout">
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -97,32 +97,35 @@
             </div>
             <div class="sidebar-nav">
                 <button class="nav-item admin-nav-btn active" data-section="items">
-                    <span class="nav-item-icon">🍽️</span><span data-i18n="manageItems">Items</span>
+                    <span class="nav-item-icon">🍽️</span><span data-i18n="manageItems">بەڕێوەبردنی ئایتمەکان</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="categories">
-                    <span class="nav-item-icon">📁</span><span data-i18n="manageCategories">Categories</span>
+                    <span class="nav-item-icon">📁</span><span data-i18n="manageCategories">بەڕێوەبردنی بەشەکان</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="offers">
-                    <span class="nav-item-icon">🏷️</span><span data-i18n="manageOffers">Offers</span>
+                    <span class="nav-item-icon">🏷️</span><span data-i18n="manageOffers">بەڕێوەبردنی ئۆفەرەکان</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="reviews">
                     <img src="images/review-icons/star.svg" class="nav-item-svg-icon" alt="">
-                    <span data-i18n="manageReviews">Reviews</span>
+                    <span data-i18n="manageReviews">هەڵسەنگاندنەکان</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="testmenu" id="adminTestMenuBtn">
-                    <span class="nav-item-icon">🧪</span><span data-i18n="manageTestMenu">Test Menu</span>
+                    <span class="nav-item-icon">🧪</span><span data-i18n="manageTestMenu">مینیوی تاقیکاری</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="subscriptions" id="adminSubscriptionBtn">
-                    <span class="nav-item-icon">⚡</span><span data-i18n="manageSubscription">Subscription</span>
+                    <span class="nav-item-icon">⚡</span><span data-i18n="manageSubscription">بەشداری و مۆڵەت (SmartServe)</span>
                 </button>
                 <button class="nav-item admin-nav-btn" data-section="settings" id="adminSettingsBtn">
-                    <span class="nav-item-icon">⚙️</span><span data-i18n="settings">Settings</span>
+                    <span class="nav-item-icon">⚙️</span><span data-i18n="settings">ڕێکخستنەکان</span>
                 </button>
                 <a class="nav-item" href="menu.html" id="adminViewMenuLink">
-                    <span class="nav-item-icon">🌐</span><span data-i18n="viewMenu">View Menu</span>
+                    <span class="nav-item-icon">🌐</span><span data-i18n="viewMenu">بینینی مێنوو</span>
+                </a>
+                <a class="nav-item" href="smartserve-admin.html" id="adminSuperAdminLink" title="SmartServe Super Admin" style="border: 1px dashed rgba(212, 175, 55, 0.45); background: rgba(212, 175, 55, 0.08); margin-top: 6px; border-radius: 10px;">
+                    <span class="nav-item-icon">🛡️</span><span data-i18n="superAdmin">سوپەر ئەدمین (SmartServe)</span>
                 </a>
                 <button class="nav-item admin-nav-btn nav-item--logout" data-section="logout">
-                    <span class="nav-item-icon">🚪</span><span data-i18n="logout">Logout</span>
+                    <span class="nav-item-icon">🚪</span><span data-i18n="logout">دەرچوون</span>
                 </button>
             </div>
         </div>
@@ -132,13 +135,13 @@
                     <button class="sidebar-hamburger" id="sidebarHamburger" aria-label="Open menu">
                         <span></span><span></span><span></span>
                     </button>
-                    <h1 class="admin-title">Admin Panel</h1>
+                    <h1 class="admin-title">داشبۆردی بەڕێوەبردن</h1>
                 </div>
                 <div class="admin-header-actions">
                     <div class="admin-lang-switcher">
-                        <button class="admin-lang-btn" data-lang="ku">KU</button>
+                        <button class="admin-lang-btn active" data-lang="ku">KU</button>
                         <button class="admin-lang-btn" data-lang="ar">AR</button>
-                        <button class="admin-lang-btn active" data-lang="en">EN</button>
+                        <button class="admin-lang-btn" data-lang="en">EN</button>
                     </div>
                     <button class="admin-theme-toggle" id="adminThemeToggle">🌙</button>
                 </div>
@@ -203,9 +206,9 @@
     <script src="js/firebase.js?v=126"></script>
     <script src="js/test-menu.js?v=132"></script>
     <script src="js/menu-data.js?v=132"></script>
-    <script src="js/app.js?v=194"></script>
+    <script src="js/app.js?v=196"></script>
     <script src="js/local-api.js?v=120"></script>
-    <script src="js/admin.js?v=146"></script>
+    <script src="js/admin.js?v=147"></script>
     <script>
         (function () {
             var brand = document.getElementById('adminBrandLogo');

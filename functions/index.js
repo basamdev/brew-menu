@@ -28,8 +28,8 @@ exports.renewRestaurantSubscription = functions.https.onCall(async (data, contex
         );
     }
 
-    // 2. Enforce Super Admin Custom Claim
-    const isSuperAdmin = context.auth.token.superadmin === true || context.auth.token.admin === true;
+    // 2. Enforce Dedicated Super Admin Custom Claim
+    const isSuperAdmin = context.auth.token.superadmin === true;
     if (!isSuperAdmin) {
         throw new functions.https.HttpsError(
             'permission-denied',

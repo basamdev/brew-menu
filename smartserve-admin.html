@@ -1,44 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ku" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartServe Super Admin • Restaurant Subscriptions</title>
+    <title>SmartServe Super Admin • بەڕێوەبردنی بەشداری و مۆڵەتی مێنیو</title>
     <link rel="icon" type="image/png" sizes="192x192" href="images/smart-serve-logo.png?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/smartserve-admin.css?v=101">
+    <link rel="stylesheet" href="css/smartserve-admin.css?v=102">
 </head>
-<body class="ss-admin-page">
+<body class="ss-admin-page" dir="rtl">
 
     <!-- Auth Gate / Login Modal -->
     <div class="ss-auth-gate" id="ssAuthGate">
-        <div class="ss-auth-card">
-            <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="ss-auth-logo">
-            <h1 class="ss-auth-title">SmartServe Super Admin</h1>
-            <p class="ss-auth-subtitle">Private Subscription & License Management</p>
+        <div class="ss-auth-card" style="text-align: right;">
+            <div style="text-align: center;">
+                <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="ss-auth-logo">
+                <h1 class="ss-auth-title" style="font-family: 'Noto Kufi Arabic', sans-serif;">SmartServe Super Admin</h1>
+                <p class="ss-auth-subtitle" style="font-size: 0.9rem;">بەڕێوەبردنی گشتی مۆڵەت و بەشداریی ساڵانە</p>
+            </div>
 
             <div class="ss-auth-error" id="ssAuthError"></div>
 
             <form id="ssLoginForm" autocomplete="on">
-                <div class="ss-form-group" style="text-align: left;">
-                    <label for="ssLoginEmail">Super Admin Email</label>
-                    <input type="email" id="ssLoginEmail" placeholder="superadmin@smartserve.com" required autocomplete="email">
+                <div class="ss-form-group">
+                    <label for="ssLoginEmail" style="font-weight: 600;">ئیمەیڵی سوپەر ئەدمین (Super Admin Email)</label>
+                    <input type="email" id="ssLoginEmail" placeholder="superadmin@smartserve.iq" required autocomplete="email" style="direction: ltr; text-align: left;">
                 </div>
-                <div class="ss-form-group" style="text-align: left;">
-                    <label for="ssLoginPassword">Master Password</label>
-                    <input type="password" id="ssLoginPassword" placeholder="••••••••••••" required autocomplete="current-password">
+                <div class="ss-form-group">
+                    <label for="ssLoginPassword" style="font-weight: 600;">وشەی نهێنی (Password)</label>
+                    <input type="password" id="ssLoginPassword" placeholder="••••••••••••" required autocomplete="current-password" style="direction: ltr; text-align: left;">
                 </div>
                 <button type="submit" class="ss-btn-primary" id="ssLoginBtn" style="width: 100%; justify-content: center; padding: 13px; margin-top: 10px;">
-                    <span id="ssLoginBtnText"><i class="fa-solid fa-shield-halved"></i> Authorize & Enter</span>
-                    <span id="ssLoginSpinner" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...</span>
+                    <span id="ssLoginBtnText"><i class="fa-solid fa-shield-halved"></i> چوونەژوورەوەی سوپەر ئەدمین</span>
+                    <span id="ssLoginSpinner" style="display: none;"><i class="fa-solid fa-circle-notch fa-spin"></i> پشکنینی مۆڵەت...</span>
                 </button>
             </form>
 
-            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.8rem; color: #78716C;">
-                Restaurant owner? <a href="login.html" style="color: #D4AF37; text-decoration: none;">Go to Restaurant Owner Portal</a>
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.82rem; color: #78716C; text-align: center;">
+                خاوەن ڕێستۆرانت یان کافێ؟ <a href="login.html" style="color: #D4AF37; text-decoration: none; font-weight: 600;">چوون بۆ پۆرتالی کافێ</a>
             </div>
         </div>
     </div>
@@ -52,18 +54,18 @@
                 <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="ss-brand-logo">
                 <div class="ss-brand-title">
                     <span>SmartServe</span>
-                    <span class="ss-brand-badge">Super Admin Console</span>
+                    <span class="ss-brand-badge">کۆنسۆڵی بەڕێوەبەری گشتی</span>
                 </div>
             </a>
 
             <div class="ss-user-status">
                 <div class="ss-user-pill">
                     <i class="fa-solid fa-user-shield" style="color: #D4AF37;"></i>
-                    <span id="ssAdminUserEmail">admin@smartserve.com</span>
+                    <span id="ssAdminUserEmail">superadmin@smartserve.iq</span>
                     <span class="ss-role-tag">SUPER ADMIN</span>
                 </div>
                 <button type="button" class="ss-btn-logout" id="ssLogoutBtn">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> دەرچوون
                 </button>
             </div>
         </header>
@@ -73,28 +75,28 @@
             <div class="ss-metric-card">
                 <div class="ss-metric-icon gold"><i class="fa-solid fa-utensils"></i></div>
                 <div class="ss-metric-info">
-                    <div class="ss-metric-label">Total Subscriptions</div>
+                    <div class="ss-metric-label">گشتی ئیشتراکەکان</div>
                     <div class="ss-metric-value" id="kpiTotal">0</div>
                 </div>
             </div>
             <div class="ss-metric-card">
                 <div class="ss-metric-icon green"><i class="fa-solid fa-circle-check"></i></div>
                 <div class="ss-metric-info">
-                    <div class="ss-metric-label">Active Menus</div>
+                    <div class="ss-metric-label">مێنیوە چالاکەکان</div>
                     <div class="ss-metric-value" id="kpiActive">0</div>
                 </div>
             </div>
             <div class="ss-metric-card">
                 <div class="ss-metric-icon red"><i class="fa-solid fa-circle-xmark"></i></div>
                 <div class="ss-metric-info">
-                    <div class="ss-metric-label">Expired Menus</div>
+                    <div class="ss-metric-label">مێنیوە بەسەرچووەکان</div>
                     <div class="ss-metric-value" id="kpiExpired">0</div>
                 </div>
             </div>
             <div class="ss-metric-card">
                 <div class="ss-metric-icon yellow"><i class="fa-solid fa-clock"></i></div>
                 <div class="ss-metric-info">
-                    <div class="ss-metric-label">Expiring Soon (&lt; 30d)</div>
+                    <div class="ss-metric-label">نزیک لە بەسەرچوون (&lt; ٣٠ ڕۆژ)</div>
                     <div class="ss-metric-value" id="kpiExpiringSoon">0</div>
                 </div>
             </div>
@@ -104,18 +106,18 @@
         <section class="ss-control-bar">
             <div class="ss-search-wrap">
                 <i class="fa-solid fa-magnifying-glass" style="color: #9CA3AF;"></i>
-                <input type="text" id="ssSearchInput" placeholder="Search by Restaurant ID or Name...">
+                <input type="text" id="ssSearchInput" placeholder="گەڕان بەپێی ناوی کافێ یان ناسنامە (ID)...">
             </div>
 
             <div class="ss-filter-chips" id="ssFilterChips">
-                <button type="button" class="ss-chip active" data-filter="all">All Subscriptions</button>
-                <button type="button" class="ss-chip" data-filter="active">Active</button>
-                <button type="button" class="ss-chip" data-filter="expired">Expired</button>
-                <button type="button" class="ss-chip" data-filter="soon">Expiring Soon</button>
+                <button type="button" class="ss-chip active" data-filter="all">هەموو مۆڵەتەکان</button>
+                <button type="button" class="ss-chip" data-filter="active">🟢 چالاک</button>
+                <button type="button" class="ss-chip" data-filter="expired">🔴 بەسەرچوو</button>
+                <button type="button" class="ss-chip" data-filter="soon">🟡 نزیک لە بەسەرچوون</button>
             </div>
 
             <button type="button" class="ss-btn-primary" id="btnOpenAddModal">
-                <i class="fa-solid fa-plus"></i> New Subscription
+                <i class="fa-solid fa-plus"></i> بەشداری نوێ (New)
             </button>
         </section>
 
@@ -125,18 +127,18 @@
                 <table class="ss-table">
                     <thead>
                         <tr>
-                            <th>Restaurant</th>
-                            <th>Status</th>
-                            <th>Activated Date</th>
-                            <th>Expiration Date</th>
-                            <th>Remaining Time</th>
-                            <th>Actions</th>
+                            <th>ڕێستۆرانت / کافێ</th>
+                            <th>دۆخی مۆڵەت</th>
+                            <th>بەرواری چالاککردن</th>
+                            <th>بەرواری بەسەرچوون</th>
+                            <th>ماوەی ماوە</th>
+                            <th>کردارەکان (Actions)</th>
                         </tr>
                     </thead>
                     <tbody id="ssSubscriptionTableBody">
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 40px; color: #D4AF37;">
-                                <i class="fa-solid fa-circle-notch fa-spin"></i> Loading subscriptions...
+                                <i class="fa-solid fa-circle-notch fa-spin"></i> چاوەڕێبە... بارکردنی زانیارییەکان...
                             </td>
                         </tr>
                     </tbody>
@@ -149,27 +151,27 @@
             <div class="ss-audit-header">
                 <div class="ss-audit-title">
                     <i class="fa-solid fa-clock-rotate-left" style="color: #D4AF37;"></i>
-                    <span>Subscription Audit Trail (Recent Admin Actions)</span>
+                    <span>تۆماری مێژووی چالاکییەکانی سوپەر ئەدمین (Audit Trail)</span>
                 </div>
                 <button type="button" class="ss-btn-sm link" id="btnRefreshAuditLogs">
-                    <i class="fa-solid fa-rotate"></i> Refresh Logs
+                    <i class="fa-solid fa-rotate"></i> نوێکردنەوەی تۆمارەکان
                 </button>
             </div>
             <div class="ss-table-wrap">
                 <table class="ss-table" style="font-size: 0.82rem;">
                     <thead>
                         <tr>
-                            <th>Time</th>
-                            <th>Restaurant ID</th>
-                            <th>Action</th>
-                            <th>Admin Identity</th>
-                            <th>Details</th>
+                            <th>کات</th>
+                            <th>ناسنامەی ڕێستۆرانت</th>
+                            <th>کردار (Action)</th>
+                            <th>ئیمەیڵی ئەدمین</th>
+                            <th>وردەکاریی گۆڕانکاری</th>
                         </tr>
                     </thead>
                     <tbody id="ssAuditTableBody">
                         <tr>
                             <td colspan="5" style="text-align: center; padding: 24px; color: #A8A29E;">
-                                Loading audit logs...
+                                بارکردنی تۆماری چالاکییەکان...
                             </td>
                         </tr>
                     </tbody>
@@ -181,38 +183,38 @@
 
     <!-- Modal: Add or Custom Renew Subscription -->
     <div class="ss-modal-overlay" id="ssSubscriptionModal">
-        <div class="ss-modal">
+        <div class="ss-modal" style="text-align: right;">
             <button type="button" class="ss-modal-close" id="btnCloseModal">✕</button>
-            <h3 style="margin-bottom: 6px; font-size: 1.15rem; color: #FAF8F5;" id="ssModalTitle">Manage Subscription</h3>
-            <p style="font-size: 0.82rem; color: #A8A29E; margin-bottom: 20px;">Activate or extend license for this restaurant.</p>
+            <h3 style="margin-bottom: 6px; font-size: 1.15rem; color: #FAF8F5;" id="ssModalTitle">بەڕێوەبردنی ئیشتراک و مۆڵەت</h3>
+            <p style="font-size: 0.82rem; color: #A8A29E; margin-bottom: 20px;">چالاککردن یان درێژکردنەوەی مۆڵەتی مێنیوی ڕێستۆرانت.</p>
 
             <form id="ssSubscriptionForm">
                 <div class="ss-form-group">
-                    <label for="modalRestaurantId">Restaurant ID (Document ID)</label>
-                    <input type="text" id="modalRestaurantId" placeholder="e.g. brew-coffee" required style="font-family: monospace;">
+                    <label for="modalRestaurantId">ناسنامەی ڕێستۆرانت (Document ID):</label>
+                    <input type="text" id="modalRestaurantId" placeholder="نموونە: brew-coffee" required style="font-family: monospace; direction: ltr; text-align: left;">
                 </div>
                 <div class="ss-form-group">
-                    <label for="modalRestaurantName">Restaurant / Cafe Name</label>
+                    <label for="modalRestaurantName">ناوی کافێ / ڕێستۆرانت:</label>
                     <input type="text" id="modalRestaurantName" placeholder="Brew Cafe & Rest" required>
                 </div>
                 <div class="ss-form-group">
-                    <label for="modalPeriodYears">License Extension Period</label>
+                    <label for="modalPeriodYears">ماوەی مۆڵەت (License Period):</label>
                     <select id="modalPeriodYears">
-                        <option value="1" selected>1 Calendar Year (Standard)</option>
-                        <option value="2">2 Calendar Years</option>
-                        <option value="3">3 Calendar Years</option>
-                        <option value="5">5 Calendar Years</option>
-                        <option value="custom">Custom Expiration Date</option>
+                        <option value="1" selected>١ ساڵی تەواو (Standard - 1 Year)</option>
+                        <option value="2">٢ ساڵی تەواو (2 Years)</option>
+                        <option value="3">٣ ساڵی تەواو (3 Years)</option>
+                        <option value="5">٥ ساڵی تەواو (5 Years)</option>
+                        <option value="custom">بەرواری دەستنیشانکراو (Custom Date)</option>
                     </select>
                 </div>
                 <div class="ss-form-group" id="modalCustomDateWrap" style="display: none;">
-                    <label for="modalCustomDate">Specific Expiry Date</label>
+                    <label for="modalCustomDate">بەرواری دیاریکراوی بەسەرچوون:</label>
                     <input type="date" id="modalCustomDate">
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 24px;">
                     <button type="submit" class="ss-btn-primary" style="flex: 1; justify-content: center;" id="modalSubmitBtn">
-                        <i class="fa-solid fa-bolt"></i> Apply Subscription
+                        <i class="fa-solid fa-bolt"></i> جێبەجێکردن و چالاککردن
                     </button>
                 </div>
             </form>
@@ -259,6 +261,6 @@
     </script>
 
     <!-- Super Admin Controller Script -->
-    <script src="js/smartserve-admin.js?v=101"></script>
+    <script src="js/smartserve-admin.js?v=102"></script>
 </body>
 </html>
