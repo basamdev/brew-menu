@@ -1630,6 +1630,7 @@ function loadAdminSection(section) {
         else if (section === 'offers') { loadManageOffers(); }
         else if (section === 'reviews') { loadCustomerReviews(); }
         else if (section === 'testmenu') { loadTestMenuSuite(); }
+        else if (section === 'subscriptions') { loadManageSubscriptions(); }
         else if (section === 'cashier') { loadCashier(); }
         else if (section === 'expenses') { loadExpenses(); }
         else if (section === 'settings') { loadSettings(); }
@@ -6254,6 +6255,20 @@ function loadSettings() {
             '<div class="settings-section-label">🎨 ' + escapeHtmlText(TL.title) + '</div>' +
             '<div class="settings-section-hint">' + escapeHtmlText(TL.hint) + '</div>' +
             '<div class="theme-picker" id="themePicker">' + swatchesHtml + '</div>' +
+        '</div>' +
+        '<div class="card admin-settings-sub-card" style="margin-top:20px; border:1px solid rgba(212,175,55,0.3); background:linear-gradient(135deg, rgba(20,20,24,0.95), rgba(30,26,18,0.95)); border-radius:16px; padding:20px;">' +
+            '<div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:12px;">' +
+                '<div style="display:flex; align-items:center; gap:12px;">' +
+                    '<img src="images/smart-serve-logo.png?v=3" alt="SmartServe" style="width:36px; height:auto; filter:drop-shadow(0 2px 8px rgba(212,175,55,0.4));">' +
+                    '<div>' +
+                        '<div style="font-weight:700; font-size:1rem; color:#FAF8F5;">⚡ SmartServe Subscription (دۆخی بەشداری مێنیو)</div>' +
+                        '<div style="font-size:0.82rem; color:rgba(212,175,55,0.85);" id="settingsSubRestaurantLabel">Restaurant: brew-coffee</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div id="settingsSubBadge" style="padding:6px 14px; border-radius:999px; font-size:0.8rem; font-weight:700; background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.35); color:#D4AF37;">پشکنین...</div>' +
+            '</div>' +
+            '<div style="font-size:0.88rem; color:#A8A29E; margin-bottom:16px;" id="settingsSubInfoText">پشکنینی دۆخی بەشداری ساڵانە لەگەڵ سێرڤەری پارێزراو...</div>' +
+            '<button type="button" class="btn-primary" id="btnSettingsOpenSubscription" style="background:linear-gradient(135deg, #D4AF37, #AA820A); color:#121214; font-weight:700; border:none; padding:10px 18px; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;">⚡ بەڕێوەبردن و نوێکردنەوەی بەشداری / Manage & Renew</button>' +
         '</div>';
 
     setupCafeTimePickers(currentLang);
@@ -6277,6 +6292,53 @@ function loadSettings() {
             });
         });
     }
+
+    var btnSettingsOpenSub = document.getElementById('btnSettingsOpenSubscription');
+    if (btnSettingsOpenSub) {
+        btnSettingsOpenSub.addEventListener('click', function () {
+            var subBtn = document.querySelector('.admin-nav-btn[data-section="subscriptions"]');
+            if (subBtn) {
+                document.querySelectorAll('.admin-nav-btn').forEach(function (b) { b.classList.remove('active'); });
+                subBtn.classList.add('active');
+            }
+            loadAdminSection('subscriptions');
+        });
+    }
+
+    // Populate subscription summary card
+    (function () {
+        var rId = localStorage.getItem('smartserve_admin_rid') || 'brew-coffee';
+        var rLabel = document.getElementById('settingsSubRestaurantLabel');
+        if (rLabel) rLabel.textContent = 'Restaurant: ' + rId;
+        if (typeof checkRestaurantSubscription === 'function') {
+            checkRestaurantSubscription(rId, function (res) {
+                var badge = document.getElementById('settingsSubBadge');
+                var text = document.getElementById('settingsSubInfoText');
+                if (!badge || !text) return;
+                if (res && res.expired) {
+                    badge.style.background = 'rgba(239,68,68,0.18)';
+                    badge.style.borderColor = 'rgba(239,68,68,0.4)';
+                    badge.style.color = '#EF4444';
+                    badge.textContent = '🔴 EXPIRED (بەسەرچووە)';
+                    text.textContent = 'ماوەی مۆڵەتی مێنیو بەسەرچووە. تکایە بۆ چالاککردنەوە کلیک لە دوگمەی خوارەوە بکە.';
+                } else if (res && res.data && res.data.expiresAt) {
+                    badge.style.background = 'rgba(52,211,153,0.18)';
+                    badge.style.borderColor = 'rgba(52,211,153,0.4)';
+                    badge.style.color = '#34D399';
+                    badge.textContent = '🟢 ACTIVE (چالاکە)';
+                    var expDateObj = res.data.expiresAt.toDate ? res.data.expiresAt.toDate() : new Date(res.data.expiresAt);
+                    var expDateStr = !isNaN(expDateObj.getTime()) ? expDateObj.toLocaleDateString() : String(res.data.expiresAt);
+                    text.textContent = 'مێنیو چالاکە بە دروستی تا بەرواری: ' + expDateStr + ' (ماوەی ساڵانەی پارێزراو).';
+                } else {
+                    badge.style.background = 'rgba(212,175,55,0.18)';
+                    badge.style.borderColor = 'rgba(212,175,55,0.4)';
+                    badge.style.color = '#D4AF37';
+                    badge.textContent = '🟡 UNCONFIGURED';
+                    text.textContent = 'بۆ ئەم ڕێستۆرانتە بەرواری بەسەرچوون دیاری نەکراوە. بۆ تەنزیمکردن کلیک لە دوگمەی خوارەوە بکە.';
+                }
+            });
+        }
+    })();
 
     function readInputValue(id) {
         var el = document.getElementById(id);
@@ -7689,6 +7751,526 @@ function loadTestMenuSuite() {
 }
 
 window.loadTestMenuSuite = loadTestMenuSuite;
+
+/* ============ SMARTSERVE SUBSCRIPTION MANAGEMENT ============ */
+
+function loadManageSubscriptions() {
+    var currentLang = localStorage.getItem('selectedLang') || 'ku';
+    var S = i18n[currentLang] || i18n.en;
+    var adminContent = document.getElementById('adminContent');
+    if (!adminContent) return;
+
+    var subI18n = {
+        ku: {
+            title: 'بەڕێوەبردنی بەشداری و مۆڵەتی مێنیو',
+            subtitle: 'سیستەمی ساڵانەی SmartServe بۆ چالاککردن و نوێکردنەوەی مێنیوی ڕێستۆرانتەکان',
+            restaurantId: 'ناسنامەی ڕێستۆرانت (Restaurant ID)',
+            restaurantName: 'ناوی کافێ / ڕێستۆرانت',
+            loadBtn: 'بارکردن / پشکنین',
+            status: 'دۆخی ئێستا',
+            statusActive: '🟢 چالاکە (Active)',
+            statusExpired: '🔴 بەسەرچووە (Expired)',
+            statusUnregistered: '🟡 تۆمار نەکراوە (Not Configured)',
+            activatedAt: 'بەرواری چالاککردن',
+            expiresAt: 'بەرواری بەسەرچوون (١ ساڵ)',
+            lastRenewedAt: 'دوایین نوێکردنەوە',
+            renewedBy: 'نوێکراوە لەلایەن',
+            daysRemaining: 'ماوەی ماوە',
+            renewBtn: '⚡ چالاککردن / نوێکردنەوە بۆ ١ ساڵ (Activate / Renew 1 Year)',
+            simulateExpireBtn: '🛑 تاقیکردنەوە: بەسەرچواندنی مێنیو (Simulate Expired)',
+            previewExpiredBtn: '👁️ پێشبینینی شاشەی بەسەرچوون',
+            openLiveMenuBtn: '🌐 کردنەوەی مێنیوی کڕیار',
+            daysLeftText: 'ڕۆژ ماوە',
+            expiredDaysAgoText: 'ڕۆژ لەمەوبەر بەسەرچووە',
+            renewSuccess: '✨ سەرکەوتووانە مۆڵەتی مێنیو بۆ ١ ساڵی تر نوێکرایەوە تا بەرواری: ',
+            expireSimSuccess: '⚠️ مێنیو بۆ تاقیکردنەوە بەسەرچوێندرا. لەسەر مۆبایلی کڕیار شاشەی بەسەرچوون دەردەکەوێت.',
+            confirmRenew: 'ئایا دڵنیایت لە چالاککردن یان نوێکردنەوەی ئەم ڕێستۆرانتە بۆ ماوەی یەک ساڵی تەواو؟',
+            confirmExpire: 'ئایا دڵنیایت لە بەسەرچواندنی ئەم مێنیوە بۆ تاقیکردنەوە؟ کڕیاران ناتوانن مێنیو ببینن تاوەکو دووبارە چالاکی دەکەیتەوە.',
+            securityTitle: 'سیستەمی پارێزراوی SmartServe',
+            secPoint1: '🛡️ سەربەخۆیی تەواو: هەر ڕێستۆرانتێک ناسنامەی خۆی (Restaurant ID) هەیە و مۆڵەتەکەی بە جیا لە Firebase هەڵدەگیرێت، لەبەرئەوە بەسەرچوونی یەکێک بە هیچ شێوەیەک کاریگەری لەسەر ئەوانی تر ناکات.',
+            secPoint2: '🔒 پارێزراوە لە دەستکاری: تەنها بەڕێوەبەری مۆڵەتپێدراو (Authenticated Admin) دەتوانێت بەرواری بەسەرچوون بگۆڕێت بەپێی یاساکانی Firebase Security Rules.',
+            secPoint3: '📶 بەکارهێنانی سەلامەت لە کاتی کێشەی هێڵ: ئەگەر هێڵی ئینتەرنێت یان فایەربەیس کێشەی هەبێت، مێنیوی کڕیار بە هەڵە ناکرێتە بەسەرچوو.',
+            secPoint4: '🌍 ٣ زمانی سەردەمیانە: شاشەی بەسەرچوون پشتگیری زمانی کوردی سۆرانی، عەرەبی و ئینگلیزی دەکات بە لۆگۆی براندی SmartServe.'
+        },
+        ar: {
+            title: 'إدارة اشتراك وترخيص القائمة',
+            subtitle: 'نظام SmartServe السنوي لتفعيل وتجديد قوائم المطاعم الرقمية',
+            restaurantId: 'معرّف المطعم (Restaurant ID)',
+            restaurantName: 'اسم المقهى / المطعم',
+            loadBtn: 'تحميل / فحص',
+            status: 'الحالة الحالية',
+            statusActive: '🟢 نشط (Active)',
+            statusExpired: '🔴 منتهي الصلاحية (Expired)',
+            statusUnregistered: '🟡 غير مهيأ (Not Configured)',
+            activatedAt: 'تاريخ التفعيل',
+            expiresAt: 'تاريخ الانتهاء (سنة كاملة)',
+            lastRenewedAt: 'آخر تجديد',
+            renewedBy: 'تم التجديد بواسطة',
+            daysRemaining: 'المدة المتبقية',
+            renewBtn: '⚡ تفعيل / تجديد لمدة سنة واحدة (Activate / Renew 1 Year)',
+            simulateExpireBtn: '🛑 تجربة: إنهاء صلاحية القائمة (Simulate Expired)',
+            previewExpiredBtn: '👁️ معاينة شاشة انتهاء الصلاحية',
+            openLiveMenuBtn: '🌐 فتح القائمة المباشرة',
+            daysLeftText: 'يوم متبقي',
+            expiredDaysAgoText: 'يوم مضت على الانتهاء',
+            renewSuccess: '✨ تم تجديد اشتراك القائمة بنجاح لمدة سنة كاملة حتى تاريخ: ',
+            expireSimSuccess: '⚠️ تم تعيين القائمة كمنتهية الصلاحية للتجربة. سيظهر للعميل شاشة الانتهاء.',
+            confirmRenew: 'هل أنت متأكد من تفعيل أو تجديد اشتراك هذا المطعم لمدة سنة كاملة؟',
+            confirmExpire: 'هل أنت متأكد من إنهاء صلاحية القائمة للتجربة؟ لن يتمكن العملاء من رؤية القائمة حتى تعيد تفعيلها.',
+            securityTitle: 'نظام حماية SmartServe',
+            secPoint1: '🛡️ استقلالية تامة: لكل مطعم معرّف مستقل (Restaurant ID) واشتراك منفصل في Firebase، لذا لا يؤثر انتهاء صلاحية مطعم على باقي المطاعم.',
+            secPoint2: '🔒 محمي من التعديل: المشرف المصرح له فقط يمكنه تحديث تواريخ الصلاحية عبر قواعد أمان Firebase Security Rules.',
+            secPoint3: '📶 تعامل آمن مع أخطاء الشبكة: إذا حدث انقطاع أو بطء في اتصال Firebase، لا يتم إغلاق القائمة بشكل خاطئ.',
+            secPoint4: '🌍 3 لغات فاخرة: شاشة الانتهاء تدعم الكردية السورانية، العربية، والإنجليزية مع شعار براند SmartServe.'
+        },
+        en: {
+            title: 'Menu Subscription & License Management',
+            subtitle: 'SmartServe annual restaurant QR menu activation & renewal system',
+            restaurantId: 'Restaurant ID',
+            restaurantName: 'Cafe / Restaurant Name',
+            loadBtn: 'Load / Verify',
+            status: 'Current Status',
+            statusActive: '🟢 Active',
+            statusExpired: '🔴 Expired',
+            statusUnregistered: '🟡 Not Configured',
+            activatedAt: 'Activation Date',
+            expiresAt: 'Expiration Date (1 Year)',
+            lastRenewedAt: 'Last Renewed',
+            renewedBy: 'Renewed By',
+            daysRemaining: 'Remaining Time',
+            renewBtn: '⚡ Activate / Renew for 1 Year',
+            simulateExpireBtn: '🛑 Test: Simulate Expired Menu',
+            previewExpiredBtn: '👁️ Preview Expired Screen (Customer View)',
+            openLiveMenuBtn: '🌐 Open Active Menu',
+            daysLeftText: 'days remaining',
+            expiredDaysAgoText: 'days ago (Expired)',
+            renewSuccess: '✨ Menu subscription successfully renewed for 1 full calendar year until: ',
+            expireSimSuccess: '⚠️ Menu marked as expired for testing. Customer screens will display the branded expiration overlay.',
+            confirmRenew: 'Are you sure you want to activate or renew this restaurant menu for 1 full calendar year?',
+            confirmExpire: 'Are you sure you want to simulate menu expiration? Customers will see the expiration overlay until re-activated.',
+            securityTitle: 'SmartServe Security & Architecture',
+            secPoint1: '🛡️ Independent Isolation: Each restaurant has its own independent Restaurant ID and document in Firebase; one restaurant’s expiration never affects another.',
+            secPoint2: '🔒 Tamper-Proof Security: Protected by Firestore Security Rules. Only authenticated SmartServe administrators can modify dates; client menus have read-only access.',
+            secPoint3: '📶 Safe Fail-Open Handling: Network issues or Firestore hiccups never accidentally lock paying customers out of their menus.',
+            secPoint4: '🌍 Tri-Lingual Luxury Overlay: High-end responsive overlay with instant Kurdish Sorani, Arabic, and English switching.'
+        }
+    };
+    var T = subI18n[currentLang] || subI18n.en;
+
+    var currentRestaurantId = localStorage.getItem('smartserve_admin_rid') || 'brew-coffee';
+    var currentRestaurantName = localStorage.getItem('cafeName') || 'Brew Cafe & Rest';
+
+    adminContent.innerHTML =
+        '<div class="admin-sub-manager" style="max-width:960px; margin:0 auto; padding-bottom:40px;">' +
+            // Header card
+            '<div class="card" style="background:linear-gradient(135deg, rgba(20,20,24,0.96), rgba(28,24,18,0.96)); border:1px solid rgba(212,175,55,0.35); border-radius:18px; padding:24px; box-shadow:0 12px 36px rgba(0,0,0,0.45); margin-bottom:24px; position:relative; overflow:hidden;">' +
+                '<div style="position:absolute; top:-40px; right:-40px; width:160px; height:160px; border-radius:50%; background:radial-gradient(circle, rgba(212,175,55,0.18), transparent 70%); pointer-events:none;"></div>' +
+                '<div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">' +
+                    '<div style="display:flex; align-items:center; gap:16px;">' +
+                        '<div style="width:58px; height:58px; border-radius:16px; background:linear-gradient(135deg, rgba(212,175,55,0.2), rgba(0,0,0,0.5)); border:1px solid rgba(212,175,55,0.5); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(212,175,55,0.25);">' +
+                            '<img src="images/smart-serve-logo.png?v=3" alt="SmartServe" style="width:40px; height:auto; filter:drop-shadow(0 2px 8px rgba(212,175,55,0.5));">' +
+                        '</div>' +
+                        '<div>' +
+                            '<div style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:800; letter-spacing:1px; color:#D4AF37; text-transform:uppercase; margin-bottom:4px;">' +
+                                '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#D4AF37; box-shadow:0 0 8px #D4AF37;"></span>' +
+                                'SMARTSERVE LICENSE SYSTEM' +
+                            '</div>' +
+                            '<h2 style="margin:0 0 4px 0; font-size:1.35rem; color:#FAF8F5; font-weight:800;">' + escapeHtmlText(T.title) + '</h2>' +
+                            '<p style="margin:0; font-size:0.86rem; color:#A8A29E;">' + escapeHtmlText(T.subtitle) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="display:flex; align-items:center; gap:8px;">' +
+                        '<button type="button" class="btn-secondary" id="btnAdminSubRefresh" style="padding:8px 14px; font-size:0.84rem; display:inline-flex; align-items:center; gap:6px; border-radius:10px;">🔄 ' + escapeHtmlText(T.loadBtn) + '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
+
+            // Restaurant selector card
+            '<div class="card" style="background:#16161A; border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:20px; margin-bottom:24px;">' +
+                '<h3 style="margin:0 0 16px 0; font-size:1rem; color:#FAF8F5; font-weight:700; display:flex; align-items:center; gap:8px;">' +
+                    '<span>🏢</span> ' + escapeHtmlText(T.restaurantId) +
+                '</h3>' +
+                '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; align-items:end;">' +
+                    '<div>' +
+                        '<label style="display:block; font-size:0.82rem; color:#A8A29E; margin-bottom:6px; font-weight:600;">Restaurant ID (Firebase Document ID):</label>' +
+                        '<input type="text" id="adminSubRestaurantIdInput" value="' + escapeHtmlAttr(currentRestaurantId) + '" placeholder="e.g. brew-coffee" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); border-radius:10px; color:#FAF8F5; font-family:monospace; font-size:0.95rem;">' +
+                    '</div>' +
+                    '<div>' +
+                        '<label style="display:block; font-size:0.82rem; color:#A8A29E; margin-bottom:6px; font-weight:600;">' + escapeHtmlText(T.restaurantName) + ':</label>' +
+                        '<input type="text" id="adminSubRestaurantNameInput" value="' + escapeHtmlAttr(currentRestaurantName) + '" placeholder="Brew Cafe & Rest" style="width:100%; padding:10px 14px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.12); border-radius:10px; color:#FAF8F5; font-size:0.95rem;">' +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-top:12px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
+                    '<span style="font-size:0.78rem; color:#78716C;">Quick Select:</span>' +
+                    '<button type="button" class="btn-chip active" data-rid="brew-coffee" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">brew-coffee</button>' +
+                    '<button type="button" class="btn-chip" data-rid="demo-restaurant" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">demo-restaurant</button>' +
+                    '<button type="button" class="btn-chip" data-rid="luxury-cafe" style="font-family:monospace; font-size:0.78rem; padding:4px 10px;">luxury-cafe</button>' +
+                '</div>' +
+            '</div>' +
+
+            // Live status & actions container
+            '<div id="adminSubLiveContainer">' +
+                '<div class="loading" style="padding:40px; text-align:center; color:#D4AF37;">Loading subscription data...</div>' +
+            '</div>' +
+
+            // Security & architecture explanations card
+            '<div class="card" style="margin-top:24px; background:rgba(18,18,22,0.85); border:1px solid rgba(212,175,55,0.2); border-radius:16px; padding:20px;">' +
+                '<div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">' +
+                    '<span style="font-size:1.3rem;">🛡️</span>' +
+                    '<h4 style="margin:0; font-size:0.96rem; color:#D4AF37; font-weight:700;">' + escapeHtmlText(T.securityTitle) + '</h4>' +
+                '</div>' +
+                '<div style="display:grid; grid-template-columns:1fr; gap:10px; font-size:0.84rem; color:#A8A29E; line-height:1.6;">' +
+                    '<div>' + escapeHtmlText(T.secPoint1) + '</div>' +
+                    '<div>' + escapeHtmlText(T.secPoint2) + '</div>' +
+                    '<div>' + escapeHtmlText(T.secPoint3) + '</div>' +
+                    '<div>' + escapeHtmlText(T.secPoint4) + '</div>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+    // Logic and rendering
+    var liveContainer = document.getElementById('adminSubLiveContainer');
+    var inputRid = document.getElementById('adminSubRestaurantIdInput');
+    var inputRName = document.getElementById('adminSubRestaurantNameInput');
+    var refreshBtn = document.getElementById('btnAdminSubRefresh');
+
+    function formatDateTime(val) {
+        if (!val) return '—';
+        var d = null;
+        if (val instanceof Date) d = val;
+        else if (val && typeof val.toDate === 'function') d = val.toDate();
+        else if (val && val.seconds != null) d = new Date(val.seconds * 1000);
+        else if (typeof val === 'string' || typeof val === 'number') {
+            var ms = Date.parse(val);
+            if (!isNaN(ms)) d = new Date(ms);
+        }
+        if (!d || isNaN(d.getTime())) return String(val);
+        var locale = currentLang === 'ar' ? 'ar-IQ' : (currentLang === 'ku' ? 'ku-IQ' : 'en-US');
+        return d.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' +
+               d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderStatusView(subData) {
+        var rId = (inputRid.value || 'brew-coffee').trim();
+        var isExpired = false;
+        var expMs = null;
+        var isUnconfigured = !subData || (!subData.expiresAt && !subData.status);
+
+        if (subData) {
+            var st = String(subData.status || 'active').toLowerCase();
+            if (st === 'expired' || st === 'disabled' || st === 'inactive') {
+                isExpired = true;
+            }
+            if (subData.expiresAt) {
+                if (typeof subData.expiresAt.toDate === 'function') {
+                    expMs = subData.expiresAt.toDate().getTime();
+                } else if (subData.expiresAt.seconds != null) {
+                    expMs = subData.expiresAt.seconds * 1000;
+                } else {
+                    expMs = Date.parse(subData.expiresAt);
+                }
+                if (!isNaN(expMs) && Date.now() > expMs) {
+                    isExpired = true;
+                }
+            }
+        }
+
+        var daysRemainingText = '—';
+        if (expMs && !isNaN(expMs)) {
+            var diffMs = expMs - Date.now();
+            var diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+            if (diffDays > 0) {
+                daysRemainingText = diffDays + ' ' + T.daysLeftText;
+            } else {
+                daysRemainingText = Math.abs(diffDays) + ' ' + T.expiredDaysAgoText;
+            }
+        }
+
+        var badgeHtml = '';
+        if (isUnconfigured) {
+            badgeHtml = '<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-weight:800; font-size:0.85rem; background:rgba(212,175,55,0.18); border:1px solid rgba(212,175,55,0.45); color:#D4AF37;">' + T.statusUnregistered + '</span>';
+        } else if (isExpired) {
+            badgeHtml = '<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-weight:800; font-size:0.85rem; background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.45); color:#EF4444; box-shadow:0 0 16px rgba(239,68,68,0.2);">' + T.statusExpired + '</span>';
+        } else {
+            badgeHtml = '<span style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:999px; font-weight:800; font-size:0.85rem; background:rgba(52,211,153,0.18); border:1px solid rgba(52,211,153,0.45); color:#34D399; box-shadow:0 0 16px rgba(52,211,153,0.2);">' + T.statusActive + '</span>';
+        }
+
+        var previewUrl = 'menu.html?restaurant=' + encodeURIComponent(rId) + '&expired=1';
+        var liveMenuUrl = 'menu.html?restaurant=' + encodeURIComponent(rId);
+
+        liveContainer.innerHTML =
+            '<div class="card" style="background:#16161A; border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.35);">' +
+                // Status Bar
+                '<div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.08);">' +
+                    '<div>' +
+                        '<div style="font-size:0.8rem; color:#A8A29E; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.status) + ' (' + escapeHtmlText(rId) + '):</div>' +
+                        badgeHtml +
+                    '</div>' +
+                    '<div style="text-align:right;">' +
+                        '<div style="font-size:0.8rem; color:#A8A29E; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.daysRemaining) + ':</div>' +
+                        '<div style="font-size:1.15rem; font-weight:800; color:' + (isExpired ? '#EF4444' : '#FAF8F5') + ';">' + escapeHtmlText(daysRemainingText) + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                // 4-item KPI grid
+                '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin:20px 0;">' +
+                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
+                        '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.activatedAt) + '</div>' +
+                        '<div style="font-size:0.92rem; color:#FAF8F5; font-weight:700;">' + formatDateTime(subData ? subData.activatedAt : null) + '</div>' +
+                    '</div>' +
+                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
+                        '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.expiresAt) + '</div>' +
+                        '<div style="font-size:0.92rem; color:' + (isExpired ? '#EF4444' : '#D4AF37') + '; font-weight:700;">' + formatDateTime(subData ? subData.expiresAt : null) + '</div>' +
+                    '</div>' +
+                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
+                        '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.lastRenewedAt) + '</div>' +
+                        '<div style="font-size:0.92rem; color:#FAF8F5; font-weight:700;">' + formatDateTime(subData ? subData.lastRenewedAt : null) + '</div>' +
+                    '</div>' +
+                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
+                        '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.renewedBy) + '</div>' +
+                        '<div style="font-size:0.92rem; color:#FAF8F5; font-weight:700; word-break:break-all;">' + escapeHtmlText((subData && subData.updatedBy) || 'admin') + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                // Action buttons
+                '<div style="display:flex; flex-direction:column; gap:12px; margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.08);">' +
+                    // Primary Renew 1 Year Button
+                    '<button type="button" id="btnAdminSubRenew1Year" style="background:linear-gradient(135deg, #D4AF37 0%, #AA820A 100%); color:#121214; font-weight:800; font-size:1rem; padding:14px 24px; border:none; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 6px 20px rgba(212,175,55,0.3); transition:all 0.2s ease;">' +
+                        '<span>⚡</span> ' + escapeHtmlText(T.renewBtn) +
+                    '</button>' +
+
+                    // Secondary action row
+                    '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px;">' +
+                        '<button type="button" id="btnAdminSubSimulateExpire" style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.35); color:#EF4444; font-weight:700; padding:11px 16px; border-radius:10px; cursor:pointer; font-size:0.86rem; transition:all 0.2s ease;">' +
+                            '<span>🛑</span> ' + escapeHtmlText(T.simulateExpireBtn) +
+                        '</button>' +
+                        '<a href="' + previewUrl + '" target="_blank" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#FAF8F5; font-weight:600; padding:11px 16px; border-radius:10px; text-decoration:none; text-align:center; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;">' +
+                            '<span>👁️</span> ' + escapeHtmlText(T.previewExpiredBtn) +
+                        '</a>' +
+                        '<a href="' + liveMenuUrl + '" target="_blank" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#FAF8F5; font-weight:600; padding:11px 16px; border-radius:10px; text-decoration:none; text-align:center; font-size:0.86rem; display:inline-flex; align-items:center; justify-content:center; gap:8px;">' +
+                            '<span>🌐</span> ' + escapeHtmlText(T.openLiveMenuBtn) +
+                        '</a>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+
+        // Wire Renew 1 Year
+        var btnRenew = document.getElementById('btnAdminSubRenew1Year');
+        if (btnRenew) {
+            btnRenew.addEventListener('click', function () {
+                if (!confirm(T.confirmRenew)) return;
+                btnRenew.disabled = true;
+                btnRenew.textContent = 'Saving to Firebase...';
+
+                var now = new Date();
+                var oneYearLater = new Date(now.getTime());
+                oneYearLater.setFullYear(now.getFullYear() + 1);
+
+                var rName = (inputRName.value || 'Brew Cafe & Rest').trim();
+                var adminEmail = (typeof getCurrentAdminEmail === 'function' ? getCurrentAdminEmail() : null) || 'admin';
+
+                var savePayload = {
+                    restaurantId: rId,
+                    restaurantName: rName,
+                    status: 'active',
+                    periodYears: 1,
+                    activatedAt: (subData && subData.activatedAt) ? subData.activatedAt : now.toISOString(),
+                    lastRenewedAt: now.toISOString(),
+                    expiresAt: oneYearLater.toISOString(),
+                    updatedAt: now.toISOString(),
+                    updatedBy: adminEmail
+                };
+
+                // Prepare Firestore modular timestamp payload
+                var firestorePayload = {
+                    restaurantId: rId,
+                    restaurantName: rName,
+                    status: 'active',
+                    periodYears: 1,
+                    activatedAt: (subData && subData.activatedAt && subData.activatedAt.toDate)
+                        ? subData.activatedAt
+                        : ((window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString()),
+                    lastRenewedAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString(),
+                    expiresAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(oneYearLater) : oneYearLater.toISOString(),
+                    updatedAt: (window.serverTimestamp && typeof window.serverTimestamp === 'function') ? window.serverTimestamp() : now.toISOString(),
+                    updatedBy: adminEmail
+                };
+
+                // Cache locally immediately
+                try {
+                    localStorage.setItem('smartserve_sub_' + rId, JSON.stringify({
+                        status: 'active',
+                        expiresAt: oneYearLater.toISOString(),
+                        verifiedAt: Date.now()
+                    }));
+                } catch (e) {}
+
+                function finishSuccess() {
+                    if (typeof showAdminToast === 'function') {
+                        showAdminToast(T.renewSuccess + oneYearLater.toLocaleDateString());
+                    } else {
+                        alert(T.renewSuccess + oneYearLater.toLocaleDateString());
+                    }
+                    loadSubscriptionForId(rId);
+                }
+
+                if (window.db && typeof doc === 'function' && typeof setDoc === 'function') {
+                    setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
+                        if (window.subscriptionApi && typeof window.subscriptionApi.save === 'function') {
+                            window.subscriptionApi.save(savePayload).catch(function () {});
+                        }
+                        finishSuccess();
+                    }).catch(function (err) {
+                        console.error('Firestore subscription save error:', err);
+                        var errMsg = (err && err.message ? err.message : String(err));
+                        if (errMsg.indexOf('permission') !== -1 || errMsg.indexOf('denied') !== -1) {
+                            alert('⚠️ Firestore Permission Denied.\n\nPlease check Firebase Console → Firestore Rules and ensure you published the updated firestore.rules allowing authenticated admin write access.');
+                        } else {
+                            alert('⚠️ Cloud save failed: ' + errMsg + '\nChanges saved in local session.');
+                        }
+                        finishSuccess();
+                    });
+                } else if (window.subscriptionApi && typeof window.subscriptionApi.save === 'function') {
+                    window.subscriptionApi.save(savePayload).then(function () {
+                        finishSuccess();
+                    }).catch(function (err) {
+                        alert('Error saving subscription: ' + (err && err.message ? err.message : err));
+                        btnRenew.disabled = false;
+                        btnRenew.textContent = T.renewBtn;
+                    });
+                } else {
+                    finishSuccess();
+                }
+            });
+        }
+
+        // Wire Simulate Expired
+        var btnExpire = document.getElementById('btnAdminSubSimulateExpire');
+        if (btnExpire) {
+            btnExpire.addEventListener('click', function () {
+                if (!confirm(T.confirmExpire)) return;
+                btnExpire.disabled = true;
+
+                var now = new Date();
+                var yesterday = new Date(now.getTime() - (86400000 * 2));
+                var rName = (inputRName.value || 'Brew Cafe & Rest').trim();
+                var adminEmail = (typeof getCurrentAdminEmail === 'function' ? getCurrentAdminEmail() : null) || 'admin';
+
+                var firestorePayload = {
+                    restaurantId: rId,
+                    restaurantName: rName,
+                    status: 'expired',
+                    periodYears: 1,
+                    activatedAt: (subData && subData.activatedAt && subData.activatedAt.toDate)
+                        ? subData.activatedAt
+                        : ((window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(new Date(now.getTime() - 86400000 * 370)) : now.toISOString()),
+                    lastRenewedAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(now) : now.toISOString(),
+                    expiresAt: (window.Timestamp && typeof window.Timestamp.fromDate === 'function') ? window.Timestamp.fromDate(yesterday) : yesterday.toISOString(),
+                    updatedAt: (window.serverTimestamp && typeof window.serverTimestamp === 'function') ? window.serverTimestamp() : now.toISOString(),
+                    updatedBy: adminEmail
+                };
+
+                try {
+                    localStorage.setItem('smartserve_sub_' + rId, JSON.stringify({
+                        status: 'expired',
+                        expiresAt: yesterday.toISOString(),
+                        verifiedAt: Date.now()
+                    }));
+                } catch (e) {}
+
+                function finishExpire() {
+                    if (typeof showAdminToast === 'function') {
+                        showAdminToast(T.expireSimSuccess);
+                    } else {
+                        alert(T.expireSimSuccess);
+                    }
+                    loadSubscriptionForId(rId);
+                }
+
+                if (window.db && typeof doc === 'function' && typeof setDoc === 'function') {
+                    setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
+                        finishExpire();
+                    }).catch(function (err) {
+                        console.error('Simulate expire error:', err);
+                        finishExpire();
+                    });
+                } else {
+                    finishExpire();
+                }
+            });
+        }
+    }
+
+    function loadSubscriptionForId(rId) {
+        liveContainer.innerHTML = '<div class="loading" style="padding:40px; text-align:center; color:#D4AF37;">Loading subscription data for <b>' + escapeHtmlText(rId) + '</b>...</div>';
+
+        localStorage.setItem('smartserve_admin_rid', rId);
+
+        if (window.db && typeof doc === 'function' && typeof getDoc === 'function') {
+            getDoc(doc(db, 'subscriptions', rId)).then(function (snap) {
+                var exists = typeof snap.exists === 'function' ? snap.exists() : !!snap.exists;
+                if (!exists) {
+                    renderStatusView(null);
+                    return;
+                }
+                var data = snap.data() || {};
+                renderStatusView(data);
+            }).catch(function (err) {
+                console.warn('Subscription fetch error:', err);
+                if (window.subscriptionApi && typeof window.subscriptionApi.get === 'function') {
+                    window.subscriptionApi.get(rId).then(function (res) {
+                        renderStatusView(res);
+                    }).catch(function () {
+                        renderStatusView(null);
+                    });
+                } else {
+                    renderStatusView(null);
+                }
+            });
+        } else if (window.subscriptionApi && typeof window.subscriptionApi.get === 'function') {
+            window.subscriptionApi.get(rId).then(function (res) {
+                renderStatusView(res);
+            }).catch(function () {
+                renderStatusView(null);
+            });
+        } else {
+            renderStatusView(null);
+        }
+    }
+
+    // Quick chips
+    document.querySelectorAll('.admin-sub-manager .btn-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            document.querySelectorAll('.admin-sub-manager .btn-chip').forEach(function (c) { c.classList.remove('active'); });
+            this.classList.add('active');
+            var rid = this.getAttribute('data-rid');
+            if (rid && inputRid) {
+                inputRid.value = rid;
+                loadSubscriptionForId(rid);
+            }
+        });
+    });
+
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+            var rid = (inputRid.value || 'brew-coffee').trim();
+            loadSubscriptionForId(rid);
+        });
+    }
+
+    if (inputRid) {
+        inputRid.addEventListener('change', function () {
+            var rid = (this.value || 'brew-coffee').trim();
+            loadSubscriptionForId(rid);
+        });
+    }
+
+    // Initial load
+    loadSubscriptionForId(currentRestaurantId);
+}
+
+window.loadManageSubscriptions = loadManageSubscriptions;
+
 
 
 

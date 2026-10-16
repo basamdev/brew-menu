@@ -123,6 +123,9 @@ document.addEventListener('DOMContentLoaded', function () {
             setupLanguageButtons();
             initHeroTitleSequence();
             setupInstallTutorial();
+            if (typeof initRestaurantSubscriptionSystem === 'function') {
+                initRestaurantSubscriptionSystem();
+            }
         } else if (document.getElementById('heroTypewriter')) {
             initHeroTitleSequence();
         }
@@ -209,6 +212,7 @@ const i18n = {
         cashier: 'کاشێر',
         manageReviews: 'هەڵسەنگاندنەکان',
         manageTestMenu: 'مینیوی تاقیکاری',
+        manageSubscription: 'بەشداریکردن (SmartServe)',
         customerReviewsTitle: 'ڕا و بەهای کڕیار',
         customerReviewsSubtitle: 'سەرنج و بۆچوونی بەڕێزتان ئاستی خزمەتگوزاریمان بەرز دەکاتەوە',
         reviewAspectLabel: 'بابەتی هەڵسەنگاندنەکە:',
@@ -483,6 +487,7 @@ const i18n = {
         cashier: 'الصندوق',
         manageReviews: 'التقييمات والآراء',
         manageTestMenu: 'موك التجربة (Test Menu)',
+        manageSubscription: 'الاشتراك (SmartServe)',
         customerReviewsTitle: 'آراء وانطباعات الضيوف',
         customerReviewsSubtitle: 'رأيك يهمنا للارتقاء بأعلى معايير الجودة والضيافة',
         reviewAspectLabel: 'موضوع التقييم:',
@@ -757,6 +762,7 @@ const i18n = {
         cashier: 'Cashier',
         manageReviews: 'Customer Reviews',
         manageTestMenu: 'Test Menu Suite',
+        manageSubscription: 'Subscription (SmartServe)',
         customerReviewsTitle: 'Guest Reviews & Feedback',
         customerReviewsSubtitle: 'Your impressions inspire our culinary craft and hospitality',
         reviewAspectLabel: 'Review Category:',
@@ -2971,6 +2977,7 @@ function updateAdminPanelText(strings) {
         offers: strings.manageOffers,
         reviews: strings.manageReviews,
         testmenu: strings.manageTestMenu,
+        subscriptions: strings.manageSubscription || 'Subscription',
         cashier: strings.cashier,
         expenses: strings.expenses,
         settings: strings.settings,
@@ -4715,88 +4722,284 @@ var CAFE_SETTING_KEYS = [
     'cafeFacebook'
 ];
 
-function getMenuLicenseExpireDate() {
-    try { localStorage.removeItem('menuExpireDate'); } catch (e) { /* ignore */ }
-    var license = window.MENU_LICENSE || {};
-    return String(license.expireDate || '').trim();
-}
+/* ==========================================================================
+   SMARTSERVE MULTI-RESTAURANT SUBSCRIPTION SYSTEM (Requirements 1 - 10)
+   ========================================================================== */
 
-function isMenuExpirePreviewRequested() {
+function getMenuRestaurantId() {
     try {
         var params = new URLSearchParams(window.location.search || '');
-        var flag = (params.get('expired') || params.get('preview') || '').toLowerCase();
-        return flag === '1' || flag === 'true' || flag === 'expired' || flag === 'yes';
-    } catch (e) {
-        return false;
+        var r = (params.get('restaurant') || params.get('restaurantId') || params.get('r') || '').trim();
+        if (r) return r.toLowerCase();
+    } catch (e) {}
+    if (window._currentRestaurantId) return String(window._currentRestaurantId).toLowerCase();
+    return 'brew-coffee';
+}
+window.getMenuRestaurantId = getMenuRestaurantId;
+
+var SMARTSERVE_EXPIRY_I18N = {
+    en: {
+        title: 'Menu Subscription Expired',
+        lead: 'Please contact SmartServe to renew your menu.',
+        contact: 'Contact SmartServe',
+        badge: 'SMARTSERVE • DIGITAL MENU'
+    },
+    ku: {
+        title: 'بەسەرچوونی ماوەی مێنیو',
+        lead: 'تکایە بۆ نوێکردنەوەی مێنیوەکەت پەیوەندی بە SmartServe بکە.',
+        contact: 'پەیوەندی بە SmartServe بکە',
+        badge: 'سمارت سێرڤ • مێنیوی دیجیتاڵی'
+    },
+    ar: {
+        title: 'انتهت صلاحية الاشتراك في القائمة',
+        lead: 'يرجى التواصل مع SmartServe لتجديد القائمة.',
+        contact: 'تواصل مع SmartServe',
+        badge: 'سمارت سيرف • قائمة طعام رقمية'
     }
-}
+};
 
-function getMenuExpireEndMs(dateStr) {
-    var raw = String(dateStr || '').trim();
-    if (!raw) return null;
-    // Expect YYYY-MM-DD; expire at end of that local day.
-    var m = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (!m) {
-        var parsed = Date.parse(raw);
-        return isNaN(parsed) ? null : parsed;
+window._currentSubData = null;
+
+function updateMenuExpiredOverlayText(lang, subData) {
+    if (lang !== 'ku' && lang !== 'ar' && lang !== 'en') lang = 'ku';
+    var strings = SMARTSERVE_EXPIRY_I18N[lang] || SMARTSERVE_EXPIRY_I18N.ku;
+    var overlay = document.getElementById('menuExpiredOverlay');
+    if (!overlay) return;
+
+    var titleEl = document.getElementById('menuExpiredTitle');
+    var leadEl = document.getElementById('menuExpiredLead');
+    var ctaTextEl = document.getElementById('menuExpiredCtaText');
+    var restNameEl = document.getElementById('menuExpiredRestName');
+
+    if (titleEl) titleEl.textContent = strings.title;
+    if (leadEl) leadEl.textContent = strings.lead;
+    if (ctaTextEl) ctaTextEl.textContent = strings.contact;
+
+    var isRtl = (lang === 'ku' || lang === 'ar');
+    overlay.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
+    overlay.setAttribute('lang', lang);
+
+    var rId = getMenuRestaurantId();
+    var rName = (subData && subData.restaurantName) ||
+                (window._currentSubData && window._currentSubData.restaurantName) ||
+                localStorage.getItem('cafeName') ||
+                'BREW CAFE & REST';
+    if (restNameEl) {
+        restNameEl.textContent = rName + ' (' + rId + ')';
     }
-    var end = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 23, 59, 59, 999);
-    return end.getTime();
+
+    // Update active state on language pills
+    overlay.querySelectorAll('.menu-expired-lang-pill').forEach(function (pill) {
+        pill.classList.toggle('active', pill.getAttribute('data-lang') === lang);
+    });
 }
 
-function isMenuExpired() {
-    if (isMenuExpirePreviewRequested()) return true;
-    var endMs = getMenuExpireEndMs(getMenuLicenseExpireDate());
-    if (endMs == null) return false;
-    return Date.now() > endMs;
-}
+function enforceMenuExpiryState(isExpired, subData) {
+    if (subData) window._currentSubData = subData;
+    var overlay = document.getElementById('menuExpiredOverlay');
+    if (!overlay) return isExpired;
 
-function ensureMenuExpiredOverlay() {
-    var existing = document.getElementById('menuExpiredOverlay');
-    if (existing) return existing;
-    var overlay = document.createElement('div');
-    overlay.id = 'menuExpiredOverlay';
-    overlay.className = 'menu-expired-overlay';
-    overlay.setAttribute('role', 'alertdialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-labelledby', 'menuExpiredTitle');
-    overlay.innerHTML =
-        '<div class="menu-expired-card">' +
-            '<div class="menu-expired-brand">Smart Serve</div>' +
-            '<h1 id="menuExpiredTitle">Menu Expired</h1>' +
-            '<p class="menu-expired-lead">This digital menu is no longer active.</p>' +
-            '<p class="menu-expired-contact">Please contact <strong>Smart Serve</strong><br>to renew your subscription.</p>' +
-        '</div>';
-    document.body.appendChild(overlay);
-    return overlay;
-}
-
-function enforceMenuExpiry() {
-    if (!document.body || !document.body.classList.contains('menu-page')) return false;
-    var expired = isMenuExpired();
-    var overlay = ensureMenuExpiredOverlay();
-    if (expired) {
+    if (isExpired) {
         document.body.classList.add('menu-expired');
         overlay.hidden = false;
         overlay.setAttribute('aria-hidden', 'false');
         try {
             document.documentElement.style.overflow = 'hidden';
             document.body.style.overflow = 'hidden';
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
+        var lang = localStorage.getItem('selectedLang') || 'ku';
+        updateMenuExpiredOverlayText(lang, subData || window._currentSubData);
         return true;
+    } else {
+        document.body.classList.remove('menu-expired');
+        overlay.hidden = true;
+        overlay.setAttribute('aria-hidden', 'true');
+        try {
+            document.documentElement.style.overflow = '';
+            document.body.style.overflow = '';
+        } catch (e) {}
+        return false;
     }
-    document.body.classList.remove('menu-expired');
-    overlay.hidden = true;
-    overlay.setAttribute('aria-hidden', 'true');
-    try {
-        document.documentElement.style.overflow = '';
-        document.body.style.overflow = '';
-    } catch (e) { /* ignore */ }
-    return false;
+}
+
+function parseExpireTimestampMs(expiresAt) {
+    if (!expiresAt) return 0;
+    if (typeof expiresAt.toMillis === 'function') return expiresAt.toMillis();
+    if (typeof expiresAt.toDate === 'function') return expiresAt.toDate().getTime();
+    if (typeof expiresAt === 'number') return expiresAt;
+    var parsed = Date.parse(expiresAt);
+    return isNaN(parsed) ? 0 : parsed;
+}
+
+function checkRestaurantSubscription(restaurantId, callback) {
+    if (isMenuExpirePreviewRequested()) {
+        if (callback) callback({ expired: true, reason: 'preview' });
+        return;
+    }
+
+    var rId = restaurantId || getMenuRestaurantId();
+
+    if (USE_LOCAL_API) {
+        localApiRequest('subscription.php?restaurant=' + encodeURIComponent(rId)).then(function (res) {
+            var isExp = false;
+            if (res && res.status === 'expired') isExp = true;
+            else if (res && res.expires_at) {
+                var expMs = parseExpireTimestampMs(res.expires_at);
+                if (expMs > 0 && Date.now() > expMs) isExp = true;
+            }
+            if (callback) callback({ expired: isExp, data: res });
+        }).catch(function (err) {
+            // Requirement 10: safe error handling
+            console.warn('[SmartServe] Local subscription check failed:', err && err.message);
+            if (callback) callback({ expired: false, unverified: true });
+        });
+        return;
+    }
+
+    if (!window.db || typeof getDoc !== 'function' || typeof doc !== 'function') {
+        // Requirement 10: If Firebase is not ready, do not incorrectly mark the menu as expired!
+        if (callback) callback({ expired: false, unverified: true });
+        return;
+    }
+
+    getDoc(doc(db, 'subscriptions', rId)).then(function (snap) {
+        var exists = typeof snap.exists === 'function' ? snap.exists() : !!snap.exists;
+        if (!exists) {
+            // Fallback for legacy configuration
+            var legacyExpire = getMenuLicenseExpireDate();
+            if (legacyExpire) {
+                var endMs = getMenuExpireEndMs(legacyExpire);
+                var isExp = endMs != null && Date.now() > endMs;
+                if (callback) callback({ expired: isExp, data: null });
+                return;
+            }
+            // Safe fallback: don't expire unconfigured menu
+            if (callback) callback({ expired: false, data: null });
+            return;
+        }
+
+        var data = snap.data() || {};
+        var isExpired = false;
+        var status = String(data.status || 'active').toLowerCase();
+        if (status === 'expired' || status === 'disabled' || status === 'inactive') {
+            isExpired = true;
+        } else if (data.expiresAt) {
+            var expMs = parseExpireTimestampMs(data.expiresAt);
+            if (expMs > 0 && Date.now() > expMs) {
+                isExpired = true;
+            }
+        }
+
+        try {
+            localStorage.setItem('smartserve_sub_' + rId, JSON.stringify({
+                status: data.status || 'active',
+                expiresAt: (data.expiresAt && data.expiresAt.toDate ? data.expiresAt.toDate().toISOString() : data.expiresAt) || '',
+                verifiedAt: Date.now()
+            }));
+        } catch (e) {}
+
+        if (callback) callback({ expired: isExpired, data: data });
+    }).catch(function (err) {
+        // Requirement 10: Handle Firebase loading errors safely. If subscription status cannot be verified, do not incorrectly mark the menu as expired!
+        console.warn('[SmartServe] Subscription check error for ' + rId + ':', err && err.message);
+        if (callback) callback({ expired: false, unverified: true, error: err });
+    });
+}
+
+var _restaurantSubUnsubscribe = null;
+
+function subscribeRestaurantSubscription(restaurantId) {
+    var rId = restaurantId || getMenuRestaurantId();
+    if (!window.db || typeof onSnapshot !== 'function' || typeof doc !== 'function') return;
+    if (_restaurantSubUnsubscribe) {
+        _restaurantSubUnsubscribe();
+        _restaurantSubUnsubscribe = null;
+    }
+
+    _restaurantSubUnsubscribe = onSnapshot(doc(db, 'subscriptions', rId), function (snap) {
+        var exists = typeof snap.exists === 'function' ? snap.exists() : !!snap.exists;
+        if (!exists) return;
+        var data = snap.data() || {};
+        var isExpired = false;
+        var status = String(data.status || 'active').toLowerCase();
+        if (status === 'expired' || status === 'disabled' || status === 'inactive') {
+            isExpired = true;
+        } else if (data.expiresAt) {
+            var expMs = parseExpireTimestampMs(data.expiresAt);
+            if (expMs > 0 && Date.now() > expMs) {
+                isExpired = true;
+            }
+        }
+        enforceMenuExpiryState(isExpired, data);
+        if (!isExpired && document.getElementById('menuGrid') && (!window.cachedMenuItems || !window.cachedMenuItems.length)) {
+            if (typeof loadMenuItems === 'function') loadMenuItems();
+        }
+    }, function (err) {
+        console.warn('[SmartServe] Realtime subscription listener notice:', err && err.message);
+    });
+}
+
+function initRestaurantSubscriptionSystem() {
+    var rId = getMenuRestaurantId();
+
+    // Wire language buttons on the expiration overlay
+    document.addEventListener('click', function (e) {
+        var pill = e.target && e.target.closest ? e.target.closest('.menu-expired-lang-pill') : null;
+        if (!pill) return;
+        var targetLang = pill.getAttribute('data-lang');
+        if (targetLang) {
+            localStorage.setItem('selectedLang', targetLang);
+            if (typeof setActiveLanguage === 'function') setActiveLanguage(targetLang);
+            if (typeof applyLanguageUI === 'function') applyLanguageUI(targetLang);
+            updateMenuExpiredOverlayText(targetLang);
+        }
+    });
+
+    // Check immediately and subscribe
+    checkRestaurantSubscription(rId, function (res) {
+        if (res && res.expired) {
+            enforceMenuExpiryState(true, res.data);
+        } else {
+            enforceMenuExpiryState(false, res ? res.data : null);
+        }
+    });
+    subscribeRestaurantSubscription(rId);
+}
+
+function isMenuExpired() {
+    if (isMenuExpirePreviewRequested()) return true;
+    var rId = getMenuRestaurantId();
+    var cachedRaw = localStorage.getItem('smartserve_sub_' + rId);
+    if (cachedRaw) {
+        try {
+            var cached = JSON.parse(cachedRaw);
+            if (cached && cached.expiresAt) {
+                var expMs = Date.parse(cached.expiresAt);
+                if (!isNaN(expMs) && Date.now() > expMs) return true;
+            }
+        } catch (e) {}
+    }
+    var endMs = getMenuExpireEndMs(getMenuLicenseExpireDate());
+    if (endMs == null) return false;
+    return Date.now() > endMs;
+}
+
+function ensureMenuExpiredOverlay() {
+    return document.getElementById('menuExpiredOverlay');
+}
+
+function enforceMenuExpiry() {
+    if (!document.body || !document.body.classList.contains('menu-page')) return false;
+    var expired = isMenuExpired();
+    return enforceMenuExpiryState(expired, window._currentSubData);
 }
 
 window.isMenuExpired = isMenuExpired;
 window.enforceMenuExpiry = enforceMenuExpiry;
+window.enforceMenuExpiryState = enforceMenuExpiryState;
+window.checkRestaurantSubscription = checkRestaurantSubscription;
+window.subscribeRestaurantSubscription = subscribeRestaurantSubscription;
+window.initRestaurantSubscriptionSystem = initRestaurantSubscriptionSystem;
 
 function toLocaleDigits(value, lang) {
     var text = String(value);

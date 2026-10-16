@@ -12142,23 +12142,37 @@ body.emenu-layout .category-btn-all {
     display: none !important;
 }
 
-/* Menu subscription expired lock screen */
+/* ==========================================================================
+   SmartServe Premium Subscription Expiration Screen (Requirements 4, 5, 6, 7)
+   ========================================================================== */
 .menu-expired-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483646;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    box-sizing: border-box;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    z-index: 2147483646 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
     background:
-        radial-gradient(ellipse at 50% 20%, rgba(196, 149, 106, 0.16), transparent 55%),
-        linear-gradient(160deg, #0B0B0B 0%, #171411 48%, #0E0C0A 100%);
+        radial-gradient(ellipse at 50% 12%, rgba(212, 175, 55, 0.22), transparent 58%),
+        radial-gradient(circle at 85% 85%, rgba(184, 137, 30, 0.12), transparent 50%),
+        linear-gradient(165deg, #07090E 0%, #111726 48%, #07090E 100%) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    animation: expiredFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 .menu-expired-overlay[hidden] {
     display: none !important;
+}
+
+@keyframes expiredFadeIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 body.menu-expired > *:not(.menu-expired-overlay) {
@@ -12171,51 +12185,213 @@ body.menu-expired .menu-expired-overlay {
     pointer-events: auto !important;
 }
 
+.menu-expired-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    background: rgba(4, 7, 13, 0.45) !important;
+    z-index: 1 !important;
+}
+
 .menu-expired-card {
-    width: min(440px, 100%);
-    text-align: center;
-    color: #F4EFE8;
-    font-family: var(--font-ku, 'Vazirmatn', 'Noto Sans Arabic', 'Noto Kufi Arabic', sans-serif);
+    position: relative !important;
+    z-index: 2 !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    padding: 32px 24px 28px !important;
+    box-sizing: border-box !important;
+    border-radius: 26px !important;
+    background: rgba(18, 25, 40, 0.78) !important;
+    backdrop-filter: blur(28px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+    border: 1px solid rgba(212, 175, 55, 0.28) !important;
+    box-shadow:
+        0 28px 70px rgba(0, 0, 0, 0.85),
+        0 0 60px rgba(212, 175, 55, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+    color: #F8FAFC !important;
+    font-family: inherit !important;
 }
 
-.menu-expired-brand {
-    display: inline-block;
-    margin-bottom: 18px;
-    padding: 6px 14px;
-    border: 1px solid rgba(196, 149, 106, 0.4);
-    border-radius: 999px;
-    color: #E2C08A;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+/* Floating 3-Language Switcher (Requirement 6) */
+.menu-expired-lang-bar {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 6px !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 999px !important;
+    margin-bottom: 6px !important;
 }
 
-.menu-expired-card h1 {
-    margin: 0 0 14px;
-    font-size: clamp(1.8rem, 5vw, 2.4rem);
-    font-weight: 800;
-    letter-spacing: 0.02em;
-    color: #FFF8F0;
+.menu-expired-lang-pill {
+    background: transparent !important;
+    border: none !important;
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 999px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    font-family: inherit !important;
 }
 
+.menu-expired-lang-pill:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.menu-expired-lang-pill.active {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8891E 100%) !important;
+    color: #0A0D14 !important;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4) !important;
+}
+
+/* SmartServe Logo Wrap (Requirement 4) */
+.menu-expired-logo-wrap {
+    width: 82px !important;
+    height: 82px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, rgba(30, 41, 64, 0.9), rgba(12, 17, 29, 0.95)) !important;
+    border: 1.5px solid rgba(212, 175, 55, 0.45) !important;
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.6),
+        0 0 35px rgba(212, 175, 55, 0.22) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    animation: logoGlowPulse 3s infinite ease-in-out !important;
+}
+
+@keyframes logoGlowPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 35px rgba(212, 175, 55, 0.22);
+    }
+    50% {
+        transform: scale(1.04);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 45px rgba(212, 175, 55, 0.35);
+    }
+}
+
+.menu-expired-logo {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+}
+
+.menu-expired-badge {
+    display: inline-block !important;
+    padding: 5px 14px !important;
+    background: rgba(212, 175, 55, 0.12) !important;
+    border: 1px solid rgba(212, 175, 55, 0.35) !important;
+    border-radius: 999px !important;
+    color: #F2C659 !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+}
+
+/* Localized Title (Requirement 5) */
+.menu-expired-title {
+    margin: 2px 0 0 !important;
+    font-size: clamp(1.6rem, 5.2vw, 2.1rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.35 !important;
+    color: #FFFFFF !important;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[dir="rtl"] .menu-expired-title {
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Kufi Arabic', sans-serif) !important;
+}
+
+/* Localized Lead (Requirement 5) */
 .menu-expired-lead {
-    margin: 0 0 18px;
-    font-size: 1.05rem;
-    line-height: 1.5;
-    color: rgba(244, 239, 232, 0.82);
+    margin: 0 !important;
+    font-size: 1.02rem !important;
+    line-height: 1.65 !important;
+    color: rgba(241, 245, 249, 0.88) !important;
+    max-width: 360px !important;
 }
 
-.menu-expired-contact {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.65;
-    color: rgba(244, 239, 232, 0.9);
+html[dir="rtl"] .menu-expired-lead {
+    font-family: var(--font-ku, 'Vazirmatn', 'Noto Kufi Arabic', sans-serif) !important;
 }
 
-.menu-expired-contact strong {
-    color: #E2C08A;
-    font-weight: 800;
+/* Restaurant Pill (Requirement 1 & 8) */
+.menu-expired-restaurant-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 7px 16px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 999px !important;
+    font-size: 0.86rem !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    font-weight: 500 !important;
+    margin-top: 4px !important;
+}
+
+.menu-expired-rest-icon {
+    font-size: 0.95rem !important;
+}
+
+/* Contact CTA Button */
+.menu-expired-cta-btn {
+    width: 100% !important;
+    max-width: 340px !important;
+    margin-top: 8px !important;
+    padding: 14px 24px !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #F2C659 0%, #D4AF37 50%, #B8891E 100%) !important;
+    color: #0A0D14 !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    box-shadow:
+        0 10px 25px rgba(212, 175, 55, 0.35),
+        0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.menu-expired-cta-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 14px 30px rgba(212, 175, 55, 0.45) !important;
+}
+
+.menu-expired-cta-btn:active {
+    transform: scale(0.98) !important;
+}
+
+.menu-expired-footer-brand {
+    margin-top: 8px !important;
+    font-size: 0.78rem !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    letter-spacing: 0.04em !important;
+}
+
+.menu-expired-footer-brand strong {
+    color: #D4AF37 !important;
+    font-weight: 700 !important;
 }
 
 /* ==========================================================================

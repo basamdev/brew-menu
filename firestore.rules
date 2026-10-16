@@ -1,9 +1,62 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Full access: allows read, create, update, and delete on all collections
+    // Helper function to check if request is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Subscriptions collection:
+    // Anyone can read subscription status (needed by public QR menu to check validity)
+    // Only authenticated SmartServe administrators can create, update, or renew subscriptions
+    match /subscriptions/{restaurantId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Settings (cafe info, hours, contacts)
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Menu items & categories
+    match /menuItems/{itemId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /menuOffers/{offerId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Customer reviews (public can submit, authenticated admins can moderate)
+    match /customerReviews/{reviewId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAuthenticated();
+    }
+
+    // Sales & expenses: authenticated admins only
+    match /sales/{saleId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /expenses/{expenseId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Default fallback
     match /{document=**} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isAuthenticated();
     }
   }
 }
+

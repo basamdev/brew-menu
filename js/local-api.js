@@ -202,6 +202,19 @@ var authApi = {
     }
 };
 
+// Subscription API
+var subscriptionApi = {
+    get: function(id) {
+        return apiRequest('subscription.php?id=' + encodeURIComponent(id || 'brew-coffee'));
+    },
+    save: function(data) {
+        return apiRequest('subscription.php', {
+            method: 'POST',
+            body: data
+        });
+    }
+};
+
 // Export for use
 window.menuItemsApi = menuItemsApi;
 window.categoriesApi = categoriesApi;
@@ -209,3 +222,5 @@ window.salesApi = salesApi;
 window.expensesApi = expensesApi;
 window.settingsApi = settingsApi;
 window.authApi = authApi;
+window.subscriptionApi = subscriptionApi;
+
