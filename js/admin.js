@@ -1472,6 +1472,8 @@ function refreshAdminCurrentSection() {
         loadItemsList();
     } else if (section === 'categories' && document.getElementById('categoriesList')) {
         loadCategoriesList();
+    } else if (section === 'offers' && document.getElementById('offersList')) {
+        loadOffersList();
     }
 }
 
@@ -5922,9 +5924,22 @@ function readCachedOffersAdmin() {
 }
 
 function writeCachedOffersAdmin(list) {
+    if (!list || !Array.isArray(list)) return;
     try {
-        localStorage.setItem('cachedMenuOffers', JSON.stringify(list || []));
-    } catch (e) { /* ignore */ }
+        localStorage.setItem('cachedMenuOffers', JSON.stringify(list));
+    } catch (e) {
+        // If quota is tight, strip oversized base64 images from offline backup
+        try {
+            var compacted = list.map(function (o) {
+                var copy = Object.assign({}, o);
+                if (copy.image && typeof copy.image === 'string' && copy.image.startsWith('data:') && copy.image.length > 2048) {
+                    copy.image = '';
+                }
+                return copy;
+            });
+            localStorage.setItem('cachedMenuOffers', JSON.stringify(compacted));
+        } catch (e2) {}
+    }
 }
 
 function sortOffersAdmin(list) {
@@ -5943,6 +5958,112 @@ function nextOfferOrder() {
         if (!isNaN(n) && n > max) max = n;
     });
     return max + 1;
+}
+
+/**
+ * Optimizes an uploaded offer image to guarantee crisp banner display on mobile and desktop
+ * while keeping total payload well below Firestore's 1MB limit (~120KB-350KB typical).
+ */
+function compressOfferImageFile(file) {
+    return new Promise(function (resolve, reject) {
+        if (!file) {
+            reject(new Error('No file selected'));
+            return;
+        }
+        var isImage = (/^image\//i.test(file.type || '')) || (/\.(jpe?g|png|webp|gif|svg|bmp|heic|heif|avif)$/i.test(file.name || ''));
+        if (!isImage) {
+            reject(new Error('Please choose an image file (JPEG, PNG, WebP)'));
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var src = e.target && e.target.result;
+            if (!src) {
+                reject(new Error('Could not read file'));
+                return;
+            }
+            var img = new Image();
+            img.onload = function () {
+                var w = img.width;
+                var h = img.height;
+                if (!w || !h) {
+                    reject(new Error('Invalid image dimensions'));
+                    return;
+                }
+
+                function renderAtQuality(targetMax, quality) {
+                    var curW = w;
+                    var curH = h;
+                    if (curW > curH && curW > targetMax) {
+                        curH = Math.round(curH * targetMax / curW);
+                        curW = targetMax;
+                    } else if (curH >= curW && curH > targetMax) {
+                        curW = Math.round(curW * targetMax / curH);
+                        curH = targetMax;
+                    }
+
+                    var canvas = document.createElement('canvas');
+                    canvas.width = curW;
+                    canvas.height = curH;
+                    var ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#121212';
+                    ctx.fillRect(0, 0, curW, curH);
+                    ctx.drawImage(img, 0, 0, curW, curH);
+
+                    return canvas.toDataURL('image/jpeg', quality);
+                }
+
+                // High-resolution Retina banner: 1200px max dimension @ 0.82 quality
+                var dataUrl = renderAtQuality(1200, 0.82);
+
+                // Step down if poster is unusually heavy to guarantee Firestore 1MB safety
+                if (dataUrl.length > 600000) {
+                    dataUrl = renderAtQuality(1000, 0.75);
+                }
+                if (dataUrl.length > 600000) {
+                    dataUrl = renderAtQuality(850, 0.68);
+                }
+
+                resolve(dataUrl);
+            };
+            img.onerror = function () {
+                reject(new Error('Could not decode image'));
+            };
+            img.src = src;
+        };
+        reader.onerror = function () {
+            reject(new Error('Error reading image file'));
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function ensureSafeOfferImageSize(imageStr) {
+    if (!imageStr || !imageStr.startsWith('data:') || imageStr.length < 700000) {
+        return Promise.resolve(imageStr);
+    }
+    // Downscale oversized directly-pasted base64 data URLs
+    return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = function () {
+            var targetMax = 1000;
+            var w = img.width, h = img.height;
+            if (w > h && w > targetMax) { h = Math.round(h * targetMax / w); w = targetMax; }
+            else if (h >= w && h > targetMax) { w = Math.round(w * targetMax / h); h = targetMax; }
+            var canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#121212';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.75));
+        };
+        img.onerror = function () {
+            resolve(imageStr);
+        };
+        img.src = imageStr;
+    });
 }
 
 function loadManageOffers() {
@@ -5965,17 +6086,28 @@ function loadManageOffers() {
                     '<form id="offerForm">' +
                         '<div class="form-group"><label>' + escapeHtmlText(S.offerTitle || 'Title') + '</label>' +
                             '<input type="text" id="offerTitle" placeholder="Burger offer, Pizza, Shawarma..."></div>' +
-                        '<div class="form-group"><label>' + escapeHtmlText(S.offerImage || 'Offer image') + '</label>' +
-                            '<input type="file" accept="image/*" id="offerImageFile" style="margin-bottom:6px;">' +
+                        '<div class="form-group"><label>' + escapeHtmlText(S.offerImage || 'Offer image') + ' <span style="color:#e53935;">*</span></label>' +
+                            '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;">' +
+                                '<input type="file" accept="image/*" id="offerImageFile" style="flex:1;">' +
+                                '<button type="button" class="btn-secondary btn-sm" id="clearOfferImageBtn" style="display:none;padding:6px 12px;white-space:nowrap;">' + escapeHtmlText(S.remove || 'Clear') + '</button>' +
+                            '</div>' +
+                            '<div id="offerImageLoading" style="display:none;margin-bottom:6px;font-size:13px;color:var(--color-gold, #D4AF37);font-weight:600;">' +
+                                '<span style="display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;vertical-align:middle;margin-right:6px;"></span>' +
+                                (S.compressingImage || 'Optimizing image...') +
+                            '</div>' +
                             '<input type="text" id="offerImageURL" placeholder="' + escapeHtmlAttr(S.imageUrlOrUpload || 'Paste image URL or upload above') + '">' +
-                            '<img id="offerImagePreview" alt="" style="display:none;margin-top:8px;max-height:140px;max-width:100%;border-radius:10px;object-fit:cover;"></div>' +
+                            '<div id="offerImagePreviewContainer" style="display:none;margin-top:10px;text-align:center;">' +
+                                '<img id="offerImagePreview" alt="" style="max-height:160px;max-width:100%;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 12px rgba(0,0,0,0.3);margin:0 auto;display:block;">' +
+                                '<span id="offerImageSizeHint" style="display:block;margin-top:4px;font-size:11px;color:var(--text-muted);"></span>' +
+                            '</div>' +
+                        '</div>' +
                         '<div class="form-group"><label>' + escapeHtmlText(S.offerLink || 'Offer link') + '</label>' +
                             '<input type="url" id="offerLinkUrl" placeholder="https://..."></div>' +
                         '<div class="form-group"><label>' + escapeHtmlText(S.offerOrder || 'Order') + '</label>' +
                             '<input type="number" id="offerOrder" min="0" step="1" value="0"></div>' +
                         '<div class="form-group"><label><input type="checkbox" id="offerActive" checked> ' + escapeHtmlText(S.offerActive || 'Active on menu') + '</label></div>' +
                         '<div class="modal-actions">' +
-                        '<button type="submit" class="btn-primary">' + escapeHtmlText(S.saveOffer || 'Save Offer') + '</button>' +
+                        '<button type="submit" class="btn-primary" id="saveOfferBtn">' + escapeHtmlText(S.saveOffer || 'Save Offer') + '</button>' +
                         '<button type="button" class="btn-secondary" id="cancelOfferBtn">' + escapeHtmlText(S.cancel || 'Cancel') + '</button>' +
                         '</div>' +
                         '<input type="hidden" id="offerId" value="">' +
@@ -6008,11 +6140,15 @@ function renderOffersTable(offers) {
         '</tr></thead><tbody>';
 
     offers.forEach(function (o) {
-        var img = o.image || '';
+        var img = (o.image || '').trim();
         var title = o.title || '—';
         var activeLabel = o.active !== false ? '✓' : '—';
+        var imgHtml = img
+            ? '<img src="' + escapeHtmlAttr(img) + '" alt="" width="72" height="48" style="border-radius:8px;object-fit:cover;background:#1e1e1e;border:1px solid rgba(255,255,255,0.1);" onerror="this.style.opacity=.3">'
+            : '<div style="width:72px;height:48px;border-radius:8px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:11px;">No image</div>';
+
         html += '<tr class="admin-row">' +
-            '<td data-label="' + escapeHtmlAttr(S.image || 'Image') + '"><img src="' + escapeHtmlAttr(img) + '" alt="" width="72" height="48" style="border-radius:8px;object-fit:cover;background:#eee;" onerror="this.style.opacity=.3"></td>' +
+            '<td data-label="' + escapeHtmlAttr(S.image || 'Image') + '">' + imgHtml + '</td>' +
             '<td data-label="' + escapeHtmlAttr(S.name || 'Title') + '">' + escapeHtmlText(title) + '</td>' +
             '<td data-label="' + escapeHtmlAttr(S.offerOrder || 'Order') + '">' + escapeHtmlText(String(o.order != null ? o.order : 0)) + '</td>' +
             '<td data-label="' + escapeHtmlAttr(S.offerActive || 'Active') + '">' + activeLabel + '</td>' +
@@ -6115,55 +6251,131 @@ function wireOfferEvents() {
     }
 
     var fileInput = document.getElementById('offerImageFile');
+    var urlInput = document.getElementById('offerImageURL');
+    var preview = document.getElementById('offerImagePreview');
+    var previewContainer = document.getElementById('offerImagePreviewContainer');
+    var loadingEl = document.getElementById('offerImageLoading');
+    var clearBtn = document.getElementById('clearOfferImageBtn');
+    var sizeHint = document.getElementById('offerImageSizeHint');
+    var saveBtn = document.getElementById('saveOfferBtn');
+
+    function updatePreview(val, sizeText) {
+        if (!preview) return;
+        var cleanVal = (val || '').trim();
+        if (cleanVal) {
+            preview.src = cleanVal;
+            if (previewContainer) previewContainer.style.display = 'block';
+            if (clearBtn) clearBtn.style.display = 'inline-block';
+            if (sizeHint) sizeHint.textContent = sizeText || '';
+        } else {
+            preview.src = '';
+            if (previewContainer) previewContainer.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+            if (sizeHint) sizeHint.textContent = '';
+        }
+    }
+
     if (fileInput) {
         fileInput.addEventListener('change', function () {
             var file = fileInput.files && fileInput.files[0];
             if (!file) return;
-            // Higher quality — offer posters have baked-in price/text that must stay sharp.
-            fileToCompressedDataURL(file, 1600, 0.88).then(function (dataUrl) {
-                var target = document.getElementById('offerImageURL');
-                if (target) target.value = dataUrl;
-                var preview = document.getElementById('offerImagePreview');
-                if (preview) { preview.src = dataUrl; preview.style.display = 'block'; }
+
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.dataset.originalText = saveBtn.textContent;
+                saveBtn.textContent = (S.processing || 'Processing image...');
+            }
+
+            compressOfferImageFile(file).then(function (dataUrl) {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = saveBtn.dataset.originalText || (S.saveOffer || 'Save Offer');
+                }
+                if (urlInput) urlInput.value = dataUrl;
+                var kb = Math.round((dataUrl.length * 0.75) / 1024);
+                updatePreview(dataUrl, '✓ ' + (S.optimized || 'Optimized') + ' (~' + kb + ' KB)');
             }).catch(function (err) {
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = saveBtn.dataset.originalText || (S.saveOffer || 'Save Offer');
+                }
                 alert((err && err.message) || 'Image error');
             });
         });
     }
 
-    var urlInput = document.getElementById('offerImageURL');
     if (urlInput) {
-        urlInput.addEventListener('input', function () {
-            var preview = document.getElementById('offerImagePreview');
-            if (!preview) return;
-            var val = urlInput.value.trim();
-            if (val) {
-                preview.src = val;
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
+        ['input', 'change', 'paste'].forEach(function (evt) {
+            urlInput.addEventListener(evt, function () {
+                setTimeout(function () {
+                    updatePreview(urlInput.value, '');
+                }, 10);
+            });
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            if (fileInput) fileInput.value = '';
+            if (urlInput) urlInput.value = '';
+            updatePreview('', '');
         });
     }
 }
 
 function openOfferModal(offerId, offer, isNew) {
     var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
-    document.getElementById('offerForm').reset();
-    document.getElementById('offerId').value = offerId || '';
-    document.getElementById('offerTitle').value = offer.title || '';
-    document.getElementById('offerImageURL').value = offer.image || '';
-    document.getElementById('offerLinkUrl').value = offer.linkUrl || '';
-    document.getElementById('offerOrder').value = offer.order != null ? offer.order : nextOfferOrder();
-    document.getElementById('offerActive').checked = offer.active !== false;
-    var pr = document.getElementById('offerImagePreview');
-    if (offer.image) {
-        pr.src = offer.image;
-        pr.style.display = 'block';
-    } else {
-        pr.style.display = 'none';
+    var form = document.getElementById('offerForm');
+    if (form) form.reset();
+
+    var idEl = document.getElementById('offerId');
+    if (idEl) idEl.value = offerId || '';
+
+    var titleEl = document.getElementById('offerTitle');
+    if (titleEl) titleEl.value = offer.title || '';
+
+    var urlEl = document.getElementById('offerImageURL');
+    if (urlEl) urlEl.value = offer.image || '';
+
+    var linkEl = document.getElementById('offerLinkUrl');
+    if (linkEl) linkEl.value = offer.linkUrl || '';
+
+    var orderEl = document.getElementById('offerOrder');
+    if (orderEl) orderEl.value = offer.order != null ? offer.order : nextOfferOrder();
+
+    var activeEl = document.getElementById('offerActive');
+    if (activeEl) activeEl.checked = offer.active !== false;
+
+    var preview = document.getElementById('offerImagePreview');
+    var previewContainer = document.getElementById('offerImagePreviewContainer');
+    var clearBtn = document.getElementById('clearOfferImageBtn');
+    var sizeHint = document.getElementById('offerImageSizeHint');
+    var loadingEl = document.getElementById('offerImageLoading');
+    if (loadingEl) loadingEl.style.display = 'none';
+
+    var saveBtn = document.getElementById('saveOfferBtn');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = escapeHtmlText(S.saveOffer || 'Save Offer');
     }
-    document.getElementById('offerModalTitle').textContent = isNew ? (S.addOffer || 'Add Offer') : (S.editOffer || 'Edit Offer');
+
+    if (offer.image) {
+        if (preview) preview.src = offer.image;
+        if (previewContainer) previewContainer.style.display = 'block';
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+        if (sizeHint) sizeHint.textContent = '';
+    } else {
+        if (preview) preview.src = '';
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (clearBtn) clearBtn.style.display = 'none';
+        if (sizeHint) sizeHint.textContent = '';
+    }
+
+    var titleHeader = document.getElementById('offerModalTitle');
+    if (titleHeader) titleHeader.textContent = isNew ? (S.addOffer || 'Add Offer') : (S.editOffer || 'Edit Offer');
     openAdminModal(document.getElementById('offerModal'));
 }
 
@@ -6189,8 +6401,34 @@ function editOffer(offerId) {
 
 function saveOffer() {
     var S = i18n[localStorage.getItem('selectedLang') || 'ku'] || i18n.en;
-    var image = (document.getElementById('offerImageURL').value || '').trim();
-    if (!image) {
+    var saveBtn = document.getElementById('saveOfferBtn');
+    var fileInput = document.getElementById('offerImageFile');
+    var urlInput = document.getElementById('offerImageURL');
+    var rawImage = (urlInput ? urlInput.value : '').trim();
+
+    // If file input has a selected file but URL input is still empty, process it now
+    if (!rawImage && fileInput && fileInput.files && fileInput.files[0]) {
+        var loadingEl = document.getElementById('offerImageLoading');
+        if (loadingEl) loadingEl.style.display = 'block';
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = S.processing || 'Processing image...';
+        }
+        compressOfferImageFile(fileInput.files[0]).then(function (compressed) {
+            if (urlInput) urlInput.value = compressed;
+            saveOffer();
+        }).catch(function (err) {
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = S.saveOffer || 'Save Offer';
+            }
+            alert((err && err.message) || 'Image error');
+        });
+        return;
+    }
+
+    if (!rawImage) {
         alert((S.offerImage || 'Offer image') + ' — required');
         return;
     }
@@ -6204,42 +6442,54 @@ function saveOffer() {
         return;
     }
 
-    var offerId = (document.getElementById('offerId').value || '').trim();
-    var isCreate = !offerId;
-    var title = (document.getElementById('offerTitle').value || '').trim();
-    var linkUrl = (document.getElementById('offerLinkUrl').value || '').trim();
-    var orderVal = parseInt(document.getElementById('offerOrder').value, 10);
-    if (isNaN(orderVal)) orderVal = nextOfferOrder();
-    var active = !!document.getElementById('offerActive').checked;
-
-    var plainData = {
-        image: image,
-        title: title,
-        linkUrl: linkUrl,
-        order: orderVal,
-        active: active,
-        updated_at: new Date().toISOString()
-    };
-
-    var ref = isCreate ? doc(collection(db, 'menuOffers')) : doc(db, 'menuOffers', offerId);
-    var savedId = ref.id;
-    var writeData = Object.assign({}, plainData, {
-        updated_at: serverTimestamp()
-    });
-    if (isCreate) {
-        writeData.created_at = serverTimestamp();
-        plainData.created_at = plainData.updated_at;
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = S.saving || 'Saving...';
     }
 
-    setDoc(ref, writeData, { merge: true }).then(function () {
-        var list = readCachedOffersAdmin().filter(function (o) { return o.id !== savedId; });
-        list.push(Object.assign({ id: savedId }, plainData));
-        writeCachedOffersAdmin(list);
-        closeAdminModal(document.getElementById('offerModal'));
-        renderOffersTable(list);
-        alert(S.offerSavedCloud || S.settingsSaved || 'Saved');
+    ensureSafeOfferImageSize(rawImage).then(function (safeImage) {
+        var offerId = (document.getElementById('offerId').value || '').trim();
+        var isCreate = !offerId;
+        var title = (document.getElementById('offerTitle').value || '').trim();
+        var linkUrl = (document.getElementById('offerLinkUrl').value || '').trim();
+        var orderVal = parseInt(document.getElementById('offerOrder').value, 10);
+        if (isNaN(orderVal)) orderVal = nextOfferOrder();
+        var active = !!document.getElementById('offerActive').checked;
+
+        var plainData = {
+            image: safeImage,
+            title: title,
+            linkUrl: linkUrl,
+            order: orderVal,
+            active: active,
+            updated_at: new Date().toISOString()
+        };
+
+        var ref = isCreate ? doc(collection(db, 'menuOffers')) : doc(db, 'menuOffers', offerId);
+        var savedId = ref.id;
+        var writeData = Object.assign({}, plainData, {
+            updated_at: serverTimestamp()
+        });
+        if (isCreate) {
+            writeData.created_at = serverTimestamp();
+            plainData.created_at = plainData.updated_at;
+        }
+
+        return setDoc(ref, writeData, { merge: true }).then(function () {
+            var list = readCachedOffersAdmin().filter(function (o) { return o.id !== savedId; });
+            list.push(Object.assign({ id: savedId }, plainData));
+            writeCachedOffersAdmin(list);
+            closeAdminModal(document.getElementById('offerModal'));
+            renderOffersTable(list);
+            alert(S.offerSavedCloud || S.settingsSaved || 'Saved');
+        });
     }).catch(function (err) {
         alert((S.itemSyncFailed || 'Save failed') + (err && err.message ? '\n' + err.message : ''));
+    }).finally(function () {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = S.saveOffer || 'Save Offer';
+        }
     });
 }
 
