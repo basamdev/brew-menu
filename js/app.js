@@ -1151,6 +1151,13 @@ function sortMenuItemsList(list) {
         var ao = getItemSortOrder(a);
         var bo = getItemSortOrder(b);
         if (ao !== bo) return ao - bo;
+        var da = (a && a.data && typeof a.data === 'object') ? a.data : a;
+        var db_ = (b && b.data && typeof b.data === 'object') ? b.data : b;
+        var ta = da && (da.created_at || da.createdAt) ? String(da.created_at || da.createdAt) : '';
+        var tb = db_ && (db_.created_at || db_.createdAt) ? String(db_.created_at || db_.createdAt) : '';
+        if (ta && tb && ta !== tb) return ta.localeCompare(tb);
+        if (ta && !tb) return -1;
+        if (!ta && tb) return 1;
         var idA = String((a && a.id) || '').toLowerCase();
         var idB = String((b && b.id) || '').toLowerCase();
         return idA.localeCompare(idB);
@@ -1302,6 +1309,8 @@ function parseMenuItemsFromRest(json) {
         var id = doc.name.split('/').pop();
         var category = restFieldValue(f.category);
         if (category && category.toLowerCase().trim() === 'water') return;
+        var ordVal = restFieldValue(f.order);
+        var ord = (ordVal != null && ordVal !== '' && !isNaN(Number(ordVal))) ? Number(ordVal) : null;
         items.push({
             id: id,
             name_ku: restFieldValue(f.name_ku),
@@ -1316,7 +1325,10 @@ function parseMenuItemsFromRest(json) {
             description_en: restFieldValue(f.description_en),
             group_ku: restFieldValue(f.group_ku),
             group_ar: restFieldValue(f.group_ar),
-            group_en: restFieldValue(f.group_en)
+            group_en: restFieldValue(f.group_en),
+            order: ord,
+            sizes: restFieldValue(f.sizes) || [],
+            created_at: restFieldValue(f.created_at) || ''
         });
     });
     return items;

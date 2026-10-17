@@ -136,8 +136,8 @@ function evictNonEssentialCacheKeys() {
 
 function serializableFirestoreData(data) {
     var o = Object.assign({}, data || {});
-    delete o.updated_at;
-    delete o.created_at;
+    if (o.updated_at && typeof o.updated_at !== 'string') delete o.updated_at;
+    if (o.created_at && typeof o.created_at !== 'string') delete o.created_at;
     return o;
 }
 
@@ -217,20 +217,26 @@ function upsertCachedMenuItem(id, data) {
     items = items.map(function (it) {
         if (it.id === id) {
             found = true;
-            return Object.assign({ id: id }, flat);
+            return Object.assign({}, it, flat, { id: id });
         }
         return it;
     });
     if (!found) items.push(Object.assign({ id: id }, flat));
     writeCachedMenuItemsFlat(items);
-    _itemsSnapDocs = getItemDocsFromLocalCache();
+    _itemsSnapDocs = sortItemDocsForAdmin(getItemDocsFromLocalCache());
+    if (typeof MenuData !== 'undefined' && MenuData.setItems) {
+        MenuData.setItems(readCachedMenuItemsFlat());
+    }
 }
 
 function removeCachedMenuItem(id) {
     if (!id) return;
     var items = readCachedMenuItemsFlat().filter(function (it) { return it.id !== id; });
     writeCachedMenuItemsFlat(items);
-    _itemsSnapDocs = getItemDocsFromLocalCache();
+    _itemsSnapDocs = sortItemDocsForAdmin(getItemDocsFromLocalCache());
+    if (typeof MenuData !== 'undefined' && MenuData.setItems) {
+        MenuData.setItems(readCachedMenuItemsFlat());
+    }
 }
 
 /* ============ SALES CACHE (offline dashboard + cashier) ============ */
@@ -625,6 +631,9 @@ function mapAdminRestMenuItem(d) {
         group_ku: data.group_ku || '',
         group_ar: data.group_ar || '',
         group_en: data.group_en || '',
+        order: (data.order != null && data.order !== '' && !isNaN(Number(data.order))) ? Number(data.order) : null,
+        sizes: Array.isArray(data.sizes) ? data.sizes : [],
+        created_at: data.created_at || '',
         updated_at: data.updated_at || '',
         createdBy: data.createdBy || ''
     };
@@ -2199,8 +2208,91 @@ function sortItemDocsForAdmin(docs) {
         var ia = (da && da.order != null && da.order !== '' && !isNaN(Number(da.order))) ? Number(da.order) : 999999;
         var ib = (db_ && db_.order != null && db_.order !== '' && !isNaN(Number(db_.order))) ? Number(db_.order) : 999999;
         if (ia !== ib) return ia - ib;
+        var ta = da && (da.created_at || da.createdAt) ? String(da.created_at || da.createdAt) : '';
+        var tb = db_ && (db_.created_at || db_.createdAt) ? String(db_.created_at || db_.createdAt) : '';
+        if (ta && tb && ta !== tb) return ta.localeCompare(tb);
+        if (ta && !tb) return -1;
+        if (!ta && tb) return 1;
         return String(a.id || '').localeCompare(String(b.id || ''));
     });
+}
+
+function computeNewItemOrder(category) {
+    if (!category) return 0;
+    var catLower = String(category).toLowerCase().trim();
+    var allDocs = getItemDocsFromLocalCache();
+    if (!allDocs || !allDocs.length) {
+        allDocs = (_itemsSnapDocs || []).slice();
+    }
+    var catDocs = (allDocs || []).filter(function (d) {
+        var data = typeof d.data === 'function' ? d.data() : (d.data || d);
+        if (!data || !data.category) return false;
+        var c = String(data.category).toLowerCase().trim();
+        return c === catLower || c.indexOf(catLower) !== -1 || catLower.indexOf(c) !== -1;
+    });
+
+    if (!catDocs.length) return 0;
+
+    catDocs = sortItemDocsForAdmin(catDocs);
+
+    var maxOrder = -1;
+    var allHaveExplicitOrder = true;
+    var seenOrders = {};
+    var hasDuplicate = false;
+
+    catDocs.forEach(function (d) {
+        var data = typeof d.data === 'function' ? d.data() : (d.data || d);
+        var ord = (data && data.order != null && data.order !== '' && !isNaN(Number(data.order))) ? Number(data.order) : null;
+        if (ord !== null) {
+            if (seenOrders[ord]) hasDuplicate = true;
+            seenOrders[ord] = true;
+            if (ord > maxOrder) maxOrder = ord;
+        } else {
+            allHaveExplicitOrder = false;
+        }
+    });
+
+    if (allHaveExplicitOrder && !hasDuplicate && maxOrder >= 0) {
+        return maxOrder + 1;
+    }
+
+    var batch = (window.db && typeof writeBatch === 'function') ? writeBatch(db) : null;
+    var updatedLocalItems = readCachedMenuItemsFlat();
+    var localMap = {};
+    updatedLocalItems.forEach(function (it) { if (it && it.id) localMap[String(it.id)] = it; });
+
+    catDocs.forEach(function (d, idx) {
+        if (!d || !d.id) return;
+        var data = typeof d.data === 'function' ? d.data() : (d.data || d);
+        data.order = idx;
+        if (typeof d.data === 'function') {
+            d.data = function () { return data; };
+        }
+        if (localMap[String(d.id)]) {
+            localMap[String(d.id)].order = idx;
+        }
+        if (batch) {
+            try {
+                var ref = doc(db, 'menuItems', String(d.id));
+                batch.set(ref, { order: idx }, { merge: true });
+            } catch (e) {}
+        }
+    });
+
+    writeCachedMenuItemsFlat(updatedLocalItems);
+    _itemsSnapDocs = sortItemDocsForAdmin(getItemDocsFromLocalCache());
+    if (typeof MenuData !== 'undefined' && MenuData.setItems) {
+        MenuData.setItems(updatedLocalItems);
+    }
+    if (batch) {
+        try {
+            batch.commit().catch(function (err) {
+                console.warn('[items] Freeze existing orders batch error:', err);
+            });
+        } catch (e) {}
+    }
+
+    return catDocs.length;
 }
 
 function filterItemDocs(docs, searchTerm, cat) {
@@ -3230,7 +3322,11 @@ function wireItemEvents() {
     if (addBtn) {
         addBtn.addEventListener('click', function () {
             document.getElementById('modalTitle').textContent = S.addNewItem;
-            document.getElementById('itemForm').reset();
+            var formEl = document.getElementById('itemForm');
+            if (formEl) {
+                formEl.reset();
+                delete formEl.dataset.itemOrder;
+            }
             document.getElementById('itemId').value = '';
             populateAdminItemSizes([]);
             document.getElementById('itemAvailable').checked = true;
@@ -3244,7 +3340,12 @@ function wireItemEvents() {
             var modal = document.getElementById('itemModal');
             openAdminModal(modal);
             activeItemModal = modal;
-            loadCategoriesDropdown();
+            loadCategoriesDropdown().then(function () {
+                if (itemsActiveCategory && itemsActiveCategory !== 'all') {
+                    var catSelect = document.getElementById('itemCategory');
+                    if (catSelect) catSelect.value = itemsActiveCategory;
+                }
+            });
         });
     }
 
@@ -3711,6 +3812,30 @@ function saveItem() {
           createdBy: getCurrentAdminEmail() || ''
       };
 
+    var formEl = document.getElementById('itemForm');
+    var existingItem = itemId ? getMenuItemFromLocalCache(itemId) : null;
+    if (itemId && !existingItem && _itemsSnapDocs) {
+        var foundDoc = _itemsSnapDocs.find(function (d) { return d && String(d.id) === String(itemId); });
+        if (foundDoc) existingItem = typeof foundDoc.data === 'function' ? foundDoc.data() : (foundDoc.data || foundDoc);
+    }
+
+    var prevCat = existingItem && existingItem.category ? String(existingItem.category).toLowerCase().trim() : '';
+    var newCat = category ? String(category).toLowerCase().trim() : '';
+
+    var savedOrder = null;
+    if (itemId && prevCat === newCat) {
+        if (existingItem && existingItem.order != null && existingItem.order !== '' && !isNaN(Number(existingItem.order))) {
+            savedOrder = Number(existingItem.order);
+        } else if (formEl && formEl.dataset.itemOrder !== undefined && formEl.dataset.itemOrder !== '' && !isNaN(Number(formEl.dataset.itemOrder))) {
+            savedOrder = Number(formEl.dataset.itemOrder);
+        } else {
+            savedOrder = computeNewItemOrder(category);
+        }
+    } else {
+        savedOrder = computeNewItemOrder(category);
+    }
+    plainData.order = savedOrder;
+
     var ref;
     var promise;
     var docId;
@@ -3740,7 +3865,13 @@ function saveItem() {
         upsertCachedMenuItem(docId, plainData);
         closeAdminModal(document.getElementById('itemModal'));
         activeItemModal = null;
-        hydrateItemsUiFromCache();
+        if (category) {
+            itemsActiveCategory = category;
+            var cf = document.getElementById('categoryFilter');
+            if (cf) cf.value = category;
+            renderItemsCategoryBar();
+        }
+        renderCurrentAdminItemsList();
         alert(offline ? S.itemSavedOffline : S.itemSavedCloud);
     }
 
@@ -3807,6 +3938,10 @@ function editItem(itemId) {
         }
         populateAdminItemSizes(item.sizes || []);
         document.getElementById('modalTitle').textContent = S.editItem;
+        var formEl = document.getElementById('itemForm');
+        if (formEl) {
+            formEl.dataset.itemOrder = (item && item.order != null && item.order !== '') ? String(item.order) : '';
+        }
         var saveBtn = document.getElementById('saveItemBtn');
         if (saveBtn) {
             saveBtn.disabled = false;
