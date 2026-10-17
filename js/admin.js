@@ -972,6 +972,19 @@ function warmSalesCacheFromServer() {
             console.warn('[sales] Local API failed:', err.message);
         });
     }
+    if (window.db) {
+        return salesCacheFromSdkServer().catch(function () {
+            if (isAdminAuthenticated() && navigator.onLine) {
+                return fetchAllAdminCollectionViaRest('sales').then(function (docs) {
+                    mergeRestSalesDocs(docs || []);
+                }).catch(function (err) {
+                    if (isFirestoreApiDisabledError(err)) {
+                        showFirestoreApiDisabledAlert();
+                    }
+                });
+            }
+        });
+    }
     if (isAdminAuthenticated() && navigator.onLine) {
         return fetchAllAdminCollectionViaRest('sales').then(function (docs) {
             mergeRestSalesDocs(docs || []);
@@ -1015,6 +1028,19 @@ function warmExpensesCacheFromServer() {
             mergeRestExpensesDocs(docs || []);
         }).catch(function(err) {
             console.warn('[expenses] Local API failed:', err.message);
+        });
+    }
+    if (window.db) {
+        return expensesCacheFromSdkServer().catch(function () {
+            if (isAdminAuthenticated() && navigator.onLine) {
+                return fetchAllAdminCollectionViaRest('expenses').then(function (docs) {
+                    mergeRestExpensesDocs(docs || []);
+                }).catch(function (err) {
+                    if (isFirestoreApiDisabledError(err)) {
+                        showFirestoreApiDisabledAlert();
+                    }
+                });
+            }
         });
     }
     if (isAdminAuthenticated() && navigator.onLine) {

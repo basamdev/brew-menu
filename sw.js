@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brew-v169';
+const CACHE_NAME = 'brew-v170';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',
@@ -145,10 +145,16 @@ self.addEventListener('fetch', function (event) {
         return;
     }
 
-    // Skip caching for other external API/font resources (not images).
-    if (url.hostname.includes('cdnjs') || url.hostname.includes('firestore.googleapis.com') || url.hostname.includes('firebase') || url.hostname.includes('googleapis') || url.hostname.includes('gstatic')) {
-        // Just fetch without caching
-        event.respondWith(fetch(request));
+    // Never intercept Firestore, Firebase Auth, Google APIs, or external CDNs.
+    // Returning without calling event.respondWith() allows the browser to handle the network request natively.
+    if (
+        url.hostname.includes('firestore.googleapis.com') ||
+        url.hostname.includes('googleapis.com') ||
+        url.hostname.includes('firebase') ||
+        url.hostname.includes('identitytoolkit') ||
+        url.hostname.includes('gstatic.com') ||
+        url.hostname.includes('cdnjs')
+    ) {
         return;
     }
 

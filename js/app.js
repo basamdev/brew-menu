@@ -6624,7 +6624,7 @@ function registerServiceWorker() {
         window.location.reload();
     });
 
-    navigator.serviceWorker.register('./sw.js?v=118').then(function (reg) {
+    navigator.serviceWorker.register('./sw.js?v=119').then(function (reg) {
         function activateWaiting(worker) {
             if (worker) worker.postMessage({ type: 'SKIP_WAITING' });
         }
