@@ -1174,11 +1174,20 @@
             justify-content: center;
             gap: 7px;
             text-decoration: none;
+            color: inherit;
             cursor: pointer;
             padding: 1px 6px;
             border-radius: 999px;
             transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
                         opacity 0.2s ease;
+        }
+
+        .menu-powered-inner,
+        .menu-powered-inner:visited,
+        .menu-powered-inner:active,
+        .menu-powered-inner:focus {
+            text-decoration: none;
+            color: inherit;
         }
 
         .menu-powered-inner:hover {
@@ -1321,9 +1330,9 @@
         </div>
 
         <!-- SmartServe Luxury Logo Badge (Requirement 4) -->
-        <div class="menu-expired-logo-wrap">
+        <a href="https://smart-serve1.vercel.app/" target="_blank" rel="noopener noreferrer" class="menu-expired-logo-wrap" title="Smart Serve" style="text-decoration:none; cursor:pointer;">
             <img src="images/smart-serve-logo.png?v=3" alt="SmartServe" class="menu-expired-logo" onerror="this.onerror=null; this.src='images/Brew-logo.png';">
-        </div>
+        </a>
 
         <div class="menu-expired-badge">SMARTSERVE • DIGITAL MENU</div>
 
@@ -1877,7 +1886,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
 
     <!-- Luxury Smart Serve Bottom Branding Bar (Matching Reference Design) -->
     <footer class="menu-powered-bar" id="menuPoweredBar" role="contentinfo" aria-label="Smart Serve Branding">
-        <a href="index.html" class="menu-powered-inner" id="menuPoweredLink" title="Smart Serve — Digital Menu System">
+        <a href="https://smart-serve1.vercel.app/" target="_blank" rel="noopener noreferrer" class="menu-powered-inner" id="menuPoweredLink" title="Smart Serve — Digital Menu System">
             <span class="menu-powered-label" id="menuPoweredLabel" data-i18n="poweredBy">پشتگیری کراوە لەلایەن</span>
             <div class="menu-powered-brand">
                 <div class="smart-serve-emblem-wrap" title="Smart Serve">

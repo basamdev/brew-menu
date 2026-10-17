@@ -679,9 +679,18 @@
             gap: 5px;
             margin-top: 6px;
             text-decoration: none;
+            color: inherit;
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s ease;
             user-select: none;
+        }
+
+        .powered-by-section,
+        .powered-by-section:visited,
+        .powered-by-section:active,
+        .powered-by-section:focus {
+            text-decoration: none;
+            color: inherit;
         }
 
         .powered-by-section:hover {
@@ -896,7 +905,7 @@
             </div>
 
             <!-- Powered by on top, Logo + Smart Serve on bottom -->
-            <div class="powered-by-section" id="poweredBySection">
+            <a href="https://smart-serve1.vercel.app/" target="_blank" rel="noopener noreferrer" class="powered-by-section" id="poweredBySection" title="Smart Serve — Digital Menu System">
                 <span class="powered-by-text" id="poweredByLabel">پشتگیری کراوە لەلایەن</span>
                 <div class="powered-by-brand-row">
                     <div class="smart-serve-emblem-wrap" title="Smart Serve">
@@ -904,7 +913,7 @@
                     </div>
                     <span class="smart-serve-name">Smart Serve</span>
                 </div>
-            </div>
+            </a>
         </section>
 
     </main>
