@@ -78,26 +78,62 @@ function readCachedMenuItemsFlat() {
     }
 }
 
+// Immediately reclaim space from duplicate/redundant cache keys
+try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
+
+function compactItemForOfflineCache(it) {
+    if (!it) return it;
+    var copy = Object.assign({}, it);
+    // Large base64 data URIs are the primary cause of localStorage 5MB quota exhaustion.
+    // In-memory MenuData keeps the full image; we only strip massive base64 payloads from the offline JSON backup.
+    if (copy.image && typeof copy.image === 'string' && (copy.image.indexOf('data:') === 0 || copy.image.length > 2048)) {
+        copy.image = '';
+    }
+    return copy;
+}
+
 function writeCachedMenuItemsFlat(items) {
+    if (!items || !Array.isArray(items)) return;
+    // Always remove redundant cashier cache key to free up storage space
+    try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
+
+    // 1. Try writing directly
     try {
         localStorage.setItem('cachedMenuItems', JSON.stringify(items));
-        syncCashierCacheFromMenuFlat(items);
-    } catch (e) {
-        console.warn('Could not write menu cache:', e);
+        return;
+    } catch (e) {}
+
+    // 2. If quota exceeded, evict non-essential items and try again
+    evictNonEssentialCacheKeys();
+    try {
+        localStorage.setItem('cachedMenuItems', JSON.stringify(items));
+        return;
+    } catch (e2) {}
+
+    // 3. Compact items by stripping massive data URIs for localStorage only (live app/DOM still has full images in memory)
+    try {
+        var compacted = items.map(compactItemForOfflineCache);
+        localStorage.setItem('cachedMenuItems', JSON.stringify(compacted));
+        return;
+    } catch (e3) {}
+
+    // 4. If still exceeding quota, clear old financial caches and retry
+    try {
+        localStorage.removeItem('cachedSales');
+        localStorage.removeItem('cachedExpenses');
+        localStorage.removeItem('cachedFavorites');
+        localStorage.removeItem('menu_ratings');
+        var compacted2 = items.map(compactItemForOfflineCache);
+        localStorage.setItem('cachedMenuItems', JSON.stringify(compacted2));
+    } catch (e4) {
+        // Continue from memory without throwing unhandled error
     }
 }
 
 function syncCashierCacheFromMenuFlat(items) {
-    var cashier = [];
-    (items || []).forEach(function (it) {
-        if (!it || !it.id || (it.category && it.category.toLowerCase().trim() === 'water') || it.available === false) return;
-        var v = Object.assign({}, it);
-        delete v.id;
-        cashier.push({ id: it.id, v: v });
-    });
-    try {
-        localStorage.setItem('cachedCashierItems', JSON.stringify(cashier));
-    } catch (e) {}
+    // Cashier reads directly from cachedMenuItems via getCashierItemsFromLocalStorage()
+    // Removing the duplicate cachedCashierItems key prevents filling up 5MB quota
+    try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
 }
 
 function safeSetItem(key, value) {
@@ -109,21 +145,29 @@ function safeSetItem(key, value) {
             try {
                 localStorage.setItem(key, value);
             } catch (e2) {
-                console.warn('[storage] setItem still failed after cleanup for', key, ':', e2.message);
+                // If it's a huge sales/expenses payload that still exceeds quota, slice recent entries
+                if ((key === 'cachedSales' || key === 'cachedExpenses') && typeof value === 'string') {
+                    try {
+                        var parsed = JSON.parse(value);
+                        if (Array.isArray(parsed) && parsed.length > 25) {
+                            localStorage.setItem(key, JSON.stringify(parsed.slice(-25)));
+                            return;
+                        }
+                    } catch (e3) {}
+                }
             }
-        } else {
-            console.warn('[storage] setItem failed for', key, ':', e.message);
         }
     }
 }
 
 // Keys that can be dropped to free space when the quota is hit. `cachedCategories`
-// is intentionally excluded so the category bar keeps rendering with images/order.
+// and `cachedMenuItems` are intentionally preserved.
 var NON_ESSENTIAL_CACHE_KEYS = [
-    'cachedMenuItems',
-    'cachedMenuItemsSig',
     'cachedCashierItems',
+    'cachedMenuItemsSig',
     'cachedMenuCategoryNames',
+    'cachedFavorites',
+    'menu_ratings',
     'cachedSales',
     'cachedExpenses'
 ];
@@ -2382,14 +2426,11 @@ function startItemsListener() {
             var cat = catEl ? catEl.value : itemsActiveCategory;
              renderItemsList(filterItemDocs(_itemsSnapDocs, searchTerm, cat));
 
-            var cashierCache = [];
             var menuCache = [];
             _itemsSnapDocs.forEach(function(d) {
                 var data = d.data();
-                cashierCache.push({ id: d.id, v: data });
                 menuCache.push(Object.assign({ id: d.id }, data));
             });
-            safeSetItem('cachedCashierItems', JSON.stringify(cashierCache));
             writeCachedMenuItemsFlat(menuCache);
 
             var catNames = {};
@@ -2426,14 +2467,11 @@ function startItemsListener() {
         refreshItemCategoryDropdown();
         renderCurrentAdminItemsList();
 
-        var cashierCache = [];
         var menuCache = [];
         snap.forEach(function (d) {
             var data = d.data();
-            cashierCache.push({ id: d.id, v: data });
             menuCache.push(Object.assign({ id: d.id }, data));
         });
-        safeSetItem('cachedCashierItems', JSON.stringify(cashierCache));
         writeCachedMenuItemsFlat(menuCache);
 
         var catNames = {};
@@ -4093,6 +4131,12 @@ function loadManageCategories() {
 function getMenuCategoryNames() {
     var names = {};
     try {
+        JSON.parse(localStorage.getItem('cachedMenuItems') || '[]').forEach(function (it) {
+            var c = it && (it.category || (it.v && it.v.category));
+            if (c) names[c] = true;
+        });
+    } catch (e) {}
+    try {
         JSON.parse(localStorage.getItem('cachedCashierItems') || '[]').forEach(function (it) {
             var c = it && it.v && it.v.category;
             if (c) names[c] = true;
@@ -5007,8 +5051,7 @@ function applyCashierItemsSnap(snap) {
         showCashierEmptyState();
         return;
     }
-var items = normalizeCashierItems(snap);
-safeSetItem('cachedCashierItems', JSON.stringify(items));
+    var items = normalizeCashierItems(snap);
     var menuCache = [];
     snap.forEach(function (d) {
         menuCache.push(Object.assign({ id: d.id }, d.data()));
@@ -5057,7 +5100,6 @@ function loadCashierItems() {
                 delete v.id;
                 return { id: id, v: v };
             });
-            safeSetItem('cachedCashierItems', JSON.stringify(items));
             if (items.length > 0) renderCashierProducts(items);
         }).catch(function (e) {
             console.warn('[cashier] REST fallback:', e.message || e);

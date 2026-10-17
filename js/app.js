@@ -38,35 +38,45 @@ window.getMenuLicenseExpireDate = getMenuLicenseExpireDate;
 window.isMenuExpirePreviewRequested = isMenuExpirePreviewRequested;
 window.getMenuExpireEndMs = getMenuExpireEndMs;
 
+function compactItemForOfflineStorage(it) {
+    if (!it) return it;
+    var copy = Object.assign({}, it);
+    if (copy.image && typeof copy.image === 'string' && (copy.image.indexOf('data:') === 0 || copy.image.length > 2048)) {
+        copy.image = '';
+    }
+    return copy;
+}
+
 function safeSetItem(key, value) {
     try {
         localStorage.setItem(key, value);
     } catch (e) {
         if (e.name === 'QuotaExceededError' || e.code === 22 || /quota/i.test(e.message || '')) {
-            // Make room by evicting only NON-essential cache keys. Never evict
-            // `cachedCategories` (the menu needs it to render with images/order)
-            // and never evict the key we are currently trying to write.
             evictNonEssentialCacheKeys();
             try {
                 localStorage.setItem(key, value);
-            } catch (e2) {
-                // Data is larger than the remaining quota — skip caching and let
-                // the app run from memory / live Firestore. Do NOT wipe categories.
-                console.warn('[storage] setItem still failed after cleanup for', key, ':', e2.message);
+                return;
+            } catch (e2) {}
+
+            if (key === 'cachedMenuItems' && typeof value === 'string') {
+                try {
+                    var parsed = JSON.parse(value);
+                    if (Array.isArray(parsed)) {
+                        var compacted = parsed.map(compactItemForOfflineStorage);
+                        localStorage.setItem(key, JSON.stringify(compacted));
+                        return;
+                    }
+                } catch (e3) {}
             }
-        } else {
-            console.warn('[storage] setItem failed for', key, ':', e.message);
         }
     }
 }
 
 // Keys that can be dropped to free space when the quota is hit. `cachedCategories`
-// is intentionally excluded: it is required to render the category bar with images
-// and correct order, so wiping it would break the UI.
+// and `cachedMenuItems` are intentionally excluded to keep the menu UI intact.
 var NON_ESSENTIAL_CACHE_KEYS = [
-    'cachedMenuItems',
-    'cachedMenuItemsSig',
     'cachedCashierItems',
+    'cachedMenuItemsSig',
     'cachedMenuCategoryNames',
     'cachedSales',
     'cachedExpenses',
