@@ -6288,8 +6288,18 @@ function loadSettings() {
                     badge.style.color = '#34D399';
                     badge.textContent = '🟢 ACTIVE (چالاکە)';
                     var expDateObj = res.data.expiresAt.toDate ? res.data.expiresAt.toDate() : new Date(res.data.expiresAt);
-                    var expDateStr = !isNaN(expDateObj.getTime()) ? expDateObj.toLocaleDateString() : String(res.data.expiresAt);
-                    text.textContent = 'مێنیو چالاکە بە دروستی تا بەرواری: ' + expDateStr + ' (ماوەی ساڵانەی پارێزراو).';
+                    var expDateStr = String(res.data.expiresAt);
+                    if (!isNaN(expDateObj.getTime())) {
+                        var sy = expDateObj.getFullYear();
+                        var sm = String(expDateObj.getMonth() + 1).padStart(2, '0');
+                        var sd = String(expDateObj.getDate()).padStart(2, '0');
+                        var sh = expDateObj.getHours();
+                        var smin = String(expDateObj.getMinutes()).padStart(2, '0');
+                        var sampm = sh >= 12 ? 'PM' : 'AM';
+                        var sh12 = sh % 12 || 12;
+                        expDateStr = sy + '/' + sm + '/' + sd + ' کاتژمێر ' + sh12 + ':' + smin + ' ' + sampm;
+                    }
+                    text.textContent = 'مێنیو چالاکە بە دروستی تا: ' + expDateStr + ' (دیاریکراو لەلایەن SmartServe).';
                 } else {
                     badge.style.background = 'rgba(212,175,55,0.18)';
                     badge.style.borderColor = 'rgba(212,175,55,0.4)';
@@ -7703,9 +7713,15 @@ function loadManageSubscriptions() {
             if (!isNaN(ms)) d = new Date(ms);
         }
         if (!d || isNaN(d.getTime())) return String(val);
-        var locale = currentLang === 'ar' ? 'ar-IQ' : (currentLang === 'ku' ? 'ku-IQ' : 'en-US');
-        return d.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' +
-               d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        var hours = d.getHours();
+        var mins = String(d.getMinutes()).padStart(2, '0');
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var h12 = hours % 12 || 12;
+        var hStr = String(h12).padStart(2, '0');
+        return '<span style="font-family:monospace; font-size:0.95rem; color:#FAF8F5;">' + y + '/' + m + '/' + day + '</span> <span style="color:#D4AF37; font-size:0.82rem; margin-right:4px; font-weight:700;">' + hStr + ':' + mins + ' ' + ampm + '</span>';
     }
 
     function renderStatusView(subData) {
@@ -7736,11 +7752,22 @@ function loadManageSubscriptions() {
         var daysRemainingText = '—';
         if (expMs && !isNaN(expMs)) {
             var diffMs = expMs - Date.now();
-            var diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-            if (diffDays > 0) {
-                daysRemainingText = diffDays + ' ' + T.daysLeftText;
+            if (diffMs <= 0) {
+                var absDays = Math.floor(Math.abs(diffMs) / 86400000);
+                daysRemainingText = absDays > 0 ? (absDays + ' ' + T.expiredDaysAgoText) : T.statusExpired;
             } else {
-                daysRemainingText = Math.abs(diffDays) + ' ' + T.expiredDaysAgoText;
+                var d = Math.floor(diffMs / 86400000);
+                var h = Math.floor((diffMs % 86400000) / 3600000);
+                if (d >= 365) {
+                    var y = Math.floor(d / 365);
+                    var remD = d % 365;
+                    daysRemainingText = y + ' ساڵ' + (remD > 0 ? ' و ' + remD + ' ڕۆژ' : '') + ' ماوە';
+                } else if (d > 0) {
+                    daysRemainingText = d + ' ڕۆژ و ' + h + ' کاتژمێر ماوە';
+                } else {
+                    var m = Math.floor((diffMs % 3600000) / 60000);
+                    daysRemainingText = h + ' کاتژمێر و ' + m + ' خولەک ماوە';
+                }
             }
         }
 
@@ -7762,7 +7789,10 @@ function loadManageSubscriptions() {
                 '<div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.08);">' +
                     '<div>' +
                         '<div style="font-size:0.8rem; color:#A8A29E; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.status) + ' (' + escapeHtmlText(rId) + '):</div>' +
-                        badgeHtml +
+                        '<div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">' +
+                            badgeHtml +
+                            '<span style="display:inline-flex; align-items:center; gap:5px; font-size:0.74rem; font-weight:700; color:#A8A29E; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:999px; padding:4px 10px;">🔒 بینین لەلایەن کافێ (View Only)</span>' +
+                        '</div>' +
                     '</div>' +
                     '<div style="text-align:right;">' +
                         '<div style="font-size:0.8rem; color:#A8A29E; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.daysRemaining) + ':</div>' +
@@ -7776,9 +7806,9 @@ function loadManageSubscriptions() {
                         '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.activatedAt) + '</div>' +
                         '<div style="font-size:0.92rem; color:#FAF8F5; font-weight:700;">' + formatDateTime(subData ? subData.activatedAt : null) + '</div>' +
                     '</div>' +
-                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
-                        '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.expiresAt) + '</div>' +
-                        '<div style="font-size:0.92rem; color:' + (isExpired ? '#EF4444' : '#D4AF37') + '; font-weight:700;">' + formatDateTime(subData ? subData.expiresAt : null) + '</div>' +
+                    '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(212,175,55,0.25); border-radius:12px; padding:14px;">' +
+                        '<div style="font-size:0.76rem; color:#D4AF37; margin-bottom:4px; font-weight:700;">📅 بەروار و کاتی بەسەرچوون (ساڵنامە و کات):</div>' +
+                        '<div style="font-size:0.95rem; color:' + (isExpired ? '#EF4444' : '#FAF8F5') + '; font-weight:700;">' + formatDateTime(subData ? subData.expiresAt : null) + '</div>' +
                     '</div>' +
                     '<div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:14px;">' +
                         '<div style="font-size:0.76rem; color:#78716C; margin-bottom:4px; font-weight:600;">' + escapeHtmlText(T.lastRenewedAt) + '</div>' +

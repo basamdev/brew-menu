@@ -198,18 +198,35 @@
                     <input type="text" id="modalRestaurantName" placeholder="Brew Cafe & Rest" required>
                 </div>
                 <div class="ss-form-group">
-                    <label for="modalPeriodYears">ماوەی مۆڵەت (License Period):</label>
+                    <label for="modalPeriodYears" style="font-weight: 600;">ماوەی مۆڵەت (License Duration):</label>
                     <select id="modalPeriodYears">
                         <option value="1" selected>١ ساڵی تەواو (Standard - 1 Year)</option>
+                        <option value="0.5">٦ مانگ (Half Year - 6 Months)</option>
                         <option value="2">٢ ساڵی تەواو (2 Years)</option>
                         <option value="3">٣ ساڵی تەواو (3 Years)</option>
                         <option value="5">٥ ساڵی تەواو (5 Years)</option>
-                        <option value="custom">بەرواری دەستنیشانکراو (Custom Date)</option>
+                        <option value="custom">📅 دیاریکردنی بەروار (ساڵ، مانگ، ڕۆژ) و کات بە ساڵنامە</option>
                     </select>
                 </div>
-                <div class="ss-form-group" id="modalCustomDateWrap" style="display: none;">
-                    <label for="modalCustomDate">بەرواری دیاریکراوی بەسەرچوون:</label>
-                    <input type="date" id="modalCustomDate">
+                <div class="ss-form-group" id="modalCustomDateWrap" style="display: none; background: rgba(212, 175, 55, 0.06); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 12px; padding: 16px; margin-top: 14px;">
+                    <div style="font-weight: 700; color: #D4AF37; margin-bottom: 12px; font-size: 0.92rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-calendar-days"></i> ساڵنامە و کاتی تەواوی بەسەرچوون:
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div>
+                            <label for="modalCustomDate" style="font-size: 0.82rem; color: #A8A29E; display: block; margin-bottom: 6px;">بەروار (ساڵ، مانگ، ڕۆژ):</label>
+                            <input type="date" id="modalCustomDate" style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #0C0A09; border: 1px solid rgba(255, 255, 255, 0.15); color: #FAF8F5;">
+                        </div>
+                        <div>
+                            <label for="modalCustomTime" style="font-size: 0.82rem; color: #A8A29E; display: block; margin-bottom: 6px;">کاتژمێر و خولەک (Time):</label>
+                            <input type="time" id="modalCustomTime" value="23:59" style="width: 100%; padding: 10px 12px; border-radius: 8px; background: #0C0A09; border: 1px solid rgba(255, 255, 255, 0.15); color: #FAF8F5;">
+                        </div>
+                    </div>
+                    <!-- Live preview card -->
+                    <div id="modalDateLivePreview" style="margin-top: 12px; padding: 10px 14px; border-radius: 8px; background: rgba(0, 0, 0, 0.5); border: 1px dashed rgba(212, 175, 55, 0.35); font-size: 0.84rem; color: #FAF8F5;">
+                        <span style="color: #D4AF37; font-weight: 700;">بەروار و کاتی هەڵبژێردراو:</span>
+                        <div id="modalDatePreviewText" style="margin-top: 4px; font-weight: 600; font-size: 0.9rem; color: #FAF8F5;">—</div>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 24px;">
@@ -261,6 +278,6 @@
     </script>
 
     <!-- Super Admin Controller Script -->
-    <script src="js/smartserve-admin.js?v=102"></script>
+    <script src="js/smartserve-admin.js?v=103"></script>
 </body>
 </html>

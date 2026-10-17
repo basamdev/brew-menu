@@ -35,6 +35,8 @@
     var modalPeriodYears = document.getElementById('modalPeriodYears');
     var modalCustomDateWrap = document.getElementById('modalCustomDateWrap');
     var modalCustomDate = document.getElementById('modalCustomDate');
+    var modalCustomTime = document.getElementById('modalCustomTime');
+    var modalDatePreviewText = document.getElementById('modalDatePreviewText');
     var btnRefreshAuditLogs = document.getElementById('btnRefreshAuditLogs');
 
     // State
@@ -264,11 +266,29 @@
                     : '<span class="ss-badge active">🟢 چالاکە (Active)</span>');
 
             var remainingText = '—';
-            if (st.daysDiff != null) {
-                if (st.daysDiff > 0) {
-                    remainingText = '<span style="color:' + (st.daysDiff <= 30 ? '#F59E0B' : '#FAF8F5') + '; font-weight:700;">' + st.daysDiff + ' ڕۆژ ماوە</span>';
+            if (st.expMs != null && !isNaN(st.expMs)) {
+                var diffMs = st.expMs - Date.now();
+                if (diffMs <= 0) {
+                    var absDays = Math.floor(Math.abs(diffMs) / 86400000);
+                    remainingText = '<span style="color:#EF4444; font-weight:700;">بەسەرچووە (' + (absDays > 0 ? absDays + ' ڕۆژ پێشتر' : 'ئەمڕۆ') + ')</span>';
                 } else {
-                    remainingText = '<span style="color:#EF4444; font-weight:700;">بەسەرچووە (' + Math.abs(st.daysDiff) + ' ڕۆژ پێشتر)</span>';
+                    var days = Math.floor(diffMs / 86400000);
+                    var hours = Math.floor((diffMs % 86400000) / 3600000);
+                    var color = days <= 30 ? '#F59E0B' : '#FAF8F5';
+                    if (days >= 365) {
+                        var yrs = Math.floor(days / 365);
+                        var remD = days % 365;
+                        remainingText = '<span style="color:' + color + '; font-weight:700;">' + yrs + ' ساڵ' + (remD > 0 ? ' و ' + remD + ' ڕۆژ' : '') + ' ماوە</span>';
+                    } else if (days >= 30) {
+                        var mos = Math.floor(days / 30);
+                        var remD = days % 30;
+                        remainingText = '<span style="color:' + color + '; font-weight:700;">' + mos + ' مانگ' + (remD > 0 ? ' و ' + remD + ' ڕۆژ' : '') + ' ماوە</span>';
+                    } else if (days > 0) {
+                        remainingText = '<span style="color:' + color + '; font-weight:700;">' + days + ' ڕۆژ و ' + hours + ' کاتژمێر ماوە</span>';
+                    } else {
+                        var mins = Math.floor((diffMs % 3600000) / 60000);
+                        remainingText = '<span style="color:#EF4444; font-weight:700;">' + hours + ' کاتژمێر و ' + mins + ' خولەک ماوە</span>';
+                    }
                 }
             }
 
@@ -281,16 +301,16 @@
                     '<div style="font-family:monospace; font-size:0.8rem; color:#D4AF37;">ID: ' + escapeHtml(rId) + '</div>' +
                 '</td>' +
                 '<td>' + badge + '</td>' +
-                '<td>' + formatDate(sub.activatedAt) + '</td>' +
-                '<td><strong style="color:' + (st.isExpired ? '#EF4444' : '#D4AF37') + ';">' + formatDate(sub.expiresAt) + '</strong></td>' +
+                '<td>' + formatDateTime(sub.activatedAt) + '</td>' +
+                '<td><strong style="color:' + (st.isExpired ? '#EF4444' : '#D4AF37') + ';">' + formatDateTime(sub.expiresAt) + '</strong></td>' +
                 '<td>' + remainingText + '</td>' +
                 '<td>' +
                     '<div class="ss-action-btns">' +
                         '<button type="button" class="ss-btn-sm renew btn-action-renew" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="نوێکردنەوە بۆ ١ ساڵی تەواو">' +
                             '<i class="fa-solid fa-bolt"></i> +١ ساڵ' +
                         '</button>' +
-                        '<button type="button" class="ss-btn-sm link btn-action-custom" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="دیاریکردنی ساڵ یان بەروار">' +
-                            '<i class="fa-solid fa-calendar-days"></i> دیاریکراو' +
+                        '<button type="button" class="ss-btn-sm link btn-action-custom" data-rid="' + escapeHtml(rId) + '" data-rname="' + escapeHtml(rName) + '" title="دیاریکردنی ساڵنامە، ساڵ، مانگ، ڕۆژ و کات">' +
+                            '<i class="fa-solid fa-calendar-days"></i> ساڵنامە و کات' +
                         '</button>' +
                         '<button type="button" class="ss-btn-sm danger btn-action-expire" data-rid="' + escapeHtml(rId) + '" title="ناچالاککردن / بەسەرچواندن">' +
                             '<i class="fa-solid fa-ban"></i>' +
@@ -310,15 +330,22 @@
     }
 
     // 3. Actions: Quick 1-Year Renewal, Custom Period, and Deactivation
-    function saveSubscription(rId, rName, periodYears, customDateStr, actionType) {
+    function saveSubscription(rId, rName, periodYears, customDateStr, customTimeStr, actionType) {
         var now = new Date();
         var targetExp = new Date(now.getTime());
 
         if (periodYears === 'custom' && customDateStr) {
-            targetExp = new Date(customDateStr + 'T23:59:59');
+            var timeVal = (customTimeStr || '23:59').trim();
+            targetExp = new Date(customDateStr + 'T' + timeVal + ':00');
         } else {
-            var yrs = parseInt(periodYears, 10) || 1;
-            targetExp.setFullYear(now.getFullYear() + yrs);
+            var yrs = parseFloat(periodYears) || 1;
+            var msToAdd = Math.round(yrs * 365.25 * 86400000);
+            targetExp = new Date(now.getTime() + msToAdd);
+        }
+
+        if (!targetExp || isNaN(targetExp.getTime())) {
+            alert('⚠️ بەروار یان کاتەکە هەڵەیە، تکایە ساڵنامەکە بە دروستی پڕبکەرەوە.');
+            return;
         }
 
         var existing = allSubscriptions.find(function (s) { return s.restaurantId === rId; });
@@ -328,7 +355,7 @@
             restaurantId: rId,
             restaurantName: rName,
             status: 'active',
-            periodYears: (periodYears === 'custom' ? 'custom' : parseInt(periodYears, 10) || 1),
+            periodYears: (periodYears === 'custom' ? 'custom' : parseFloat(periodYears) || 1),
             activatedAt: (existing && existing.activatedAt && existing.activatedAt.toDate) ? existing.activatedAt : (Timestamp ? Timestamp.fromDate(now) : now.toISOString()),
             lastRenewedAt: Timestamp ? Timestamp.fromDate(now) : now.toISOString(),
             expiresAt: Timestamp ? Timestamp.fromDate(targetExp) : targetExp.toISOString(),
@@ -339,12 +366,12 @@
         // Write to Firestore `subscriptions/{restaurantId}`
         setDoc(doc(db, 'subscriptions', rId), firestorePayload, { merge: true }).then(function () {
             // Write to Audit Log
-            logAuditAction(rId, actionType || 'RENEWED_1_YEAR', prevExpiry, targetExp.toISOString(), {
+            logAuditAction(rId, actionType || 'RENEWED_CUSTOM_CALENDAR', prevExpiry, targetExp.toISOString(), {
                 periodYears: periodYears,
                 restaurantName: rName
             });
 
-            alert('✨ پیرۆزە! بەشداری بۆ ڕێستۆرانتی ' + rId + ' نوێکرایەوە تا بەرواری ' + targetExp.toLocaleDateString('ku-IQ') + '.');
+            alert('✨ پیرۆزە! بەشداری بۆ ڕێستۆرانتی ' + rId + ' نوێکرایەوە تا بەروار و کاتی: ' + formatDateTimePlain(targetExp) + '.');
             closeModal();
             loadSubscriptions();
         }).catch(function (err) {
@@ -436,7 +463,50 @@
         });
     }
 
-    // Modal Handling
+    // Modal Handling & Calendar / Time Live Preview
+    function updateModalPreview() {
+        if (!modalDatePreviewText) return;
+        var period = modalPeriodYears ? modalPeriodYears.value : '1';
+        var targetDate = null;
+        if (period === 'custom') {
+            var dateVal = modalCustomDate ? modalCustomDate.value : '';
+            var timeVal = modalCustomTime ? modalCustomTime.value : '23:59';
+            if (dateVal) {
+                targetDate = new Date(dateVal + 'T' + timeVal + ':00');
+            }
+        } else {
+            var yrs = parseFloat(period) || 1;
+            var msToAdd = Math.round(yrs * 365.25 * 86400000);
+            targetDate = new Date(Date.now() + msToAdd);
+        }
+
+        if (!targetDate || isNaN(targetDate.getTime())) {
+            modalDatePreviewText.innerHTML = '<span style="color:#EF4444;">تکایە بەروار و کاتێکی دروست دیاری بکە</span>';
+            return;
+        }
+
+        var diffMs = targetDate.getTime() - Date.now();
+        var diffText = '';
+        if (diffMs <= 0) {
+            diffText = '<span style="color:#EF4444; font-weight:700;">بەسەرچووە</span>';
+        } else {
+            var d = Math.floor(diffMs / 86400000);
+            var h = Math.floor((diffMs % 86400000) / 3600000);
+            var m = Math.floor((diffMs % 3600000) / 60000);
+            if (d >= 365) {
+                var y = Math.floor(d / 365);
+                var remD = d % 365;
+                diffText = '<span style="color:#34D399; font-weight:700;">' + y + ' ساڵ' + (remD > 0 ? ' و ' + remD + ' ڕۆژ' : '') + ' لەمەودوا</span>';
+            } else if (d > 0) {
+                diffText = '<span style="color:#34D399; font-weight:700;">' + d + ' ڕۆژ و ' + h + ' کاتژمێر لەمەودوا</span>';
+            } else {
+                diffText = '<span style="color:#34D399; font-weight:700;">' + h + ' کاتژمێر و ' + m + ' خولەک لەمەودوا</span>';
+            }
+        }
+
+        modalDatePreviewText.innerHTML = '<span style="color:#FAF8F5;">' + formatDateTimePlain(targetDate) + '</span> — (' + diffText + ')';
+    }
+
     function openModal(rId, rName) {
         if (!modalOverlay) return;
         if (modalRestaurantId) {
@@ -446,8 +516,30 @@
         if (modalRestaurantName) {
             modalRestaurantName.value = rName || (rId ? rId : '');
         }
-        if (modalPeriodYears) modalPeriodYears.value = '1';
-        if (modalCustomDateWrap) modalCustomDateWrap.style.display = 'none';
+
+        var existing = allSubscriptions.find(function (s) { return s.restaurantId === rId; });
+        var defaultDate = new Date(Date.now() + 365 * 86400000);
+        var defaultTimeStr = '23:59';
+        if (existing && existing.expiresAt) {
+            var expD = existing.expiresAt.toDate ? existing.expiresAt.toDate() : new Date(existing.expiresAt);
+            if (!isNaN(expD.getTime())) {
+                defaultDate = expD;
+                var hh = String(expD.getHours()).padStart(2, '0');
+                var min = String(expD.getMinutes()).padStart(2, '0');
+                defaultTimeStr = hh + ':' + min;
+            }
+        }
+        var yyyy = defaultDate.getFullYear();
+        var mm = String(defaultDate.getMonth() + 1).padStart(2, '0');
+        var dd = String(defaultDate.getDate()).padStart(2, '0');
+
+        if (modalCustomDate) modalCustomDate.value = yyyy + '-' + mm + '-' + dd;
+        if (modalCustomTime) modalCustomTime.value = defaultTimeStr;
+
+        if (modalPeriodYears) modalPeriodYears.value = 'custom';
+        if (modalCustomDateWrap) modalCustomDateWrap.style.display = 'block';
+
+        updateModalPreview();
         modalOverlay.classList.add('active');
     }
 
@@ -473,7 +565,17 @@
             } else {
                 modalCustomDateWrap.style.display = 'none';
             }
+            updateModalPreview();
         });
+    }
+
+    if (modalCustomDate) {
+        modalCustomDate.addEventListener('input', updateModalPreview);
+        modalCustomDate.addEventListener('change', updateModalPreview);
+    }
+    if (modalCustomTime) {
+        modalCustomTime.addEventListener('input', updateModalPreview);
+        modalCustomTime.addEventListener('change', updateModalPreview);
     }
 
     if (subForm) {
@@ -483,6 +585,7 @@
             var rName = (modalRestaurantName.value || '').trim() || rId;
             var period = modalPeriodYears.value;
             var customDate = modalCustomDate ? modalCustomDate.value : '';
+            var customTime = modalCustomTime ? modalCustomTime.value : '23:59';
 
             if (!rId) {
                 alert('تکایە ناسنامەی ڕێستۆرانت (Restaurant ID) بنووسە.');
@@ -490,11 +593,11 @@
             }
 
             if (period === 'custom' && !customDate) {
-                alert('تکایە بەرواری دیاریکراوی بەسەرچوون دیاری بکە.');
+                alert('تکایە بەروار (ساڵ، مانگ، ڕۆژ) لە ساڵنامەکە دیاری بکە.');
                 return;
             }
 
-            saveSubscription(rId, rName, period, customDate, 'SET_SUBSCRIPTION');
+            saveSubscription(rId, rName, period, customDate, customTime, 'SET_SUBSCRIPTION');
         });
     }
 
@@ -530,8 +633,8 @@
             if (btnRenew) {
                 var rid = btnRenew.getAttribute('data-rid');
                 var rname = btnRenew.getAttribute('data-rname');
-                if (confirm('Renew subscription for ' + rid + ' for 1 full calendar year?')) {
-                    saveSubscription(rid, rname, 1, null, 'RENEWED_1_YEAR');
+                if (confirm('نوێکردنەوەی بەشداری بۆ ' + rid + ' بۆ ماوەی ١ ساڵی تەواو؟')) {
+                    saveSubscription(rid, rname, 1, null, null, 'RENEWED_1_YEAR');
                 }
                 return;
             }
@@ -554,7 +657,7 @@
     }
 
     // Helpers
-    function formatDate(val) {
+    function formatDateTime(val) {
         if (!val) return '—';
         var d = null;
         if (val instanceof Date) d = val;
@@ -564,8 +667,43 @@
             var ms = Date.parse(val);
             if (!isNaN(ms)) d = new Date(ms);
         }
-        if (!d || isNaN(d.getTime())) return String(val).substring(0, 10);
-        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        if (!d || isNaN(d.getTime())) return String(val).substring(0, 16);
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        var hours = d.getHours();
+        var mins = String(d.getMinutes()).padStart(2, '0');
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var h12 = hours % 12;
+        h12 = h12 ? h12 : 12;
+        var hStr = String(h12).padStart(2, '0');
+        return '<span style="color:#FAF8F5; font-family:monospace; font-size:0.88rem;">' + y + '/' + m + '/' + day + '</span> <span style="color:#D4AF37; font-size:0.78rem; margin-right:4px; font-weight:600;">' + hStr + ':' + mins + ' ' + ampm + '</span>';
+    }
+
+    function formatDateTimePlain(val) {
+        if (!val) return '—';
+        var d = null;
+        if (val instanceof Date) d = val;
+        else if (val && typeof val.toDate === 'function') d = val.toDate();
+        else if (val && val.seconds != null) d = new Date(val.seconds * 1000);
+        else if (typeof val === 'string' || typeof val === 'number') {
+            var ms = Date.parse(val);
+            if (!isNaN(ms)) d = new Date(ms);
+        }
+        if (!d || isNaN(d.getTime())) return String(val).substring(0, 16);
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        var hours = d.getHours();
+        var mins = String(d.getMinutes()).padStart(2, '0');
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var h12 = hours % 12;
+        h12 = h12 ? h12 : 12;
+        return y + '/' + m + '/' + day + ' (' + h12 + ':' + mins + ' ' + ampm + ')';
+    }
+
+    function formatDate(val) {
+        return formatDateTime(val);
     }
 
     function escapeHtml(str) {
