@@ -38,14 +38,22 @@ window.getMenuLicenseExpireDate = getMenuLicenseExpireDate;
 window.isMenuExpirePreviewRequested = isMenuExpirePreviewRequested;
 window.getMenuExpireEndMs = getMenuExpireEndMs;
 
-function compactItemForOfflineStorage(it) {
-    if (!it) return it;
-    var copy = Object.assign({}, it);
-    if (copy.image && typeof copy.image === 'string' && (copy.image.indexOf('data:') === 0 || copy.image.length > 2048)) {
-        copy.image = '';
+// Immediately reclaim space from duplicate/redundant cache keys
+try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
+
+// Self-heal corrupted cache if previous version stripped images
+try {
+    var _rawCachedApp = localStorage.getItem('cachedMenuItems');
+    if (_rawCachedApp) {
+        var _parsedCachedApp = JSON.parse(_rawCachedApp);
+        if (Array.isArray(_parsedCachedApp) && _parsedCachedApp.length > 0) {
+            var _withImgApp = _parsedCachedApp.filter(function (it) { return it && it.image; }).length;
+            if (_withImgApp === 0) {
+                localStorage.removeItem('cachedMenuItems');
+            }
+        }
     }
-    return copy;
-}
+} catch (e) {}
 
 function safeSetItem(key, value) {
     try {
@@ -58,15 +66,14 @@ function safeSetItem(key, value) {
                 return;
             } catch (e2) {}
 
-            if (key === 'cachedMenuItems' && typeof value === 'string') {
-                try {
-                    var parsed = JSON.parse(value);
-                    if (Array.isArray(parsed)) {
-                        var compacted = parsed.map(compactItemForOfflineStorage);
-                        localStorage.setItem(key, JSON.stringify(compacted));
-                        return;
-                    }
-                } catch (e3) {}
+            try {
+                localStorage.removeItem('cachedSales');
+                localStorage.removeItem('cachedExpenses');
+                localStorage.removeItem('cachedFavorites');
+                localStorage.removeItem('menu_ratings');
+                localStorage.setItem(key, value);
+            } catch (e3) {
+                // Keep running in memory with full data
             }
         }
     }
@@ -1293,7 +1300,7 @@ function paintMenuFromItems(items, options) {
     });
     var cat = _activeCategory || (isEmenuPage() ? ALL_CATEGORY_ID : null);
     if (cat) {
-        switchCategory(cat, { silent: true, immediate: true });
+        switchCategory(cat, { silent: true, immediate: true, forceRender: true });
     } else {
         autoSelectCategoryAfterRender(true);
     }
@@ -1464,8 +1471,19 @@ function applyMenuItemsUpdate(items, options) {
 
     clearMenuLoadingSpinner();
 
-    if (!_menuUiReady || menuStillLoading()) {
-        paintMenuFromItems(items, { autoSelect: true });
+    // Check if current DOM is missing images while incoming items have images
+    var domNeedsImageRefresh = false;
+    try {
+        var firstImg = container.querySelector('.menu-card-img');
+        if (firstImg && firstImg.src && (firstImg.src.indexOf('data:image/svg') !== -1 || firstImg.src.indexOf('placehold.co') !== -1)) {
+            if (items.some(function (it) { return it && it.image; })) {
+                domNeedsImageRefresh = true;
+            }
+        }
+    } catch (e) {}
+
+    if (options.force || domNeedsImageRefresh || !_menuUiReady || menuStillLoading()) {
+        paintMenuFromItems(items, { autoSelect: false });
         return;
     }
 
@@ -1477,7 +1495,7 @@ function applyMenuItemsUpdate(items, options) {
     if (catBarChanged) {
         autoSelectCategoryAfterRender(true);
     } else if (_activeCategory) {
-        switchCategory(_activeCategory, { silent: true });
+        switchCategory(_activeCategory, { silent: true, forceRender: true });
     } else if (items.length > 0) {
         autoSelectCategoryAfterRender(true);
     } else {
@@ -1945,8 +1963,8 @@ function scrollToCategorySection(category, behavior) {
     }, behavior === 'smooth' ? 900 : 80);
 }
 
-function ensureAllCategoriesRendered() {
-    var needsRender = _activeCategory !== ALL_CATEGORY_ID || menuStillLoading() ||
+function ensureAllCategoriesRendered(force) {
+    var needsRender = force || _activeCategory !== ALL_CATEGORY_ID || menuStillLoading() ||
         !document.querySelector('[data-category-section]');
     _activeCategory = ALL_CATEGORY_ID;
     document.body.classList.add('category-selected', 'category-all-active');
@@ -1964,7 +1982,7 @@ function switchCategory(category, options) {
 
     /* E-menu: keep full list, sticky bar scrolls to sections (restaurant-app style) */
     if (emenu && !options.forceFilter) {
-        ensureAllCategoriesRendered();
+        ensureAllCategoriesRendered(options.forceRender || options.force);
         setCategoryPillActive(category);
 
         if (options.silent) return;
@@ -6865,12 +6883,19 @@ window.openInstallTutorial = openInstallTutorial;
    ======================================== */
 
 function normalizeImageUrl(url) {
-    if (!url) return null;
+    if (!url || typeof url !== 'string') return null;
+    var trimmed = url.trim();
+    if (!trimmed) return null;
+    if (trimmed.indexOf('data:image/') === 0 || trimmed.indexOf('blob:') === 0 ||
+        trimmed.indexOf('/') === 0 || trimmed.indexOf('./') === 0 || trimmed.indexOf('../') === 0 ||
+        trimmed.indexOf('images/') === 0 || trimmed.indexOf('assets/') === 0) {
+        return trimmed;
+    }
     try {
-        new URL(url);
-        return url;
+        new URL(trimmed);
+        return trimmed;
     } catch (e) {
-        return null;
+        return trimmed;
     }
 }
 

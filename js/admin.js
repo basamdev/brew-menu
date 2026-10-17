@@ -81,52 +81,47 @@ function readCachedMenuItemsFlat() {
 // Immediately reclaim space from duplicate/redundant cache keys
 try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
 
-function compactItemForOfflineCache(it) {
-    if (!it) return it;
-    var copy = Object.assign({}, it);
-    // Large base64 data URIs are the primary cause of localStorage 5MB quota exhaustion.
-    // In-memory MenuData keeps the full image; we only strip massive base64 payloads from the offline JSON backup.
-    if (copy.image && typeof copy.image === 'string' && (copy.image.indexOf('data:') === 0 || copy.image.length > 2048)) {
-        copy.image = '';
+// Self-heal corrupted cache if previous version stripped images
+try {
+    var _rawCached = localStorage.getItem('cachedMenuItems');
+    if (_rawCached) {
+        var _parsedCached = JSON.parse(_rawCached);
+        if (Array.isArray(_parsedCached) && _parsedCached.length > 0) {
+            var _withImg = _parsedCached.filter(function (it) { return it && it.image; }).length;
+            if (_withImg === 0) {
+                localStorage.removeItem('cachedMenuItems');
+            }
+        }
     }
-    return copy;
-}
+} catch (e) {}
 
 function writeCachedMenuItemsFlat(items) {
     if (!items || !Array.isArray(items)) return;
     // Always remove redundant cashier cache key to free up storage space
     try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
 
-    // 1. Try writing directly
+    // 1. Try writing directly with full images intact
     try {
         localStorage.setItem('cachedMenuItems', JSON.stringify(items));
         return;
     } catch (e) {}
 
-    // 2. If quota exceeded, evict non-essential items and try again
+    // 2. If quota exceeded, evict non-essential items (sales, expenses, etc.) and try again
     evictNonEssentialCacheKeys();
     try {
         localStorage.setItem('cachedMenuItems', JSON.stringify(items));
         return;
     } catch (e2) {}
 
-    // 3. Compact items by stripping massive data URIs for localStorage only (live app/DOM still has full images in memory)
-    try {
-        var compacted = items.map(compactItemForOfflineCache);
-        localStorage.setItem('cachedMenuItems', JSON.stringify(compacted));
-        return;
-    } catch (e3) {}
-
-    // 4. If still exceeding quota, clear old financial caches and retry
+    // 3. Clear larger historical financial caches if still full, NEVER strip item images
     try {
         localStorage.removeItem('cachedSales');
         localStorage.removeItem('cachedExpenses');
         localStorage.removeItem('cachedFavorites');
         localStorage.removeItem('menu_ratings');
-        var compacted2 = items.map(compactItemForOfflineCache);
-        localStorage.setItem('cachedMenuItems', JSON.stringify(compacted2));
-    } catch (e4) {
-        // Continue from memory without throwing unhandled error
+        localStorage.setItem('cachedMenuItems', JSON.stringify(items));
+    } catch (e3) {
+        // Continue from memory with full images intact
     }
 }
 
@@ -5928,16 +5923,9 @@ function writeCachedOffersAdmin(list) {
     try {
         localStorage.setItem('cachedMenuOffers', JSON.stringify(list));
     } catch (e) {
-        // If quota is tight, strip oversized base64 images from offline backup
+        evictNonEssentialCacheKeys();
         try {
-            var compacted = list.map(function (o) {
-                var copy = Object.assign({}, o);
-                if (copy.image && typeof copy.image === 'string' && copy.image.startsWith('data:') && copy.image.length > 2048) {
-                    copy.image = '';
-                }
-                return copy;
-            });
-            localStorage.setItem('cachedMenuOffers', JSON.stringify(compacted));
+            localStorage.setItem('cachedMenuOffers', JSON.stringify(list));
         } catch (e2) {}
     }
 }
