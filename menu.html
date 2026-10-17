@@ -2657,125 +2657,12 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
     <script src="js/menu-data.js?v=133"></script>
     <script src="js/app.js?v=197"></script>
     <script src="js/local-api.js?v=120"></script>
-    <script>
-        (function () {
-            var heroLogo = document.querySelector('.menu-hero-logo');
-            var headerLogo = document.getElementById('headerLogo');
-            // Single → index.html | Double → login.html
-            function goIndex() { window.location.href = 'index.html'; }
-            setupLogoClickActions(heroLogo, goIndex, 'login.html');
-            setupLogoClickActions(headerLogo, goIndex, 'login.html');
-
-            function syncPoweredLabel() {
-                var currentLang = localStorage.getItem('selectedLang') || 'ku';
-                var poweredLabel = document.getElementById('menuPoweredLabel');
-                if (poweredLabel) {
-                    if (currentLang === 'ku') poweredLabel.textContent = 'پشتگیری کراوە لەلایەن';
-                    else if (currentLang === 'ar') poweredLabel.textContent = 'التطوير بواسطة';
-                    else if (currentLang === 'en') poweredLabel.textContent = 'Powered by';
-                }
-            }
-            syncPoweredLabel();
-            window.addEventListener('storage', syncPoweredLabel);
-
-            // ----------------------------------------------------
-            // Smart Serve In-App Viewer Modal with Back Button
-            // ----------------------------------------------------
-            function openSmartServeViewer() {
-                var overlay = document.getElementById('ssViewerOverlay');
-                var iframe = document.getElementById('ssViewerIframe');
-                var loader = document.getElementById('ssViewerLoader');
-                var backText = document.getElementById('ssViewerBackText');
-                var loadingText = document.getElementById('ssViewerLoadingText');
-                if (!overlay || !iframe) return;
-
-                var lang = (document.documentElement.getAttribute('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
-                if (backText) {
-                    if (lang === 'ar') backText.textContent = 'العودة للقائمة';
-                    else if (lang === 'en') backText.textContent = 'Back to Menu';
-                    else backText.textContent = 'گەڕانەوە بۆ مێنوو';
-                }
-                if (loadingText) {
-                    if (lang === 'ar') loadingText.textContent = 'جاري التحميل...';
-                    else if (lang === 'en') loadingText.textContent = 'Loading...';
-                    else loadingText.textContent = 'چاوەڕوان بە...';
-                }
-
-                if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
-                    if (loader) loader.classList.remove('hidden');
-                    iframe.classList.remove('loaded');
-                    iframe.onload = function() {
-                        if (loader) loader.classList.add('hidden');
-                        iframe.classList.add('loaded');
-                    };
-                    iframe.src = 'https://smart-serve1.vercel.app/';
-                }
-
-                overlay.classList.add('active');
-                overlay.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-
-                try {
-                    history.pushState({ ssViewerOpen: true }, '', window.location.href);
-                } catch(e) {}
-            }
-
-            function closeSmartServeViewer(shouldRevertHistory) {
-                var overlay = document.getElementById('ssViewerOverlay');
-                if (!overlay || !overlay.classList.contains('active')) return;
-                overlay.classList.remove('active');
-                overlay.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-                if (shouldRevertHistory !== false && history.state && history.state.ssViewerOpen) {
-                    try { history.back(); } catch(e) {}
-                }
-            }
-
-            var menuPoweredLink = document.getElementById('menuPoweredLink');
-            if (menuPoweredLink) {
-                menuPoweredLink.addEventListener('click', function(e) {
-                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                        e.preventDefault();
-                        openSmartServeViewer();
-                    }
-                });
-            }
-
-            var expiredLogoWrap = document.querySelector('.menu-expired-logo-wrap');
-            if (expiredLogoWrap) {
-                expiredLogoWrap.addEventListener('click', function(e) {
-                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                        e.preventDefault();
-                        openSmartServeViewer();
-                    }
-                });
-            }
-
-            var ssBackBtn = document.getElementById('ssViewerBackBtn');
-            var ssBackdrop = document.getElementById('ssViewerBackdrop');
-            if (ssBackBtn) ssBackBtn.addEventListener('click', function() { closeSmartServeViewer(true); });
-            if (ssBackdrop) ssBackdrop.addEventListener('click', function() { closeSmartServeViewer(true); });
-
-            window.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeSmartServeViewer(true);
-            });
-
-            window.addEventListener('popstate', function() {
-                var overlay = document.getElementById('ssViewerOverlay');
-                if (overlay && overlay.classList.contains('active')) {
-                    closeSmartServeViewer(false);
-                }
-            });
-
-        })();
-    </script>
-
     <!-- Smart Serve In-App Viewer Modal with Back Button -->
     <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">
-        <div class="ss-viewer-backdrop" id="ssViewerBackdrop"></div>
+        <div class="ss-viewer-backdrop" id="ssViewerBackdrop" onclick="window.closeSmartServeViewer(true)"></div>
         <div class="ss-viewer-container">
             <header class="ss-viewer-header">
-                <button type="button" class="ss-viewer-back-btn" id="ssViewerBackBtn" aria-label="Back">
+                <button type="button" class="ss-viewer-back-btn" id="ssViewerBackBtn" onclick="window.closeSmartServeViewer(true)" aria-label="Return to Menu">
                     <span class="ss-viewer-back-icon" aria-hidden="true">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
@@ -2804,5 +2691,133 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             </div>
         </div>
     </div>
+
+    <script>
+        // Global Smart Serve In-App Viewer Controller
+        window.closeSmartServeViewer = function(shouldRevertHistory) {
+            var overlay = document.getElementById('ssViewerOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            if (shouldRevertHistory !== false && window.history && window.history.state && window.history.state.ssViewerOpen) {
+                try { window.history.back(); } catch(e) {}
+            }
+        };
+
+        window.openSmartServeViewer = function() {
+            var overlay = document.getElementById('ssViewerOverlay');
+            var iframe = document.getElementById('ssViewerIframe');
+            var loader = document.getElementById('ssViewerLoader');
+            var backText = document.getElementById('ssViewerBackText');
+            var loadingText = document.getElementById('ssViewerLoadingText');
+            if (!overlay || !iframe) return;
+
+            var lang = (document.documentElement.getAttribute('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
+            if (backText) {
+                if (lang === 'ar') backText.textContent = 'العودة للقائمة';
+                else if (lang === 'en') backText.textContent = 'Back to Menu';
+                else backText.textContent = 'گەڕانەوە بۆ مێنوو';
+            }
+            if (loadingText) {
+                if (lang === 'ar') loadingText.textContent = 'جاري التحميل...';
+                else if (lang === 'en') loadingText.textContent = 'Loading...';
+                else loadingText.textContent = 'چاوەڕوان بە...';
+            }
+
+            if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
+                if (loader) loader.classList.remove('hidden');
+                iframe.classList.remove('loaded');
+                iframe.onload = function() {
+                    if (loader) loader.classList.add('hidden');
+                    iframe.classList.add('loaded');
+                };
+                iframe.src = 'https://smart-serve1.vercel.app/';
+            }
+
+            overlay.style.display = 'flex';
+            void overlay.offsetWidth;
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                window.history.pushState({ ssViewerOpen: true }, '', window.location.href);
+            } catch(e) {}
+        };
+
+        // Capture-phase event delegation for instantaneous click/touch handling
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.closest('#ssViewerBackBtn') || e.target.closest('#ssViewerBackdrop'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.closeSmartServeViewer(true);
+            }
+        }, true);
+
+        document.addEventListener('touchend', function(e) {
+            if (e.target && (e.target.closest('#ssViewerBackBtn') || e.target.closest('#ssViewerBackdrop'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.closeSmartServeViewer(true);
+            }
+        }, { capture: true, passive: false });
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') window.closeSmartServeViewer(true);
+        });
+
+        window.addEventListener('popstate', function() {
+            var overlay = document.getElementById('ssViewerOverlay');
+            if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
+                window.closeSmartServeViewer(false);
+            }
+        });
+
+        (function () {
+            var heroLogo = document.querySelector('.menu-hero-logo');
+            var headerLogo = document.getElementById('headerLogo');
+            // Single → index.html | Double → login.html
+            function goIndex() { window.location.href = 'index.html'; }
+            if (typeof setupLogoClickActions === 'function') {
+                setupLogoClickActions(heroLogo, goIndex, 'login.html');
+                setupLogoClickActions(headerLogo, goIndex, 'login.html');
+            }
+
+            function syncPoweredLabel() {
+                var currentLang = localStorage.getItem('selectedLang') || 'ku';
+                var poweredLabel = document.getElementById('menuPoweredLabel');
+                if (poweredLabel) {
+                    if (currentLang === 'ku') poweredLabel.textContent = 'پشتگیری کراوە لەلایەن';
+                    else if (currentLang === 'ar') poweredLabel.textContent = 'التطوير بواسطة';
+                    else if (currentLang === 'en') poweredLabel.textContent = 'Powered by';
+                }
+            }
+            syncPoweredLabel();
+            window.addEventListener('storage', syncPoweredLabel);
+
+            var menuPoweredLink = document.getElementById('menuPoweredLink');
+            if (menuPoweredLink) {
+                menuPoweredLink.addEventListener('click', function(e) {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                        e.preventDefault();
+                        window.openSmartServeViewer();
+                    }
+                });
+            }
+
+            var expiredLogoWrap = document.querySelector('.menu-expired-logo-wrap');
+            if (expiredLogoWrap) {
+                expiredLogoWrap.addEventListener('click', function(e) {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                        e.preventDefault();
+                        window.openSmartServeViewer();
+                    }
+                });
+            }
+
+        })();
+    </script>
 </body>
 </html>

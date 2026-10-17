@@ -1152,9 +1152,127 @@
 
     </main>
 
+    <!-- Smart Serve In-App Viewer Modal with Back Button -->
+    <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">
+        <div class="ss-viewer-backdrop" id="ssViewerBackdrop" onclick="window.closeSmartServeViewer(true)"></div>
+        <div class="ss-viewer-container">
+            <header class="ss-viewer-header">
+                <button type="button" class="ss-viewer-back-btn" id="ssViewerBackBtn" onclick="window.closeSmartServeViewer(true)" aria-label="Return to Menu">
+                    <span class="ss-viewer-back-icon" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </span>
+                    <span class="ss-viewer-back-text" id="ssViewerBackText">گەڕانەوە</span>
+                </button>
+                <div class="ss-viewer-brand">
+                    <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="ss-viewer-brand-logo">
+                    <span class="ss-viewer-brand-name">Smart Serve</span>
+                </div>
+                <a href="https://smart-serve1.vercel.app/" target="_blank" rel="noopener noreferrer" class="ss-viewer-external-btn" id="ssViewerExternalBtn" title="Open in browser" aria-label="Open in browser">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                    </svg>
+                </a>
+            </header>
+            <div class="ss-viewer-body">
+                <div class="ss-viewer-loader" id="ssViewerLoader">
+                    <div class="ss-viewer-spinner"></div>
+                    <span class="ss-viewer-loading-text" id="ssViewerLoadingText">چاوەڕوان بە...</span>
+                </div>
+                <iframe class="ss-viewer-iframe" id="ssViewerIframe" title="Smart Serve" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+
     <!-- Core App Logic & Settings -->
     <script src="js/app.js?v=196"></script>
     <script>
+        // Global Smart Serve In-App Viewer Controller
+        window.closeSmartServeViewer = function(shouldRevertHistory) {
+            var overlay = document.getElementById('ssViewerOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.style.display = 'none';
+            document.body.style.overflow = '';
+            if (shouldRevertHistory !== false && window.history && window.history.state && window.history.state.ssViewerOpen) {
+                try { window.history.back(); } catch(e) {}
+            }
+        };
+
+        window.openSmartServeViewer = function() {
+            var overlay = document.getElementById('ssViewerOverlay');
+            var iframe = document.getElementById('ssViewerIframe');
+            var loader = document.getElementById('ssViewerLoader');
+            var backText = document.getElementById('ssViewerBackText');
+            var loadingText = document.getElementById('ssViewerLoadingText');
+            if (!overlay || !iframe) return;
+
+            var lang = (document.documentElement.getAttribute('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
+            if (backText) {
+                if (lang === 'ar') backText.textContent = 'رجوع';
+                else if (lang === 'en') backText.textContent = 'Back';
+                else backText.textContent = 'گەڕانەوە';
+            }
+            if (loadingText) {
+                if (lang === 'ar') loadingText.textContent = 'جاري التحميل...';
+                else if (lang === 'en') loadingText.textContent = 'Loading...';
+                else loadingText.textContent = 'چاوەڕوان بە...';
+            }
+
+            if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
+                if (loader) loader.classList.remove('hidden');
+                iframe.classList.remove('loaded');
+                iframe.onload = function() {
+                    if (loader) loader.classList.add('hidden');
+                    iframe.classList.add('loaded');
+                };
+                iframe.src = 'https://smart-serve1.vercel.app/';
+            }
+
+            overlay.style.display = 'flex';
+            // Force browser repaint before adding active class for silky transition
+            void overlay.offsetWidth;
+            overlay.classList.add('active');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                window.history.pushState({ ssViewerOpen: true }, '', window.location.href);
+            } catch(e) {}
+        };
+
+        // Capture-phase event delegation for instantaneous click/touch handling
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.closest('#ssViewerBackBtn') || e.target.closest('#ssViewerBackdrop'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.closeSmartServeViewer(true);
+            }
+        }, true);
+
+        document.addEventListener('touchend', function(e) {
+            if (e.target && (e.target.closest('#ssViewerBackBtn') || e.target.closest('#ssViewerBackdrop'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.closeSmartServeViewer(true);
+            }
+        }, { capture: true, passive: false });
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') window.closeSmartServeViewer(true);
+        });
+
+        window.addEventListener('popstate', function() {
+            var overlay = document.getElementById('ssViewerOverlay');
+            if (overlay && (overlay.classList.contains('active') || overlay.style.display === 'flex')) {
+                window.closeSmartServeViewer(false);
+            }
+        });
+
         (function () {
             'use strict';
 
@@ -1432,121 +1550,17 @@
             applyLanguage(currentLang);
             setupQuickLinks();
 
-            // ----------------------------------------------------
-            // Smart Serve In-App Viewer Modal with Back Button
-            // ----------------------------------------------------
-            function openSmartServeViewer() {
-                var overlay = document.getElementById('ssViewerOverlay');
-                var iframe = document.getElementById('ssViewerIframe');
-                var loader = document.getElementById('ssViewerLoader');
-                var backText = document.getElementById('ssViewerBackText');
-                var loadingText = document.getElementById('ssViewerLoadingText');
-                if (!overlay || !iframe) return;
-
-                var lang = (document.documentElement.getAttribute('lang') || currentLang || 'ku').toLowerCase();
-                if (backText) {
-                    if (lang === 'ar') backText.textContent = 'رجوع';
-                    else if (lang === 'en') backText.textContent = 'Back';
-                    else backText.textContent = 'گەڕانەوە';
-                }
-                if (loadingText) {
-                    if (lang === 'ar') loadingText.textContent = 'جاري التحميل...';
-                    else if (lang === 'en') loadingText.textContent = 'Loading...';
-                    else loadingText.textContent = 'چاوەڕوان بە...';
-                }
-
-                if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
-                    if (loader) loader.classList.remove('hidden');
-                    iframe.classList.remove('loaded');
-                    iframe.onload = function() {
-                        if (loader) loader.classList.add('hidden');
-                        iframe.classList.add('loaded');
-                    };
-                    iframe.src = 'https://smart-serve1.vercel.app/';
-                }
-
-                overlay.classList.add('active');
-                overlay.setAttribute('aria-hidden', 'false');
-                document.body.style.overflow = 'hidden';
-
-                try {
-                    history.pushState({ ssViewerOpen: true }, '', window.location.href);
-                } catch(e) {}
-            }
-
-            function closeSmartServeViewer(shouldRevertHistory) {
-                var overlay = document.getElementById('ssViewerOverlay');
-                if (!overlay || !overlay.classList.contains('active')) return;
-                overlay.classList.remove('active');
-                overlay.setAttribute('aria-hidden', 'true');
-                document.body.style.overflow = '';
-                if (shouldRevertHistory !== false && history.state && history.state.ssViewerOpen) {
-                    try { history.back(); } catch(e) {}
-                }
-            }
-
             var poweredBySection = document.getElementById('poweredBySection');
             if (poweredBySection) {
                 poweredBySection.addEventListener('click', function(e) {
                     if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                         e.preventDefault();
-                        openSmartServeViewer();
+                        window.openSmartServeViewer();
                     }
                 });
             }
 
-            var ssBackBtn = document.getElementById('ssViewerBackBtn');
-            var ssBackdrop = document.getElementById('ssViewerBackdrop');
-            if (ssBackBtn) ssBackBtn.addEventListener('click', function() { closeSmartServeViewer(true); });
-            if (ssBackdrop) ssBackdrop.addEventListener('click', function() { closeSmartServeViewer(true); });
-
-            window.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeSmartServeViewer(true);
-            });
-
-            window.addEventListener('popstate', function() {
-                var overlay = document.getElementById('ssViewerOverlay');
-                if (overlay && overlay.classList.contains('active')) {
-                    closeSmartServeViewer(false);
-                }
-            });
-
         })();
     </script>
-
-    <!-- Smart Serve In-App Viewer Modal with Back Button -->
-    <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">
-        <div class="ss-viewer-backdrop" id="ssViewerBackdrop"></div>
-        <div class="ss-viewer-container">
-            <header class="ss-viewer-header">
-                <button type="button" class="ss-viewer-back-btn" id="ssViewerBackBtn" aria-label="Back">
-                    <span class="ss-viewer-back-icon" aria-hidden="true">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                    </span>
-                    <span class="ss-viewer-back-text" id="ssViewerBackText">گەڕانەوە</span>
-                </button>
-                <div class="ss-viewer-brand">
-                    <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="ss-viewer-brand-logo">
-                    <span class="ss-viewer-brand-name">Smart Serve</span>
-                </div>
-                <a href="https://smart-serve1.vercel.app/" target="_blank" rel="noopener noreferrer" class="ss-viewer-external-btn" id="ssViewerExternalBtn" title="Open in browser" aria-label="Open in browser">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                </a>
-            </header>
-            <div class="ss-viewer-body">
-                <div class="ss-viewer-loader" id="ssViewerLoader">
-                    <div class="ss-viewer-spinner"></div>
-                    <span class="ss-viewer-loading-text" id="ssViewerLoadingText">چاوەڕوان بە...</span>
-                </div>
-                <iframe class="ss-viewer-iframe" id="ssViewerIframe" title="Smart Serve" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" loading="lazy"></iframe>
-            </div>
-        </div>
-    </div>
 </body>
 </html>
