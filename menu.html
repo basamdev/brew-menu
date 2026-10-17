@@ -1408,6 +1408,11 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.18s ease;
+            pointer-events: none;
+        }
+
+        .ss-viewer-back-text {
+            pointer-events: none;
         }
 
         .ss-viewer-back-btn:hover .ss-viewer-back-icon {
@@ -2686,9 +2691,9 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
 
                 var lang = (document.documentElement.getAttribute('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
                 if (backText) {
-                    if (lang === 'ar') backText.textContent = 'رجوع';
-                    else if (lang === 'en') backText.textContent = 'Back';
-                    else backText.textContent = 'گەڕانەوە';
+                    if (lang === 'ar') backText.textContent = 'العودة للقائمة';
+                    else if (lang === 'en') backText.textContent = 'Back to Menu';
+                    else backText.textContent = 'گەڕانەوە بۆ مێنوو';
                 }
                 if (loadingText) {
                     if (lang === 'ar') loadingText.textContent = 'جاري التحميل...';
@@ -2776,7 +2781,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </span>
-                    <span class="ss-viewer-back-text" id="ssViewerBackText">گەڕانەوە</span>
+                    <span class="ss-viewer-back-text" id="ssViewerBackText">گەڕانەوە بۆ مێنوو</span>
                 </button>
                 <div class="ss-viewer-brand">
                     <img src="images/smart-serve-logo.png?v=3" alt="Smart Serve" class="ss-viewer-brand-logo">
