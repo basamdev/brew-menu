@@ -247,6 +247,12 @@
         });
     }
 
+    function setItems(newItems) {
+        if (!Array.isArray(newItems)) return;
+        _items.length = 0;
+        _items.push.apply(_items, newItems);
+    }
+
     function getItems() { return getCombinedItems(_items); }
     function getCategories() { return getCombinedCategories(_categories); }
 
@@ -278,6 +284,7 @@
         loadItems: loadItems,
         loadCategories: loadCategories,
         getItems: getItems,
+        setItems: setItems,
         getCategories: getCategories,
         filterItems: filterItems,
         unsubscribeAll: unsubscribeAll,

@@ -345,7 +345,7 @@ function sumExpensesInRange(start, end) {
 function hydrateItemsUiFromCache() {
     var docs = getItemDocsFromLocalCache();
     if (!docs.length) return false;
-    _itemsSnapDocs = docs;
+    _itemsSnapDocs = sortItemDocsForAdmin(docs);
     refreshCategoryFilterOptions();
     refreshItemCategoryDropdown();
     var searchEl = document.getElementById('itemSearch');
@@ -2088,10 +2088,10 @@ function loadManageItems() {
                     console.log('[admin items] Trying REST API fallback');
                     fetchMenuItemsForAdmin(12000).then(function (items) {
                         if (items && items.length > 0) {
-                            _itemsSnapDocs = items.map(function (d) {
+                            _itemsSnapDocs = sortItemDocsForAdmin(items.map(function (d) {
                                 return { id: d.id, data: function () { return d; } };
-                            });
-                            renderItemsList(_itemsSnapDocs);
+                            }));
+                            renderCurrentAdminItemsList();
                             loadCategoryFilter();
                         } else if (el.querySelector('.loading')) {
                             el.innerHTML = '<p style="color:var(--text-muted);">' + (S.menuConnectionHint || 'Check your connection and try again.') + '</p>';
@@ -2120,8 +2120,8 @@ function loadManageItems() {
         _itemsSnapDocs = sortItemDocsForAdmin(items.map(function (d) {
             return { id: d.id, data: function () { return d; } };
         }));
-        renderItemsList(_itemsSnapDocs);
-        loadCategoryFilter();
+        renderCurrentAdminItemsList();
+        renderItemsCategoryBar();
         refreshCategoriesCache(function () {
             refreshCategoryFilterOptions();
             refreshItemCategoryDropdown();
@@ -2137,10 +2137,10 @@ function loadManageItems() {
         console.log('[admin items] Trying REST API fallback after error');
         fetchMenuItemsForAdmin(12000).then(function (items) {
             if (items && items.length > 0) {
-                _itemsSnapDocs = items.map(function (d) {
+                _itemsSnapDocs = sortItemDocsForAdmin(items.map(function (d) {
                     return { id: d.id, data: function () { return d; } };
-                });
-                renderItemsList(_itemsSnapDocs);
+                }));
+                renderCurrentAdminItemsList();
                 loadCategoryFilter();
             } else {
                 var el = document.getElementById('itemsList');
@@ -2196,34 +2196,43 @@ function sortItemDocsForAdmin(docs) {
         var ao = catOrder[ca] != null ? catOrder[ca] : 9999;
         var bo = catOrder[cb] != null ? catOrder[cb] : 9999;
         if (ao !== bo) return ao - bo;
-        var ia = da && da.order != null ? Number(da.order) : 0;
-        var ib = db_ && db_.order != null ? Number(db_.order) : 0;
+        var ia = (da && da.order != null && da.order !== '' && !isNaN(Number(da.order))) ? Number(da.order) : 999999;
+        var ib = (db_ && db_.order != null && db_.order !== '' && !isNaN(Number(db_.order))) ? Number(db_.order) : 999999;
         if (ia !== ib) return ia - ib;
         return String(a.id || '').localeCompare(String(b.id || ''));
     });
 }
 
 function filterItemDocs(docs, searchTerm, cat) {
-    var filtered = docs.slice();
+    var filtered = (docs || []).slice();
     if (searchTerm) {
         var lang = localStorage.getItem('selectedLang') || 'ku';
         var term = searchTerm.toLowerCase();
         filtered = filtered.filter(function (d) {
-            var item = d.data();
-            var name = (item['name_' + lang] || item.name_en || '').toLowerCase();
+            var item = typeof d.data === 'function' ? d.data() : (d.data || d);
+            var name = (item['name_' + lang] || item.name_en || item.name_ar || item.name_ku || '').toLowerCase();
             return name.indexOf(term) !== -1;
         });
     }
     if (cat && cat !== 'all') {
-        var catLower = cat.toLowerCase().trim();
+        var catLower = String(cat).toLowerCase().trim();
         filtered = filtered.filter(function (d) {
-            var dc = d.data().category;
+            var item = typeof d.data === 'function' ? d.data() : (d.data || d);
+            var dc = item.category;
             if (!dc) return false;
             var dcLower = String(dc).toLowerCase().trim();
             return dcLower === catLower || dcLower.indexOf(catLower) !== -1;
         });
     }
     return filtered;
+}
+
+function renderCurrentAdminItemsList() {
+    var searchEl = document.getElementById('itemSearch');
+    var searchTerm = searchEl ? searchEl.value : '';
+    var cat = itemsActiveCategory || 'all';
+    var filtered = filterItemDocs(_itemsSnapDocs, searchTerm, cat);
+    renderItemsList(filtered);
 }
 
 function startItemsListener() {
@@ -2297,11 +2306,7 @@ function startItemsListener() {
         _itemsSnapDocs = collectItemDocsFromSnap(snap);
         refreshCategoryFilterOptions();
         refreshItemCategoryDropdown();
-        var searchEl = document.getElementById('itemSearch');
-        var catEl = document.getElementById('categoryFilter');
-        var searchTerm = searchEl ? searchEl.value : '';
-        var cat = catEl ? catEl.value : itemsActiveCategory;
-        renderItemsList(filterItemDocs(_itemsSnapDocs, searchTerm, cat));
+        renderCurrentAdminItemsList();
 
         var cashierCache = [];
         var menuCache = [];
@@ -2367,10 +2372,10 @@ function loadItemsList() {
      }
      var items = MenuData.getItems();
      if (items.length > 0) {
-         _itemsSnapDocs = items.map(function (d) {
+         _itemsSnapDocs = sortItemDocsForAdmin(items.map(function (d) {
              return { id: d.id, data: function () { return d; } };
-         });
-         renderItemsList(_itemsSnapDocs);
+         }));
+         renderCurrentAdminItemsList();
          loadCategoryFilter();
          return;
      }
@@ -2384,18 +2389,18 @@ function loadItemsList() {
      // Still empty after auth — do not leave spinner forever.
      if (adminSectionStillLoading('itemsList')) {
          MenuData.loadItems(6000, function (fresh) {
-             _itemsSnapDocs = fresh.map(function (d) {
+             _itemsSnapDocs = sortItemDocsForAdmin(fresh.map(function (d) {
                  return { id: d.id, data: function () { return d; } };
-             });
-             renderItemsList(_itemsSnapDocs);
+             }));
+             renderCurrentAdminItemsList();
              loadCategoryFilter();
          }, function () {
              fetchMenuItemsForAdmin(12000).then(function (restItems) {
                  if (restItems && restItems.length) {
-                     _itemsSnapDocs = restItems.map(function (d) {
+                     _itemsSnapDocs = sortItemDocsForAdmin(restItems.map(function (d) {
                          return { id: d.id, data: function () { return d; } };
-                     });
-                     renderItemsList(_itemsSnapDocs);
+                     }));
+                     renderCurrentAdminItemsList();
                      loadCategoryFilter();
                  } else if (!hydrateItemsUiFromCache()) {
                      clearAdminLoadingEl('itemsList', '<p>' + (S.menuConnectionHint || S.noItemsFound) + '</p>');
@@ -3006,7 +3011,7 @@ function persistItemOrder(itemList) {
     itemList.forEach(function (docObj, idx) {
         if (!docObj) return;
         if (typeof docObj.data === 'function') {
-            var currentData = docObj.data() || {};
+            var currentData = Object.assign({}, docObj.data() || {});
             currentData.order = idx;
             docObj.data = function () { return currentData; };
         } else if (docObj.data) {
@@ -3017,18 +3022,21 @@ function persistItemOrder(itemList) {
     });
 
     var idToIdx = {};
-    itemList.forEach(function (it, idx) { if (it && it.id) idToIdx[it.id] = idx; });
+    itemList.forEach(function (it, idx) { if (it && it.id) idToIdx[String(it.id)] = idx; });
     _itemsSnapDocs.forEach(function (d) {
-        if (d && d.id && idToIdx[d.id] !== undefined) {
-            var dataObj = typeof d.data === 'function' ? d.data() : (d.data || d);
-            dataObj.order = idToIdx[d.id];
+        if (d && d.id && idToIdx[String(d.id)] !== undefined) {
+            var dataObj = typeof d.data === 'function' ? Object.assign({}, d.data()) : (d.data || d);
+            dataObj.order = idToIdx[String(d.id)];
             if (typeof d.data === 'function') {
                 d.data = function () { return dataObj; };
+            } else {
+                d.data = dataObj;
             }
         }
     });
 
-    renderItemsList(itemList);
+    _itemsSnapDocs = sortItemDocsForAdmin(_itemsSnapDocs);
+    renderCurrentAdminItemsList();
     showAdminToast(toastMsg);
 
     var flat = _itemsSnapDocs.map(function (doc) {
@@ -3109,7 +3117,7 @@ function renderItemsList(items) {
     function paintRows(catMap) {
         var html = '<div class="table-responsive"><table class="admin-table admin-table--items"><thead><tr><th class="admin-th-sort">' + escapeHtmlText(sortColLabel) + '</th><th>Image</th><th>Name</th><th>' + S.category + '</th><th>' + (S.group || 'Group') + '</th><th>' + S.price + '</th><th>' + S.available + '</th><th>Actions</th></tr></thead><tbody>';
         items.forEach(function (doc, idx) {
-            var item = doc.data();
+            var item = typeof doc.data === 'function' ? doc.data() : (doc.data || doc);
             var name = item['name_' + lang] || item.name_ku || item.name_ar || item.name_en || S.unnamed;
             var img = item.image || 'https://placehold.co/50x50?text=No+Image';
             var avail = item.available ? '<span style="color:#2E7D32;">' + S.yes + '</span>' : '<span style="color:#C62828;">' + S.no + '</span>';
@@ -3393,20 +3401,27 @@ function wireItemEvents() {
 
 function applyItemFilter(searchTerm, cat) {
     cat = cat || itemsActiveCategory || 'all';
-    console.log('[admin items] applyItemFilter - searchTerm:', searchTerm, 'cat:', cat, 'itemsActiveCategory:', itemsActiveCategory);
-    var items = MenuData.getItems();
-    console.log('[admin items] Total items from MenuData:', items.length);
-    if (items.length > 0) {
-        _itemsSnapDocs = items.map(function (d) {
-            return { id: d.id, data: function () { return d; } };
-        });
-        var filtered = filterItemDocs(_itemsSnapDocs, searchTerm, cat);
-        console.log('[admin items] Filtered items count:', filtered.length);
-        renderItemsList(filtered);
-        return;
+    itemsActiveCategory = cat;
+    var cf = document.getElementById('categoryFilter');
+    if (cf) cf.value = itemsActiveCategory;
+    var searchEl = document.getElementById('itemSearch');
+    var st = (searchTerm !== undefined && searchTerm !== null) ? searchTerm : (searchEl ? searchEl.value : '');
+
+    if (!_itemsSnapDocs || !_itemsSnapDocs.length) {
+        var items = (typeof MenuData !== 'undefined' && MenuData.getItems) ? MenuData.getItems() : [];
+        if (items.length > 0) {
+            _itemsSnapDocs = sortItemDocsForAdmin(items.map(function (d) {
+                return { id: d.id, data: function () { return d; } };
+            }));
+        } else {
+            _itemsSnapDocs = sortItemDocsForAdmin(getItemDocsFromLocalCache());
+        }
+    } else {
+        _itemsSnapDocs = sortItemDocsForAdmin(_itemsSnapDocs);
     }
-    console.log('[admin items] No items available, showing empty list');
-    renderItemsList([]);
+
+    var filtered = filterItemDocs(_itemsSnapDocs, st, cat);
+    renderItemsList(filtered);
 }
 
 /* Offline-resilient write helper.
