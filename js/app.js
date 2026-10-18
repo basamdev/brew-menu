@@ -142,8 +142,16 @@ var MenuCache = (function () {
         try {
             var raw = localStorage.getItem(key);
             if (!raw) {
-                // Backward-compatibility: if rId is 'brew-coffee', migrate legacy generic cache
+                // Backward-compatibility: if rId is 'brew-coffee', check pre-saved initial data or legacy generic cache
                 if (rId === 'brew-coffee') {
+                    if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && isValid(window.BREW_COFFEE_INITIAL_DATA, 'brew-coffee')) {
+                        try {
+                            safeSetItem(key, JSON.stringify(window.BREW_COFFEE_INITIAL_DATA));
+                            safeSetItem('cachedMenuItems', JSON.stringify(window.BREW_COFFEE_INITIAL_DATA.items));
+                            safeSetItem('cachedCategories', JSON.stringify(window.BREW_COFFEE_INITIAL_DATA.categories));
+                        } catch (e) {}
+                        return window.BREW_COFFEE_INITIAL_DATA;
+                    }
                     var oldItemsRaw = localStorage.getItem('cachedMenuItems');
                     var oldCatsRaw = localStorage.getItem('cachedCategories');
                     if (oldItemsRaw) {

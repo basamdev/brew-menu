@@ -22,6 +22,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800;900&family=Noto+Sans+Arabic:wght@400;500;600;700;800;900&family=Vazirmatn:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Cinzel:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css?v=214">
+    <script src="js/brew-initial-data.js?v=2"></script>
     <style>
         /* LUXURY DIAMOND LOGO STYLING - REMOVE ALL CIRCULAR CONTAINERS & RINGS */
         .header-logo-ring,
@@ -2156,26 +2157,35 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                 } catch(e) {}
             }
 
-            // Fallback for brew-coffee: migrate authentic legacy cache if present
+            // Fallback for brew-coffee: use pre-saved authentic data or migrate legacy cache
             if (!cache && rId === 'brew-coffee') {
-                try {
-                    var oldItemsRaw = localStorage.getItem('cachedMenuItems');
-                    var oldCatsRaw = localStorage.getItem('cachedCategories');
-                    if (oldItemsRaw) {
-                        var pItems = JSON.parse(oldItemsRaw);
-                        var pCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
-                        if (Array.isArray(pItems) && pItems.length > 0 && !pItems.some(function(it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
-                            cache = {
-                                restaurantId: 'brew-coffee',
-                                version: 2,
-                                timestamp: Date.now(),
-                                categories: Array.isArray(pCats) ? pCats : [],
-                                items: pItems
-                            };
-                            localStorage.setItem(key, JSON.stringify(cache));
+                if (window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items) && window.BREW_COFFEE_INITIAL_DATA.items.length > 0) {
+                    cache = window.BREW_COFFEE_INITIAL_DATA;
+                    try {
+                        localStorage.setItem(key, JSON.stringify(cache));
+                        localStorage.setItem('cachedMenuItems', JSON.stringify(cache.items));
+                        localStorage.setItem('cachedCategories', JSON.stringify(cache.categories));
+                    } catch(e) {}
+                } else {
+                    try {
+                        var oldItemsRaw = localStorage.getItem('cachedMenuItems');
+                        var oldCatsRaw = localStorage.getItem('cachedCategories');
+                        if (oldItemsRaw) {
+                            var pItems = JSON.parse(oldItemsRaw);
+                            var pCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
+                            if (Array.isArray(pItems) && pItems.length > 0 && !pItems.some(function(it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
+                                cache = {
+                                    restaurantId: 'brew-coffee',
+                                    version: 2,
+                                    timestamp: Date.now(),
+                                    categories: Array.isArray(pCats) ? pCats : [],
+                                    items: pItems
+                                };
+                                localStorage.setItem(key, JSON.stringify(cache));
+                            }
                         }
-                    }
-                } catch(e) {}
+                    } catch(e) {}
+                }
             }
 
             var grid = document.getElementById('menuGrid');
