@@ -1550,39 +1550,6 @@
             applyLanguage(currentLang);
             setupQuickLinks();
 
-            // Background pre-warm menu cache for instant 0ms opening when clicking Open Menu
-            try {
-                var cacheKey = 'smartserve_menu_cache_brew-coffee';
-                if (!localStorage.getItem(cacheKey)) {
-                    var baselineCache = {
-                        restaurantId: 'brew-coffee',
-                        version: 2,
-                        timestamp: Date.now(),
-                        categories: [
-                            { id: 'cat_coffee', name_ku: 'قاوە', name_ar: 'قهوة', name_en: 'Coffee', image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400' },
-                            { id: 'cat_tea', name_ku: 'چای', name_ar: 'شاي', name_en: 'Tea', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400' },
-                            { id: 'cat_cold', name_ku: 'خواردنەوەی سارد', name_ar: 'مشروبات باردة', name_en: 'Cold Drinks', image: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400' },
-                            { id: 'cat_dessert', name_ku: 'شیرینی', name_ar: 'حلويات', name_en: 'Dessert', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400' },
-                            { id: 'cat_special', name_ku: 'خواردنەوەی تایبەت', name_ar: 'مشروبات خاصة', name_en: 'Special Drinks', image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400' },
-                            { id: 'cat_shisha', name_ku: 'نێرگیلە', name_ar: 'أركيلة', name_en: 'Shisha', image: 'https://cdn-icons-png.flaticon.com/128/10170/10170651.png' }
-                        ],
-                        items: [
-                            { id: 'item_1', name_ku: 'لاتە', name_ar: 'لاتيه', name_en: 'Latte', description_ku: 'قاوەی لاتەی گەرم بە شیری تازە', description_ar: 'مشروب لاتيه ساخن بالحليب الطازج', description_en: 'Hot latte coffee with freshly steamed milk', price: 3500, category: 'cat_coffee', image: 'https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=500', available: true },
-                            { id: 'item_2', name_ku: 'ئێسپرێسۆ', name_ar: 'إسبريسو', name_en: 'Espresso', description_ku: 'قاوەی ئێسپرێسۆی تایبەت و بەهێز', description_ar: 'قهوة إسبريسو قوية ومركزة', description_en: 'Rich and concentrated espresso shot', price: 2500, category: 'cat_coffee', image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=500', available: true },
-                            { id: 'item_3', name_ku: 'کاپوچینۆ', name_ar: 'كابوتشينو', name_en: 'Cappuccino', description_ku: 'قاوەی کاپوچینۆ بە کرێم و فۆمی بەتام', description_ar: 'قهوة كابوتشينو غنية بالرغوة', description_en: 'Classic cappuccino with rich velvety foam', price: 3500, category: 'cat_coffee', image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=500', available: true },
-                            { id: 'item_4', name_ku: 'ئامریکانۆ', name_ar: 'أمريكانو', name_en: 'Americano', description_ku: 'ئێسپرێسۆ لەگەڵ ئاوی گەرم', description_ar: 'إسبريسو ممدد بالماء الساخن', description_en: 'Espresso shots topped with hot water', price: 3000, category: 'cat_coffee', image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500', available: true },
-                            { id: 'item_5', name_ku: 'سپانیش لاتە سارد', name_ar: 'سبانش لاتيه بارد', name_en: 'Iced Spanish Latte', description_ku: 'سپانیش لاتەی سارد بە شیری شیرینکراو', description_ar: 'سبانش لاتيه بارد بالحليب المكثف المحلى', description_en: 'Sweetened iced latte with condensed milk', price: 4500, category: 'cat_special', image: 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=500', available: true },
-                            { id: 'item_6', name_ku: 'چای شاهانە', name_ar: 'شاي ملوكي', name_en: 'Royal Tea', description_ku: 'چای سەرخۆش بە هێل و زعفران', description_ar: 'شاي أسود فاخر بالهيل والزعفران', description_en: 'Premium black tea brewed with cardamom & saffron', price: 1500, category: 'cat_tea', image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500', available: true },
-                            { id: 'item_7', name_ku: 'چای سەوز', name_ar: 'شاي أخضر', name_en: 'Green Tea', description_ku: 'چای سەوزی سروشتی بە تەندروست', description_ar: 'شاي أخضر طبيعي وصحي', description_en: 'Pure natural antioxidant green tea', price: 2000, category: 'cat_tea', image: 'https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=500', available: true },
-                            { id: 'item_8', name_ku: 'مۆهیتۆ بلو کوراڕاو', name_ar: 'موهيتو بلو كوراساو', name_en: 'Blue Curacao Mojito', description_ku: 'مۆهیتۆی ساردی نەعنا و لیمۆ بە تامی بلو', description_ar: 'موهيتو منعش بالنعناع والليمون مع نكهة البلو', description_en: 'Refreshing mint & lime mocktail with blue curacao', price: 4000, category: 'cat_cold', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500', available: true },
-                            { id: 'item_9', name_ku: 'شەربەتی پرتەقاڵی سروشتی', name_ar: 'عصير برتقال فريش', name_en: 'Fresh Orange Juice', description_ku: 'شەربەتی پرتەقاڵی تازە گوشراو', description_ar: 'عصير برتقال طازج 100%', description_en: '100% freshly squeezed orange juice', price: 3500, category: 'cat_cold', image: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500', available: true },
-                            { id: 'item_10', name_ku: 'سان سیباستیان چیزکەیک', name_ar: 'تشيز كيك سان سباستيان', name_en: 'San Sebastian Cheesecake', description_ku: 'چیزکەیکی سووتاوی ئیسپانی بە شوکولاتەی بەلجیکی', description_ar: 'تشيز كيك إسباني محروق مع صوص شوكولاتة بلجيكية', description_en: 'Creamy burnt cheesecake with warm Belgian chocolate', price: 5000, category: 'cat_dessert', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500', available: true }
-                        ]
-                    };
-                    localStorage.setItem(cacheKey, JSON.stringify(baselineCache));
-                }
-            } catch (e) {}
-
             var poweredBySection = document.getElementById('poweredBySection');
             if (poweredBySection) {
                 poweredBySection.addEventListener('click', function(e) {

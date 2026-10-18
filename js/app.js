@@ -124,6 +124,9 @@ var MenuCache = (function () {
             if (isNaN(age) || age < 0 || age > MAX_AGE_MS) return false;
         }
 
+        // Discard any dummy test items or mock images
+        if (cache.items.some(function (it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) return false;
+
         // Structural check: items must have valid IDs
         for (var i = 0; i < Math.min(cache.items.length, 30); i++) {
             var it = cache.items[i];
@@ -147,7 +150,7 @@ var MenuCache = (function () {
                         try {
                             var oldItems = JSON.parse(oldItemsRaw);
                             var oldCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
-                            if (Array.isArray(oldItems) && oldItems.length > 0) {
+                            if (Array.isArray(oldItems) && oldItems.length > 0 && !oldItems.some(function (x) { return x && (x.id === 'item_1' || (x.image && x.image.indexOf('images.unsplash.com') !== -1)); })) {
                                 var legacyCache = {
                                     restaurantId: 'brew-coffee',
                                     version: CURRENT_SCHEMA_VERSION,
@@ -164,6 +167,12 @@ var MenuCache = (function () {
                 return null;
             }
             var parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.items) && parsed.items.some(function (it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
+                console.warn('[MenuCache] Purging dummy test items from cache for', rId);
+                try { localStorage.removeItem(key); } catch (e) {}
+                try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
+                return null;
+            }
             if (isValid(parsed, rId)) {
                 return parsed;
             } else {
@@ -1832,8 +1841,15 @@ async function loadMenuItems() {
     // 1. Immediately render valid cached categories & products without waiting for Firebase (Requirement 3)
     const hadCache = showCachedMenuIfAvailable();
 
-    // 2. Clear any lingering spinner - menu cards are immediately visible (0ms)
-    clearMenuLoadingSpinner();
+    // 2. On first visit with NO cache, show the existing loading indicator (Requirement 6)
+    if (!hadCache && !_menuUiReady) {
+        var loadingText = strings.loadingMenu || 'داگرتنی مێنوو...';
+        if (container && !container.children.length) {
+            container.innerHTML = '<div class="loading-menu" data-i18n="loadingMenu">' + loadingText + '</div>';
+        }
+    } else {
+        clearMenuLoadingSpinner();
+    }
 
     // 3. Prevent duplicate Firebase listeners or repeated menu requests when initializing (Requirement 12)
     if (loadMenuItems._activeRestaurant === rId && loadMenuItems._listenersActive) {
