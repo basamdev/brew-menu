@@ -1603,8 +1603,14 @@ async function loadCategoriesFromFirebase() {
 function applyMenuItemsUpdate(items, options) {
     options = options || {};
     var rId = getMenuRestaurantId();
+    items = normalizeMenuItemsList(items);
+    if (!items || !items.length) return;
+
     const sig = menuItemsSignature(items);
-    if (sig === _lastMenuItemsSignature && !options.force && !menuStillLoading()) return;
+    if (sig === _lastMenuItemsSignature && !options.force && !menuStillLoading()) {
+        console.log('[menu] Background data matches displayed items - no reload');
+        return;
+    }
     _lastMenuItemsSignature = sig;
 
     cachedMenuItems = items;
@@ -1621,19 +1627,8 @@ function applyMenuItemsUpdate(items, options) {
 
     clearMenuLoadingSpinner();
 
-    // Check if current DOM is missing images while incoming items have images
-    var domNeedsImageRefresh = false;
-    try {
-        var firstImg = container.querySelector('.menu-card-img');
-        if (firstImg && firstImg.src && (firstImg.src.indexOf('data:image/svg') !== -1 || firstImg.src.indexOf('placehold.co') !== -1)) {
-            if (items.some(function (it) { return it && it.image; })) {
-                domNeedsImageRefresh = true;
-            }
-        }
-    } catch (e) {}
-
     // Only full-repaint if explicitly forced without background flag, or UI not ready yet
-    if ((options.force && !options.background) || domNeedsImageRefresh || !_menuUiReady || menuStillLoading()) {
+    if ((options.force && !options.background) || !_menuUiReady || menuStillLoading()) {
         paintMenuFromItems(items, { autoSelect: false });
         return;
     }
@@ -1762,7 +1757,7 @@ function showCachedMenuIfAvailable() {
             _menuUiReady = true;
             _activeCategory = ALL_CATEGORY_ID;
             document.body.classList.add('category-selected', 'category-all-active');
-            _lastMenuItemsSignature = menuItemsSignature(items);
+            _lastMenuItemsSignature = window._fastMenuSig || menuItemsSignature(items);
             bindExistingMenuCards();
             setupCategoryScrollSpy();
             clearMenuLoadingSpinner();
@@ -1883,6 +1878,7 @@ async function loadMenuItems() {
         _freshCategories = categories;
         safeSetItem('cachedCategories', JSON.stringify(categories));
         var sig = categories.map(function (c) { return c.id; }).join('|');
+        var prevSig = localStorage.getItem('cachedCategoriesSig') || '';
         safeSetItem('cachedCategoriesSig', sig);
 
         // Update restaurant-specific cache with categories
@@ -1891,11 +1887,13 @@ async function loadMenuItems() {
             MenuCache.set(rId, currentItems, categories);
         }
 
-        // Reflect category changes without clearing menu or hiding products (Requirement 7 & 8)
-        if (cachedMenuItems && cachedMenuItems.length > 0) {
-            renderCategories(cachedMenuItems, { autoSelect: false, forceRebuild: true });
-        } else {
-            renderCategories([], { autoSelect: false, forceRebuild: true });
+        // Only reflect category changes if categories actually changed
+        if (prevSig !== sig) {
+            if (cachedMenuItems && cachedMenuItems.length > 0) {
+                renderCategories(cachedMenuItems, { autoSelect: false, forceRebuild: true });
+            } else {
+                renderCategories([], { autoSelect: false, forceRebuild: true });
+            }
         }
     }, function (err) {
         console.warn('[menu] MenuData categories error:', err && err.message);
@@ -3887,7 +3885,7 @@ function setupMenuAutoRefresh() {
         lastRefreshMs = now;
 
         fetchMenuViaRest(12000).then(function (items) {
-            applyMenuItemsUpdate(items, { force: true });
+            applyMenuItemsUpdate(items, { background: true });
         }).catch(function () {});
 
         loadCategoriesFromFirebase().then(function (categoriesChanged) {
@@ -6963,7 +6961,7 @@ function checkForAppUpdate() {
                 if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
                 }
-                window.location.reload();
+                console.log('[PWA] New version ready in background:', remote);
                 return;
             }
             if (!seen) localStorage.setItem(key, remote);
@@ -6978,7 +6976,7 @@ function registerServiceWorker() {
     navigator.serviceWorker.addEventListener('controllerchange', function () {
         if (refreshing) return;
         refreshing = true;
-        window.location.reload();
+        console.log('[PWA] Service worker updated');
     });
 
     navigator.serviceWorker.register('./sw.js?v=119').then(function (reg) {

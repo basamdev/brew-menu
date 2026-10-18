@@ -2336,6 +2336,14 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             if (grid && gridHtml) {
                 grid.innerHTML = gridHtml;
                 window._fastMenuAlreadyPainted = true;
+                try {
+                    window._fastMenuSig = items.map(function(i) {
+                        return i.id + '|' + (i.available === false ? '0' : '1') + '|' + (i.price || 0) +
+                            '|' + (i.category || '') + '|' + (i.image || '') +
+                            '|' + (i.name_ku || '') + '|' + (i.name_ar || '') + '|' + (i.name_en || '') +
+                            '|' + (i.group_ku || '') + '|' + (i.group_ar || '') + '|' + (i.group_en || '');
+                    }).sort().join(';');
+                } catch(e) {}
             }
 
             if (scroll) {
