@@ -114,7 +114,9 @@ var MenuCache = (function () {
     function isValid(cache, targetRestaurantId) {
         if (!cache || typeof cache !== 'object') return false;
         var rId = String(targetRestaurantId || '').trim().toLowerCase() || 'brew-coffee';
-        if (String(cache.restaurantId || '').toLowerCase() !== rId) return false;
+        var cId = String(cache.restaurantId || '').toLowerCase().trim();
+        var isMatch = (cId === rId) || ((cId === 'brew' || cId === 'brew-coffee') && (rId === 'brew' || rId === 'brew-coffee'));
+        if (!isMatch) return false;
         if (!Array.isArray(cache.items) || cache.items.length === 0) return false;
         if (!Array.isArray(cache.categories)) return false;
 
@@ -138,65 +140,68 @@ var MenuCache = (function () {
 
     function get(restaurantId) {
         var rId = String(restaurantId || '').trim().toLowerCase() || 'brew-coffee';
-        var key = getStorageKey(rId);
+        var isBrew = (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1);
+        var canonicalId = isBrew ? 'brew-coffee' : rId;
+        var key = getStorageKey(canonicalId);
         try {
             var raw = localStorage.getItem(key);
+            if (!raw && isBrew) {
+                raw = localStorage.getItem('smartserve_menu_cache_brew-coffee') || localStorage.getItem('smartserve_menu_cache_brew');
+            }
             if (!raw) {
-                // Backward-compatibility: if rId is 'brew-coffee', check pre-saved initial data or legacy generic cache
-                if (rId === 'brew-coffee') {
-                    if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && isValid(window.BREW_COFFEE_INITIAL_DATA, 'brew-coffee')) {
+                if (isBrew) {
+                    if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && isValid(window.BREW_COFFEE_INITIAL_DATA, canonicalId)) {
                         try {
                             safeSetItem(key, JSON.stringify(window.BREW_COFFEE_INITIAL_DATA));
-                            safeSetItem('cachedMenuItems', JSON.stringify(window.BREW_COFFEE_INITIAL_DATA.items));
-                            safeSetItem('cachedCategories', JSON.stringify(window.BREW_COFFEE_INITIAL_DATA.categories));
+                            localStorage.removeItem('cachedMenuItems');
+                            localStorage.removeItem('cachedCategories');
                         } catch (e) {}
                         return window.BREW_COFFEE_INITIAL_DATA;
-                    }
-                    var oldItemsRaw = localStorage.getItem('cachedMenuItems');
-                    var oldCatsRaw = localStorage.getItem('cachedCategories');
-                    if (oldItemsRaw) {
-                        try {
-                            var oldItems = JSON.parse(oldItemsRaw);
-                            var oldCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
-                            if (Array.isArray(oldItems) && oldItems.length > 0 && !oldItems.some(function (x) { return x && (x.id === 'item_1' || (x.image && x.image.indexOf('images.unsplash.com') !== -1)); })) {
-                                var legacyCache = {
-                                    restaurantId: 'brew-coffee',
-                                    version: CURRENT_SCHEMA_VERSION,
-                                    timestamp: Date.now(),
-                                    categories: Array.isArray(oldCats) ? oldCats : [],
-                                    items: oldItems
-                                };
-                                safeSetItem(key, JSON.stringify(legacyCache));
-                                return legacyCache;
-                            }
-                        } catch (e) {}
                     }
                 }
                 return null;
             }
             var parsed = JSON.parse(raw);
             if (parsed && Array.isArray(parsed.items) && parsed.items.some(function (it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
-                console.warn('[MenuCache] Purging dummy test items from cache for', rId);
+                console.warn('[MenuCache] Purging dummy test items from cache for', canonicalId);
                 try { localStorage.removeItem(key); } catch (e) {}
                 try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
                 return null;
             }
-            if (isValid(parsed, rId)) {
+            if (isValid(parsed, canonicalId)) {
+                // If stored cache has fewer items than our authentic initial data (e.g. from an incomplete previous fetch), prefer initial data
+                if (isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+                    if (parsed.items.length < window.BREW_COFFEE_INITIAL_DATA.items.length) {
+                        try {
+                            safeSetItem(key, JSON.stringify(window.BREW_COFFEE_INITIAL_DATA));
+                            localStorage.removeItem('cachedMenuItems');
+                            localStorage.removeItem('cachedCategories');
+                        } catch (e) {}
+                        return window.BREW_COFFEE_INITIAL_DATA;
+                    }
+                }
                 return parsed;
             } else {
-                console.warn('[MenuCache] Discarding invalid/expired cache for', rId);
+                console.warn('[MenuCache] Discarding invalid/expired cache for', canonicalId);
                 try { localStorage.removeItem(key); } catch (e) {}
+                if (isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && isValid(window.BREW_COFFEE_INITIAL_DATA, canonicalId)) {
+                    return window.BREW_COFFEE_INITIAL_DATA;
+                }
                 return null;
             }
         } catch (e) {
-            console.error('[MenuCache] Failed parsing cache for', rId, e);
+            console.error('[MenuCache] Failed parsing cache for', canonicalId, e);
             try { localStorage.removeItem(key); } catch (err) {}
+            if (isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA) {
+                return window.BREW_COFFEE_INITIAL_DATA;
+            }
             return null;
         }
     }
 
     function set(restaurantId, items, categories) {
-        var rId = String(restaurantId || '').trim().toLowerCase() || 'brew-coffee';
+        var isBrew = (restaurantId === 'brew-coffee' || restaurantId === 'brew' || !restaurantId || String(restaurantId).indexOf('brew') !== -1);
+        var rId = isBrew ? 'brew-coffee' : String(restaurantId || '').trim().toLowerCase();
         if (!Array.isArray(items) || items.length === 0) return false;
         var existing = null;
         try {
@@ -217,14 +222,10 @@ var MenuCache = (function () {
         };
 
         try {
+            // Free quota by removing redundant duplicate keys
+            try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
+            try { localStorage.removeItem('cachedCategories'); } catch (e) {}
             safeSetItem(getStorageKey(rId), JSON.stringify(payload));
-            // Keep legacy keys updated for 'brew-coffee' for backward compatibility
-            if (rId === 'brew-coffee') {
-                safeSetItem('cachedMenuItems', JSON.stringify(items));
-                if (finalCategories.length > 0) {
-                    safeSetItem('cachedCategories', JSON.stringify(finalCategories));
-                }
-            }
             return true;
         } catch (e) {
             console.warn('[MenuCache] Save error for', rId, e);
@@ -1622,7 +1623,6 @@ function applyMenuItemsUpdate(items, options) {
     _lastMenuItemsSignature = sig;
 
     cachedMenuItems = items;
-    safeSetItem('cachedMenuItems', JSON.stringify(items));
     if (typeof MenuCache !== 'undefined') {
         var currentCats = (window.MenuData && typeof window.MenuData.getCategories === 'function')
             ? window.MenuData.getCategories()
@@ -1732,9 +1732,20 @@ function bindExistingMenuCards() {
 
 function showCachedMenuIfAvailable() {
     var rId = getMenuRestaurantId();
-    var cache = (window._fastCachedMenu && String(window._fastCachedMenu.restaurantId || '').toLowerCase() === rId)
-        ? window._fastCachedMenu
-        : (typeof MenuCache !== 'undefined' ? MenuCache.get(rId) : null);
+    var isBrew = (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1);
+    var cache = null;
+    if (window._fastCachedMenu && Array.isArray(window._fastCachedMenu.items) && window._fastCachedMenu.items.length > 0) {
+        var fastRId = String(window._fastCachedMenu.restaurantId || '').toLowerCase().trim();
+        if (fastRId === rId || (isBrew && (fastRId === 'brew' || fastRId === 'brew-coffee'))) {
+            cache = window._fastCachedMenu;
+        }
+    }
+    if (!cache && typeof MenuCache !== 'undefined') {
+        cache = MenuCache.get(rId);
+    }
+    if (!cache && isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA) {
+        cache = window.BREW_COFFEE_INITIAL_DATA;
+    }
 
     if (!cache || !Array.isArray(cache.items) || !cache.items.length) {
         return false;
@@ -1755,9 +1766,8 @@ function showCachedMenuIfAvailable() {
             }
         }
 
-        // Store restaurant's cached categories in localStorage for category names resolution
+        // Store categories signature for change detection without redundant multi-MB storage
         if (Array.isArray(cache.categories) && cache.categories.length > 0) {
-            safeSetItem('cachedCategories', JSON.stringify(cache.categories));
             var catSig = cache.categories.map(function (c) { return c.id; }).join('|');
             safeSetItem('cachedCategoriesSig', catSig);
         }
@@ -1767,7 +1777,9 @@ function showCachedMenuIfAvailable() {
             console.log('[MenuCache] Fast inline menu already painted for:', rId, '- binding events');
             _menuUiReady = true;
             _activeCategory = ALL_CATEGORY_ID;
-            document.body.classList.add('category-selected', 'category-all-active');
+            if (document.body && document.body.classList) {
+                document.body.classList.add('category-selected', 'category-all-active');
+            }
             _lastMenuItemsSignature = window._fastMenuSig || menuItemsSignature(items);
             bindExistingMenuCards();
             setupCategoryScrollSpy();
@@ -1780,7 +1792,9 @@ function showCachedMenuIfAvailable() {
         if (painted) {
             _menuUiReady = true;
             _activeCategory = ALL_CATEGORY_ID;
-            document.body.classList.add('category-selected', 'category-all-active');
+            if (document.body && document.body.classList) {
+                document.body.classList.add('category-selected', 'category-all-active');
+            }
             clearMenuLoadingSpinner();
         }
         return painted;
@@ -1887,12 +1901,11 @@ async function loadMenuItems() {
     MenuData.loadCategories(4000, function (categories) {
         console.log('[menu] Categories loaded from Firebase:', categories.length);
         _freshCategories = categories;
-        safeSetItem('cachedCategories', JSON.stringify(categories));
         var sig = categories.map(function (c) { return c.id; }).join('|');
         var prevSig = localStorage.getItem('cachedCategoriesSig') || '';
         safeSetItem('cachedCategoriesSig', sig);
 
-        // Update restaurant-specific cache with categories
+        // Update restaurant-specific unified cache with categories
         var currentItems = cachedMenuItems && cachedMenuItems.length ? cachedMenuItems : MenuData.getItems();
         if (typeof MenuCache !== 'undefined' && currentItems && currentItems.length > 0) {
             MenuCache.set(rId, currentItems, categories);
@@ -1921,10 +1934,14 @@ async function loadMenuItems() {
         // 5. Replace cached menu with fresh Firebase data only after received & processed (Requirement 5)
         var cats = _freshCategories || (MenuData.getCategories && MenuData.getCategories().length ? MenuData.getCategories() : null);
         if (!cats) {
-            var rawCats = localStorage.getItem('cachedCategories');
-            if (rawCats) {
-                try { cats = JSON.parse(rawCats); } catch (e) {}
+            var activeC = (typeof MenuCache !== 'undefined') ? MenuCache.get(rId) : null;
+            if (activeC && Array.isArray(activeC.categories) && activeC.categories.length) {
+                cats = activeC.categories;
             }
+        }
+        var isBrew = (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1);
+        if (!cats && isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.categories)) {
+            cats = window.BREW_COFFEE_INITIAL_DATA.categories;
         }
         if (typeof MenuCache !== 'undefined') {
             MenuCache.set(rId, items, cats || []);
@@ -2009,10 +2026,38 @@ function loadFromCache() {
     var container = document.getElementById('menuGrid');
     if (!container) return;
 
-    var cached = localStorage.getItem('cachedMenuItems');
-    if (cached) {
+    var rawItems = null;
+    var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+
+    // 1. Try MenuCache (unified restaurant-scoped cache)
+    if (typeof MenuCache !== 'undefined' && typeof MenuCache.get === 'function') {
+        var activeCache = MenuCache.get(rId);
+        if (activeCache && Array.isArray(activeCache.items) && activeCache.items.length > 0) {
+            rawItems = activeCache.items;
+        }
+    }
+
+    // 2. Fall back to legacy cachedMenuItems key if present
+    if (!rawItems) {
+        var cached = localStorage.getItem('cachedMenuItems');
+        if (cached) {
+            try {
+                var parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length > 0) rawItems = parsed;
+            } catch (e) {}
+        }
+    }
+
+    // 3. Fall back to bundled initial data for instant cold start
+    if (!rawItems && (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1)) {
+        if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+            rawItems = window.BREW_COFFEE_INITIAL_DATA.items;
+        }
+    }
+
+    if (rawItems && rawItems.length > 0) {
         try {
-            var items = normalizeMenuItemsList(JSON.parse(cached));
+            var items = normalizeMenuItemsList(rawItems);
             if (items.length > 0) {
                 console.log('Loaded from cache:', items.length);
                 paintMenuFromItems(items, { autoSelect: true });
@@ -2022,7 +2067,7 @@ function loadFromCache() {
             container.innerHTML = '';
         } catch (e) {
             console.error('Error parsing cache:', e);
-            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>' + strings.errorLoadingMenu + '</p>';
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>' + strings.errorLoadingMenu + '</p></div>';
         }
     } else {
         clearMenuLoadingSpinner();
@@ -2035,7 +2080,7 @@ window.addEventListener('pagehide', function () {
 });
 
 function isEmenuPage() {
-    return document.body.classList.contains('emenu-layout');
+    return !!(document.body && document.body.classList && document.body.classList.contains('emenu-layout'));
 }
 
 function allCategoryIconSvg() {
@@ -2072,7 +2117,7 @@ function renderCategories(items, options) {
     options = options || {};
     var scroll = document.getElementById('categoryScroll');
     if (!scroll) return;
-    console.log('[renderCategories] Starting render, items:', items.length);
+    console.log('[renderCategories] Starting render, items:', (items && items.length) ? items.length : 0);
     var lang = localStorage.getItem('selectedLang') || 'ku';
     var strings = i18n[lang] || i18n.en;
     var rId = getMenuRestaurantId();
@@ -2094,6 +2139,10 @@ function renderCategories(items, options) {
     if ((!categories || !categories.length) && window.MenuData && typeof window.MenuData.getCategories === 'function') {
         categories = (window.MenuData.getCategories() || []).slice();
     }
+    if ((!categories || !categories.length) && (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1) &&
+        typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.categories)) {
+        categories = window.BREW_COFFEE_INITIAL_DATA.categories.slice();
+    }
     var seenCat = {};
     categories = categories.filter(function (c) {
         if (!c || !c.id) return false;
@@ -2102,7 +2151,35 @@ function renderCategories(items, options) {
         seenCat[lower] = true;
         return true;
     });
+
+    // Filter out categories that have 0 items so buttons strictly match rendered grid sections
+    var activeItems = (items && items.length) ? items : (window.cachedMenuItems || []);
+    if (activeItems && activeItems.length > 0) {
+        var activeCatIds = {};
+        activeItems.forEach(function (it) {
+            if (it && it.category) activeCatIds[String(it.category).toLowerCase()] = true;
+        });
+        categories = categories.filter(function (c) {
+            return c && c.id && activeCatIds[String(c.id).toLowerCase()];
+        });
+    }
+
     categories = sortCategoriesList(categories);
+
+    var newSig = categories.map(function (c) { return c.id; }).join('|') + '|' + lang;
+    var currentSig = (scroll.dataset && scroll.dataset.categorySig) || (typeof scroll.getAttribute === 'function' ? scroll.getAttribute('data-category-sig') : '') || '';
+    if (!options.forceRebuild && currentSig === newSig && scroll.children.length > 0) {
+        if (options.autoSelect !== false) {
+            autoSelectCategoryAfterRender(options.forceFirst);
+        }
+        return;
+    }
+    if (scroll.dataset) {
+        scroll.dataset.categorySig = newSig;
+    } else if (typeof scroll.setAttribute === 'function') {
+        scroll.setAttribute('data-category-sig', newSig);
+    }
+
     let html = '';
     categories.forEach(cat => {
         var catData = (cat.data && typeof cat.data === 'object') ? cat.data : cat;
@@ -2271,6 +2348,18 @@ function scrollToCategorySection(category, behavior) {
     } else {
         var targetSection = document.getElementById('category-section-' + category);
         if (!targetSection) {
+            var catLower = String(category).toLowerCase().trim();
+            var allSecs = document.querySelectorAll('[data-category-section]');
+            for (var si = 0; si < allSecs.length; si++) {
+                var s = allSecs[si];
+                var secCat = (s.getAttribute('data-category-section') || s.getAttribute('data-category') || '').toLowerCase().trim();
+                if (secCat === catLower) {
+                    targetSection = s;
+                    break;
+                }
+            }
+        }
+        if (!targetSection) {
             window._categoryClickScrolling = false;
             return;
         }
@@ -2405,6 +2494,7 @@ function setupStickyCategoryBar() {
 
 function setupCategoryScrollSpy() {
     if (window._categoryScrollSpy) return;
+    if (typeof IntersectionObserver === 'undefined') return;
     window._categoryScrollSpy = true;
 
     setupStickyCategoryBar();

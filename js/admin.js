@@ -72,10 +72,33 @@ let itemsActiveCategory = 'all';
 
 function readCachedMenuItemsFlat() {
     try {
-        return JSON.parse(localStorage.getItem('cachedMenuItems') || '[]');
-    } catch (e) {
-        return [];
+        var items = JSON.parse(localStorage.getItem('cachedMenuItems') || '[]');
+        if (Array.isArray(items) && items.length > 0) return items;
+    } catch (e) {}
+
+    // Fallback to unified MenuCache
+    try {
+        var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+        if (typeof MenuCache !== 'undefined' && typeof MenuCache.get === 'function') {
+            var cached = MenuCache.get(rId);
+            if (cached && Array.isArray(cached.items) && cached.items.length > 0) return cached.items;
+        } else {
+            var raw = localStorage.getItem('smartserve_menu_cache_' + rId);
+            if (!raw && (rId === 'brew-coffee' || rId === 'brew')) {
+                raw = localStorage.getItem('smartserve_menu_cache_brew-coffee') || localStorage.getItem('smartserve_menu_cache_brew');
+            }
+            if (raw) {
+                var parsed = JSON.parse(raw);
+                if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) return parsed.items;
+            }
+        }
+    } catch (e) {}
+
+    // Fallback to BREW_COFFEE_INITIAL_DATA
+    if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+        return window.BREW_COFFEE_INITIAL_DATA.items;
     }
+    return [];
 }
 
 // Immediately reclaim space from duplicate/redundant cache keys

@@ -2122,6 +2122,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             var params = new URLSearchParams(window.location.search || '');
             var rId = (params.get('restaurant') || params.get('restaurantId') || params.get('r') || window._currentRestaurantId || 'brew-coffee').trim().toLowerCase();
             window._currentRestaurantId = rId;
+            var isBrew = (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1);
 
             var lang = (params.get('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
             if (lang !== 'ku' && lang !== 'ar' && lang !== 'en') lang = 'ku';
@@ -2139,7 +2140,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                 }
             } catch(e) {}
 
-            var key = 'smartserve_menu_cache_' + rId;
+            var key = 'smartserve_menu_cache_' + (isBrew ? 'brew-coffee' : rId);
             var raw = localStorage.getItem(key);
             var cache = null;
 
@@ -2151,39 +2152,21 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                         try { localStorage.removeItem(key); } catch(e) {}
                         parsed = null;
                     }
-                    if (parsed && String(parsed.restaurantId || '').toLowerCase() === rId && Array.isArray(parsed.items) && parsed.items.length > 0) {
+                    if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
                         cache = parsed;
                     }
                 } catch(e) {}
             }
 
-            // Fallback for brew-coffee: use pre-saved authentic data or migrate legacy cache
-            if (!cache && rId === 'brew-coffee') {
-                if (window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items) && window.BREW_COFFEE_INITIAL_DATA.items.length > 0) {
+            // Fallback: use pre-saved authentic data whenever available, or if stored cache has fewer items than authentic dataset
+            if (isBrew && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items) && window.BREW_COFFEE_INITIAL_DATA.items.length > 0) {
+                if (!cache || !Array.isArray(cache.items) || cache.items.length < window.BREW_COFFEE_INITIAL_DATA.items.length) {
                     cache = window.BREW_COFFEE_INITIAL_DATA;
                     try {
                         localStorage.setItem(key, JSON.stringify(cache));
-                        localStorage.setItem('cachedMenuItems', JSON.stringify(cache.items));
-                        localStorage.setItem('cachedCategories', JSON.stringify(cache.categories));
-                    } catch(e) {}
-                } else {
-                    try {
-                        var oldItemsRaw = localStorage.getItem('cachedMenuItems');
-                        var oldCatsRaw = localStorage.getItem('cachedCategories');
-                        if (oldItemsRaw) {
-                            var pItems = JSON.parse(oldItemsRaw);
-                            var pCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
-                            if (Array.isArray(pItems) && pItems.length > 0 && !pItems.some(function(it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
-                                cache = {
-                                    restaurantId: 'brew-coffee',
-                                    version: 2,
-                                    timestamp: Date.now(),
-                                    categories: Array.isArray(pCats) ? pCats : [],
-                                    items: pItems
-                                };
-                                localStorage.setItem(key, JSON.stringify(cache));
-                            }
-                        }
+                        // Reclaim storage quota by evicting legacy redundant duplicate keys
+                        localStorage.removeItem('cachedMenuItems');
+                        localStorage.removeItem('cachedCategories');
                     } catch(e) {}
                 }
             }
@@ -2202,9 +2185,18 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             window._fastCachedMenu = cache;
 
             // Render categories into #categoryScroll immediately
-            var categories = Array.isArray(cache.categories) ? cache.categories : [];
+            var categories = Array.isArray(cache.categories) ? cache.categories.slice() : [];
             var items = cache.items.filter(function(it) {
                 return it && it.available !== false && (!it.category || it.category.toLowerCase().trim() !== 'water');
+            });
+
+            // Map which categories actually contain items
+            var itemCatMap = {};
+            items.forEach(function(it) {
+                if (it.category) {
+                    itemCatMap[it.category] = true;
+                    itemCatMap[String(it.category).toLowerCase().trim()] = true;
+                }
             });
 
             if (categories.length === 0) {
@@ -2215,7 +2207,25 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                         categories.push({ id: it.category, name_ku: it.category, name_ar: it.category, name_en: it.category });
                     }
                 });
+            } else {
+                // Filter out empty categories with no active items
+                categories = categories.filter(function(c) {
+                    if (!c || !c.id) return false;
+                    return !!itemCatMap[c.id] || !!itemCatMap[String(c.id).toLowerCase().trim()];
+                });
             }
+
+            // Sort categories by order property to match app.js sortCategoriesList exactly
+            categories.sort(function(a, b) {
+                var da = (a && a.data) ? a.data : a;
+                var db_ = (b && b.data) ? b.data : b;
+                var ao = (da && da.order != null && da.order !== '') ? Number(da.order) : NaN;
+                var bo = (db_ && db_.order != null && db_.order !== '') ? Number(db_.order) : NaN;
+                if (!isNaN(ao) && !isNaN(bo) && ao !== bo) return ao - bo;
+                if (!isNaN(ao) && isNaN(bo)) return -1;
+                if (isNaN(ao) && !isNaN(bo)) return 1;
+                return String((a && a.id) || '').localeCompare(String((b && b.id) || ''));
+            });
 
             if (scroll && categories.length > 0) {
                 var catHtml = '';
@@ -2234,6 +2244,12 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                     catHtml += '<button class="category-btn' + activeClass + '" data-category="' + cat.id + '">' + icon + '<span class="cat-label">' + cName + '</span></button>';
                 });
                 scroll.innerHTML = catHtml;
+                var catSigVal = categories.map(function(c) { return c.id; }).join('|') + '|' + lang;
+                if (scroll.dataset) {
+                    scroll.dataset.categorySig = catSigVal;
+                } else if (typeof scroll.setAttribute === 'function') {
+                    scroll.setAttribute('data-category-sig', catSigVal);
+                }
             }
 
             // Favorites map
@@ -2269,15 +2285,35 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             items.forEach(function(item) {
                 fastItemsMap[item.id] = item;
                 var c = item.category || '__uncategorized';
+                for (var ci = 0; ci < catOrder.length; ci++) {
+                    if (String(catOrder[ci]).toLowerCase().trim() === String(c).toLowerCase().trim()) {
+                        c = catOrder[ci];
+                        break;
+                    }
+                }
                 if (!groups[c]) groups[c] = [];
                 groups[c].push(item);
                 if (catOrder.indexOf(c) === -1) catOrder.push(c);
             });
             window._fastItemsMap = fastItemsMap;
 
+            function sortItems(list) {
+                list.sort(function(a, b) {
+                    var ao = (a && a.order != null && a.order !== '') ? Number(a.order) : NaN;
+                    var bo = (b && b.order != null && b.order !== '') ? Number(b.order) : NaN;
+                    if (!isNaN(ao) && !isNaN(bo) && ao !== bo) return ao - bo;
+                    if (!isNaN(ao) && isNaN(bo)) return -1;
+                    if (isNaN(ao) && !isNaN(bo)) return 1;
+                    var na = (a && (a['name_' + lang] || a.name_en || a.name_ku || '')) || '';
+                    var nb = (b && (b['name_' + lang] || b.name_en || b.name_ku || '')) || '';
+                    return String(na).localeCompare(String(nb));
+                });
+                return list;
+            }
+
             var gridHtml = '';
             catOrder.forEach(function(cId) {
-                var groupItems = groups[cId];
+                var groupItems = sortItems((groups[cId] || []).slice());
                 if (!groupItems || groupItems.length === 0) return;
 
                 var catTitle = getCatTitle(cId);
@@ -2365,7 +2401,22 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                         window.switchCategory(cat);
                     } else {
                         var sec = document.getElementById('category-section-' + cat);
-                        if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (!sec) {
+                            var allSecs = document.querySelectorAll('[data-category-section]');
+                            var lowerCat = String(cat).toLowerCase().trim();
+                            for (var si = 0; si < allSecs.length; si++) {
+                                if (String(allSecs[si].getAttribute('data-category-section')).toLowerCase().trim() === lowerCat) {
+                                    sec = allSecs[si];
+                                    break;
+                                }
+                            }
+                        }
+                        if (sec) {
+                            var bar = document.querySelector('.top-sticky-wrapper') || scroll;
+                            var barH = bar ? (bar.offsetHeight + 10) : 70;
+                            var top = sec.getBoundingClientRect().top + window.pageYOffset - barH;
+                            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                        }
                         scroll.querySelectorAll('.category-btn').forEach(function(b) { b.classList.toggle('active', b === btn); });
                     }
                 });
@@ -2950,7 +3001,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=137"></script>
-    <script src="js/app.js?v=205"></script>
+    <script src="js/app.js?v=206"></script>
     <script src="js/local-api.js?v=120"></script>
     <!-- Smart Serve In-App Viewer Modal with Back Button -->
     <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">
