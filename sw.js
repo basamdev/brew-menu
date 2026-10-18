@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brew-v174';
+const CACHE_NAME = 'brew-v175';
 const APP_SHELL_PATHS = /\.(html|css|js)$/i;
 const FIREBASE_SDK_URLS = [
     'https://www.gstatic.com/firebasejs/12.17.0/firebase-app.js',

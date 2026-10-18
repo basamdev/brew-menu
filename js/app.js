@@ -1596,7 +1596,7 @@ function menuItemsSignature(items) {
     if (!items || !items.length) return '';
     return items.map(function (i) {
         return i.id + '|' + (i.available === false ? '0' : '1') + '|' + (i.price || 0) +
-            '|' + (i.category || '') + '|' + (i.image || '') +
+            '|' + (i.category || '') + '|' + (i.image ? '1' : '0') +
             '|' + (i.name_ku || '') + '|' + (i.name_ar || '') + '|' + (i.name_en || '') +
             '|' + (i.group_ku || '') + '|' + (i.group_ar || '') + '|' + (i.group_en || '');
     }).sort().join(';');
@@ -1680,12 +1680,10 @@ function applyMenuItemsUpdate(items, options) {
 
     if (catBarChanged) {
         autoSelectCategoryAfterRender(true);
-    } else if (_activeCategory) {
+    } else if (_activeCategory && (!options.background || !container.querySelector('.menu-card'))) {
         switchCategory(_activeCategory, { silent: true, forceRender: true });
-    } else if (items.length > 0) {
+    } else if (items.length > 0 && (!container.children.length || !container.querySelector('.menu-card'))) {
         autoSelectCategoryAfterRender(true);
-    } else {
-        container.innerHTML = '';
     }
     setupCategoryScrollSpy();
 }
