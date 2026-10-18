@@ -2760,15 +2760,13 @@ body.is-lang-en .detail-size-name {
     font-size: 0.9rem;
 }
 
+.loading-menu {
+    display: none !important;
+}
+
 .loading-menu::before {
+    display: none !important;
     content: '';
-    display: block;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 3px solid var(--color-border);
-    border-top-color: var(--color-gold);
-    animation: spin 0.8s linear infinite;
 }
 
 /* Empty state */
@@ -14613,6 +14611,20 @@ body[data-menu-theme="mocha"] .search-preview-price {
 
 body.light-mode .search-preview-price {
     color: #D97706 !important;
+}
+
+/* Guarantee no spinning loading circle can ever appear */
+.loading-menu,
+.loading-menu::before,
+.loading-menu::after {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 

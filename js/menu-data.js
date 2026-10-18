@@ -33,13 +33,35 @@
     }
 
     function whenDbReady(fn) {
-        var p = window.dbReady || Promise.resolve(window.db);
-        return Promise.resolve(p).then(function () {
+        if (window.db) {
             if (typeof fn === 'function') fn(window.db);
-            return window.db;
+            return Promise.resolve(window.db);
+        }
+        var p = null;
+        if (typeof window.waitForFirebase === 'function') {
+            p = window.waitForFirebase().then(function (res) {
+                return (res && res.db) || window.db;
+            });
+        } else if (window.dbReady) {
+            p = Promise.resolve(window.dbReady);
+        } else {
+            p = new Promise(function (resolve) {
+                var start = Date.now();
+                var timer = setInterval(function () {
+                    if (window.db || Date.now() - start > 6000) {
+                        clearInterval(timer);
+                        resolve(window.db || null);
+                    }
+                }, 50);
+            });
+        }
+        return p.then(function (db) {
+            var targetDb = db || window.db;
+            if (typeof fn === 'function') fn(targetDb);
+            return targetDb;
         }).catch(function () {
-            if (typeof fn === 'function') fn(window.db);
-            return window.db;
+            if (typeof fn === 'function') fn(window.db || null);
+            return window.db || null;
         });
     }
 
