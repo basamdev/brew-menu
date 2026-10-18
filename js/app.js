@@ -225,10 +225,41 @@ var MenuCache = (function () {
             // Free quota by removing redundant duplicate keys
             try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
             try { localStorage.removeItem('cachedCategories'); } catch (e) {}
-            safeSetItem(getStorageKey(rId), JSON.stringify(payload));
+
+            var jsonStr = JSON.stringify(payload);
+            // If payload exceeds 3.5MB, reuse optimized thumbnails to prevent QuotaExceededError
+            if (jsonStr.length > 3500000) {
+                var imgMap = {};
+                if (existing && Array.isArray(existing.items)) {
+                    existing.items.forEach(function (it) {
+                        if (it && it.id && it.image && it.image.length < 60000) imgMap[it.id] = it.image;
+                    });
+                }
+                if (typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+                    window.BREW_COFFEE_INITIAL_DATA.items.forEach(function (it) {
+                        if (it && it.id && it.image && (!imgMap[it.id] || it.image.length < imgMap[it.id].length)) {
+                            imgMap[it.id] = it.image;
+                        }
+                    });
+                }
+                payload.items = payload.items.map(function (it) {
+                    if (it && it.id && it.image && it.image.length > 60000 && imgMap[it.id]) {
+                        var clone = Object.assign({}, it);
+                        clone.image = imgMap[it.id];
+                        return clone;
+                    }
+                    return it;
+                });
+                jsonStr = JSON.stringify(payload);
+            }
+
+            safeSetItem(getStorageKey(rId), jsonStr);
             return true;
         } catch (e) {
             console.warn('[MenuCache] Save error for', rId, e);
+            if (isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA) {
+                try { safeSetItem(getStorageKey(rId), JSON.stringify(window.BREW_COFFEE_INITIAL_DATA)); } catch(err) {}
+            }
             return false;
         }
     }
@@ -2796,6 +2827,10 @@ function renderMenuItems(items) {
                           allCats.push(cc);
                       }
                   });
+              }
+              if ((!allCats || !allCats.length) && (rId === 'brew-coffee' || rId === 'brew' || !rId || rId.indexOf('brew') !== -1) &&
+                  typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.categories)) {
+                  allCats = window.BREW_COFFEE_INITIAL_DATA.categories.slice();
               }
               allCats = sortCategoriesList(allCats);
               allCats.forEach(function (c) {
