@@ -1686,10 +1686,13 @@ function bindExistingMenuCards() {
         if (!item || card._hasMenuClick) return;
         card._hasMenuClick = true;
 
-        var openDetail = function () { openProductDetail(item); };
+        var openDetail = function (e) {
+            if (e && e.target && e.target.closest('.menu-card-fav, .menu-card-cart, .grid-add-btn')) return;
+            openProductDetail(item, card);
+        };
         card.addEventListener('click', openDetail);
         card.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); }
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(e); }
         });
 
         card.querySelectorAll('.menu-card-cart, .grid-add-btn').forEach(function (cartBtn) {
@@ -2611,9 +2614,12 @@ function createMenuCard(item, lang, strings) {
         `;
     }
 
-    const openDetail = () => openProductDetail(item);
+    const openDetail = (e) => {
+        if (e && e.target && e.target.closest('.menu-card-fav, .menu-card-cart, .grid-add-btn')) return;
+        openProductDetail(item, card);
+    };
     card.addEventListener('click', openDetail);
-    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(); } });
+    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(e); } });
 
     card.querySelectorAll('.menu-card-cart, .grid-add-btn').forEach((cartBtn) => {
         cartBtn.addEventListener('click', (e) => {
@@ -2815,23 +2821,54 @@ function renderMenuItems(items) {
    ======================================== */
 
 var _detailScrollY = 0;
+var _lastClickedItemCard = null;
 
-function lockPageScroll() {
-    _detailScrollY = window.scrollY || window.pageYOffset || 0;
-    document.body.style.position = 'fixed';
-    document.body.style.top = '-' + _detailScrollY + 'px';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
+function lockPageScroll(sourceCard) {
+    _detailScrollY = window.scrollY || window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || (document.body && document.body.scrollTop) || 0;
+    _lastClickedItemCard = sourceCard || null;
+    document.body.style.overflow = 'hidden';
 }
 
-function unlockPageScroll() {
+function unlockPageScroll(sourceCard) {
+    document.body.style.overflow = '';
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.left = '';
     document.body.style.right = '';
     document.body.style.width = '';
-    window.scrollTo(0, _detailScrollY);
+
+    var targetY = _detailScrollY;
+    var targetCard = sourceCard || _lastClickedItemCard;
+
+    var html = document.documentElement;
+    var prevHtmlBehavior = html ? html.style.scrollBehavior : '';
+    var prevBodyBehavior = document.body ? document.body.style.scrollBehavior : '';
+    if (html) html.style.scrollBehavior = 'auto';
+    if (document.body) document.body.style.scrollBehavior = 'auto';
+
+    function restoreScroll() {
+        if (typeof targetY === 'number' && targetY >= 0) {
+            window.scrollTo(0, targetY);
+            if (document.documentElement) document.documentElement.scrollTop = targetY;
+            if (document.body) document.body.scrollTop = targetY;
+        }
+        if (targetCard && typeof targetCard.scrollIntoView === 'function') {
+            var curr = window.scrollY || window.pageYOffset || (document.documentElement && document.documentElement.scrollTop) || 0;
+            if (Math.abs(curr - targetY) > 50) {
+                targetCard.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+            }
+        }
+    }
+
+    restoreScroll();
+    requestAnimationFrame(function () {
+        restoreScroll();
+        requestAnimationFrame(function () {
+            restoreScroll();
+            if (html) html.style.scrollBehavior = prevHtmlBehavior;
+            if (document.body) document.body.style.scrollBehavior = prevBodyBehavior;
+        });
+    });
 }
 
 function getCategoryDisplayName(categoryId, lang) {
@@ -2891,8 +2928,12 @@ function getCategoryDisplayName(categoryId, lang) {
     return strings[key] || categoryId;
 }
 
-function openProductDetail(item) {
+function openProductDetail(item, sourceCard) {
     _currentDetailItem = item;
+    if (!sourceCard && item && item.id) {
+        sourceCard = document.querySelector('.menu-card[data-item-id="' + item.id + '"]');
+    }
+    _lastClickedItemCard = sourceCard || _lastClickedItemCard;
     const lang = localStorage.getItem('selectedLang') || 'ku';
     const name = item[`name_${lang}`] || item.name_en || item.name_ar || item.name_ku || 'Unnamed Item';
     const description = item[`description_${lang}`] || item.description_en || item.description_ar || item.description_ku || '';
@@ -3049,21 +3090,33 @@ function openProductDetail(item) {
         }
         overlay.classList.add('open');
         document.body.classList.add('detail-open');
-        lockPageScroll();
+        lockPageScroll(sourceCard);
         overlay.scrollTop = 0;
     }
 }
 
-function closeProductDetail() {
+function closeProductDetail(e) {
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    var cardToRestore = _lastClickedItemCard;
+    if (!cardToRestore && _currentDetailItem && _currentDetailItem.id) {
+        cardToRestore = document.querySelector('.menu-card[data-item-id="' + _currentDetailItem.id + '"]');
+    }
+
     const overlay = document.getElementById('detailOverlay');
     if (overlay) {
         overlay.classList.remove('open');
         document.body.classList.remove('detail-open');
-        unlockPageScroll();
+        unlockPageScroll(cardToRestore);
     }
     _currentDetailItem = null;
     window._selectedDetailSize = null;
 }
+
+window.openProductDetail = openProductDetail;
+window.closeProductDetail = closeProductDetail;
 
 /* ========================================
    Video Modal

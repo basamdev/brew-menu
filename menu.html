@@ -2402,7 +2402,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                         var id = card.getAttribute('data-item-id');
                         var item = window._fastItemsMap ? window._fastItemsMap[id] : null;
                         if (item && typeof window.openProductDetail === 'function') {
-                            window.openProductDetail(item);
+                            window.openProductDetail(item, card);
                         }
                     }
                 });
@@ -2427,9 +2427,9 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
     </footer>
 
     <div class="detail-overlay" id="detailOverlay">
-        <div class="detail-backdrop" id="detailBackdrop"></div>
+        <div class="detail-backdrop" id="detailBackdrop" onclick="if(window.closeProductDetail) window.closeProductDetail(event);"></div>
         <div class="detail-panel" id="detailPanel">
-            <button class="detail-close" id="detailClose" aria-label="Close">✕</button>
+            <button type="button" class="detail-close" id="detailClose" aria-label="Close" onclick="if(window.closeProductDetail) window.closeProductDetail(event);">✕</button>
             <div class="detail-media" id="detailMedia">
                 <img id="detailImage" src="" alt="">
                 <button class="video-play-btn" id="videoPlayBtn" aria-label="Play video">
