@@ -2146,7 +2146,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                 try {
                     var parsed = JSON.parse(raw);
                     // Discard any dummy test items (item_1 etc.) and purge from localStorage
-                    if (parsed && Array.isArray(parsed.items) && parsed.items.some(function(it) { return it && it.id === 'item_1'; })) {
+                    if (parsed && Array.isArray(parsed.items) && parsed.items.some(function(it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
                         try { localStorage.removeItem(key); } catch(e) {}
                         parsed = null;
                     }
@@ -2164,7 +2164,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                     if (oldItemsRaw) {
                         var pItems = JSON.parse(oldItemsRaw);
                         var pCats = oldCatsRaw ? JSON.parse(oldCatsRaw) : [];
-                        if (Array.isArray(pItems) && pItems.length > 0 && !pItems.some(function(it) { return it && it.id === 'item_1'; })) {
+                        if (Array.isArray(pItems) && pItems.length > 0 && !pItems.some(function(it) { return it && (it.id === 'item_1' || (it.image && it.image.indexOf('images.unsplash.com') !== -1)); })) {
                             cache = {
                                 restaurantId: 'brew-coffee',
                                 version: 2,
