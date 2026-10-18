@@ -100,6 +100,29 @@ function writeCachedMenuItemsFlat(items) {
     // Always remove redundant cashier cache key to free up storage space
     try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
 
+    // Sync restaurant-isolated menu cache
+    try {
+        var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+        if (typeof MenuCache !== 'undefined' && typeof MenuCache.set === 'function') {
+            MenuCache.set(rId, items, []);
+        } else {
+            var cacheKey = 'smartserve_menu_cache_' + rId;
+            var existingRaw = localStorage.getItem(cacheKey);
+            var existingCats = [];
+            if (existingRaw) {
+                try { existingCats = JSON.parse(existingRaw).categories || []; } catch (e) {}
+            }
+            var payload = {
+                restaurantId: rId,
+                version: 2,
+                timestamp: Date.now(),
+                categories: existingCats,
+                items: items
+            };
+            localStorage.setItem(cacheKey, JSON.stringify(payload));
+        }
+    } catch (e) {}
+
     // 1. Try writing directly with full images intact
     try {
         localStorage.setItem('cachedMenuItems', JSON.stringify(items));
