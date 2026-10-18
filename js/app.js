@@ -1725,6 +1725,8 @@ function bindExistingMenuCards() {
         });
 
         card.querySelectorAll('.menu-card-cart, .grid-add-btn').forEach(function (cartBtn) {
+            if (cartBtn._hasCartClick) return;
+            cartBtn._hasCartClick = true;
             cartBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1735,20 +1737,27 @@ function bindExistingMenuCards() {
         });
 
         var favBtn = card.querySelector('.menu-card-fav');
-        if (favBtn) {
+        if (favBtn && !favBtn._hasFavClick) {
+            favBtn._hasFavClick = true;
             favBtn.addEventListener('click', function (e) {
+                e.preventDefault();
                 e.stopPropagation();
+                if (favBtn._favHandled) return;
+                favBtn._favHandled = true;
+                setTimeout(function () { favBtn._favHandled = false; }, 350);
                 var nowFav = MENU_FEATURES.toggleFav(item.id);
-                favBtn.classList.toggle('is-fav', nowFav);
-                var svg = favBtn.querySelector('svg');
-                if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
                 var lang = localStorage.getItem('selectedLang') || 'ku';
-                var strings = i18n[lang] || i18n.en;
+                var strings = (typeof i18n !== 'undefined' && (i18n[lang] || i18n.en)) || {};
                 var label = nowFav
                     ? (strings.removeFromFavorites || 'Remove from favorites')
                     : (strings.addToFavorites || 'Add to favorites');
-                favBtn.setAttribute('aria-label', label);
-                favBtn.setAttribute('title', label);
+                document.querySelectorAll('.menu-card-fav[data-item-id="' + item.id + '"]').forEach(function (btn) {
+                    btn.classList.toggle('is-fav', nowFav);
+                    var svg = btn.querySelector('svg');
+                    if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+                    btn.setAttribute('aria-label', label);
+                    btn.setAttribute('title', label);
+                });
                 updateFavBadge();
             });
         }
@@ -2585,24 +2594,50 @@ function setupCategoryScrollSpy() {
 var MENU_FEATURES = window.MENU_FEATURES || {
     getFavorites: function () {
         try {
-            var raw = JSON.parse(localStorage.getItem('menu_favorites') || '[]');
-            if (Array.isArray(raw)) return raw.map(function(id) { return String(id); });
+            var raw = localStorage.getItem('menu_favorites') || localStorage.getItem('user_favorites');
+            if (!raw) return [];
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed.map(function(id) { return String(id); });
+            if (parsed && typeof parsed === 'object') return Object.keys(parsed).filter(function(k) { return !!parsed[k]; });
             return [];
         } catch (e) { return []; }
     },
     toggleFav: function (id) {
+        if (!id) return false;
         id = String(id);
         var favs = this.getFavorites();
         var idx = favs.indexOf(id);
-        if (idx > -1) { favs.splice(idx, 1); } else { favs.push(id); }
-        localStorage.setItem('menu_favorites', JSON.stringify(favs));
-        return idx === -1;
+        var isNowFav = false;
+        if (idx > -1) {
+            favs.splice(idx, 1);
+            isNowFav = false;
+        } else {
+            favs.push(id);
+            isNowFav = true;
+        }
+        try {
+            localStorage.setItem('menu_favorites', JSON.stringify(favs));
+            var map = {};
+            favs.forEach(function(fid) { map[fid] = true; });
+            localStorage.setItem('user_favorites', JSON.stringify(map));
+        } catch (e) {}
+        if (typeof updateFavBadge === 'function') {
+            updateFavBadge();
+        }
+        return isNowFav;
     },
     isFav: function (id) {
+        if (!id) return false;
         return this.getFavorites().indexOf(String(id)) > -1;
     },
     clearAll: function () {
-        localStorage.setItem('menu_favorites', JSON.stringify([]));
+        try {
+            localStorage.setItem('menu_favorites', JSON.stringify([]));
+            localStorage.setItem('user_favorites', JSON.stringify({}));
+        } catch (e) {}
+        if (typeof updateFavBadge === 'function') {
+            updateFavBadge();
+        }
     }
 };
 window.MENU_FEATURES = MENU_FEATURES;
@@ -2733,6 +2768,7 @@ function createMenuCard(item, lang, strings) {
         `;
     }
 
+    card._hasMenuClick = true;
     const openDetail = (e) => {
         if (e && e.target && e.target.closest('.menu-card-fav, .menu-card-cart, .grid-add-btn')) return;
         openProductDetail(item, card);
@@ -2741,6 +2777,8 @@ function createMenuCard(item, lang, strings) {
     card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(e); } });
 
     card.querySelectorAll('.menu-card-cart, .grid-add-btn').forEach((cartBtn) => {
+        if (cartBtn._hasCartClick) return;
+        cartBtn._hasCartClick = true;
         cartBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -2753,18 +2791,25 @@ function createMenuCard(item, lang, strings) {
     });
 
     const favBtn = card.querySelector('.menu-card-fav');
-    if (favBtn) {
+    if (favBtn && !favBtn._hasFavClick) {
+        favBtn._hasFavClick = true;
         favBtn.addEventListener('click', function (e) {
+            e.preventDefault();
             e.stopPropagation();
+            if (favBtn._favHandled) return;
+            favBtn._favHandled = true;
+            setTimeout(function () { favBtn._favHandled = false; }, 350);
             var nowFav = MENU_FEATURES.toggleFav(item.id);
-            favBtn.classList.toggle('is-fav', nowFav);
-            var svg = favBtn.querySelector('svg');
-            if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
             var label = nowFav
                 ? (strings.removeFromFavorites || 'Remove from favorites')
                 : (strings.addToFavorites || 'Add to favorites');
-            favBtn.setAttribute('aria-label', label);
-            favBtn.setAttribute('title', label);
+            document.querySelectorAll('.menu-card-fav[data-item-id="' + item.id + '"]').forEach(function (btn) {
+                btn.classList.toggle('is-fav', nowFav);
+                var svg = btn.querySelector('svg');
+                if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+                btn.setAttribute('aria-label', label);
+                btn.setAttribute('title', label);
+            });
             updateFavBadge();
         });
     }
@@ -6770,11 +6815,22 @@ function updateFavBadge() {
 function findMenuItemById(itemId) {
     if (itemId == null || itemId === '') return null;
     var targetStr = String(itemId).trim();
+    if (window._fastItemsMap && window._fastItemsMap[targetStr]) {
+        return window._fastItemsMap[targetStr];
+    }
     if (Array.isArray(cachedMenuItems)) {
         for (var i = 0; i < cachedMenuItems.length; i++) {
             var mItem = cachedMenuItems[i];
             if (mItem && (String(mItem.id).trim() === targetStr || String(mItem._id).trim() === targetStr)) {
                 return mItem;
+            }
+        }
+    }
+    if (window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+        for (var k = 0; k < window.BREW_COFFEE_INITIAL_DATA.items.length; k++) {
+            var bItem = window.BREW_COFFEE_INITIAL_DATA.items[k];
+            if (bItem && (String(bItem.id).trim() === targetStr || String(bItem._id).trim() === targetStr)) {
+                return bItem;
             }
         }
     }

@@ -2127,6 +2127,69 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             var lang = (params.get('lang') || localStorage.getItem('selectedLang') || 'ku').toLowerCase();
             if (lang !== 'ku' && lang !== 'ar' && lang !== 'en') lang = 'ku';
 
+            // Ensure window.MENU_FEATURES and badge updater exist from millisecond 0
+            window.updateFavBadge = window.updateFavBadge || function() {
+                var badges = document.querySelectorAll('#favBadge, .fav-badge');
+                var favs = window.MENU_FEATURES ? window.MENU_FEATURES.getFavorites() : [];
+                var count = Array.isArray(favs) ? favs.length : 0;
+                badges.forEach(function(badge) {
+                    badge.textContent = String(count);
+                    badge.classList.toggle('show', count > 0);
+                    badge.style.display = count > 0 ? 'inline-flex' : 'none';
+                });
+            };
+
+            window.MENU_FEATURES = window.MENU_FEATURES || {
+                getFavorites: function() {
+                    try {
+                        var raw = localStorage.getItem('menu_favorites') || localStorage.getItem('user_favorites');
+                        if (!raw) return [];
+                        var parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) return parsed.map(function(id) { return String(id); });
+                        if (parsed && typeof parsed === 'object') return Object.keys(parsed).filter(function(k) { return !!parsed[k]; });
+                        return [];
+                    } catch(e) { return []; }
+                },
+                toggleFav: function(id) {
+                    if (!id) return false;
+                    id = String(id);
+                    var favs = this.getFavorites();
+                    var idx = favs.indexOf(id);
+                    var isNowFav = false;
+                    if (idx > -1) {
+                        favs.splice(idx, 1);
+                        isNowFav = false;
+                    } else {
+                        favs.push(id);
+                        isNowFav = true;
+                    }
+                    try {
+                        localStorage.setItem('menu_favorites', JSON.stringify(favs));
+                        var map = {};
+                        favs.forEach(function(fid) { map[fid] = true; });
+                        localStorage.setItem('user_favorites', JSON.stringify(map));
+                    } catch(e) {}
+                    if (typeof window.updateFavBadge === 'function') {
+                        window.updateFavBadge();
+                    }
+                    return isNowFav;
+                },
+                isFav: function(id) {
+                    if (!id) return false;
+                    return this.getFavorites().indexOf(String(id)) > -1;
+                },
+                clearAll: function() {
+                    try {
+                        localStorage.setItem('menu_favorites', JSON.stringify([]));
+                        localStorage.setItem('user_favorites', JSON.stringify({}));
+                    } catch(e) {}
+                    if (typeof window.updateFavBadge === 'function') {
+                        window.updateFavBadge();
+                    }
+                }
+            };
+            try { window.updateFavBadge(); } catch(e) {}
+
             // Immediately purge any accidental dummy items or mock images from client storage
             try {
                 for (var si = localStorage.length - 1; si >= 0; si--) {
@@ -2255,8 +2318,10 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
             // Favorites map
             var favs = {};
             try {
-                var rawFav = localStorage.getItem('user_favorites');
-                if (rawFav) favs = JSON.parse(rawFav) || {};
+                var favList = (window.MENU_FEATURES && typeof window.MENU_FEATURES.getFavorites === 'function')
+                    ? window.MENU_FEATURES.getFavorites()
+                    : [];
+                favList.forEach(function(fid) { favs[fid] = true; });
             } catch(e) {}
 
             var fallbackImage = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27300%27%3E%3Crect fill=%231a1a1a width=%27400%27 height=%27300%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%2740%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%23D4AF37%27%3E%E2%98%95%3C/text%3E%3C/svg%3E';
@@ -2426,13 +2491,19 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                 grid.addEventListener('click', function(e) {
                     var favBtn = e.target.closest('.menu-card-fav');
                     if (favBtn) {
+                        e.preventDefault();
                         e.stopPropagation();
+                        if (favBtn._favHandled) return;
+                        favBtn._favHandled = true;
+                        setTimeout(function() { favBtn._favHandled = false; }, 350);
                         var id = favBtn.getAttribute('data-item-id');
                         if (window.MENU_FEATURES && window.MENU_FEATURES.toggleFav) {
                             var nowFav = window.MENU_FEATURES.toggleFav(id);
-                            favBtn.classList.toggle('is-fav', nowFav);
-                            var svg = favBtn.querySelector('svg');
-                            if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+                            document.querySelectorAll('.menu-card-fav[data-item-id="' + id + '"]').forEach(function(b) {
+                                b.classList.toggle('is-fav', nowFav);
+                                var svg = b.querySelector('svg');
+                                if (svg) svg.setAttribute('fill', nowFav ? 'currentColor' : 'none');
+                            });
                         }
                         return;
                     }
@@ -3001,7 +3072,7 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
     </script>
     <script src="js/firebase.js?v=126"></script>
     <script src="js/menu-data.js?v=137"></script>
-    <script src="js/app.js?v=208"></script>
+    <script src="js/app.js?v=209"></script>
     <script src="js/local-api.js?v=120"></script>
     <!-- Smart Serve In-App Viewer Modal with Back Button -->
     <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">
