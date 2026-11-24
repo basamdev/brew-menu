@@ -2223,10 +2223,10 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
 
             // Fallback: use pre-saved authentic data whenever available, or if stored cache has fewer items than authentic dataset
             if (isBrew && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items) && window.BREW_COFFEE_INITIAL_DATA.items.length > 0) {
-                if (!cache || !Array.isArray(cache.items) || cache.items.length < window.BREW_COFFEE_INITIAL_DATA.items.length) {
+                if (!cache || !Array.isArray(cache.items) || (!(Number(cache.version) >= 3) && cache.items.length < window.BREW_COFFEE_INITIAL_DATA.items.length)) {
                     cache = window.BREW_COFFEE_INITIAL_DATA;
                     try {
-                        localStorage.setItem(key, JSON.stringify(cache));
+                        if (!raw) localStorage.setItem(key, JSON.stringify(cache));
                         // Reclaim storage quota by evicting legacy redundant duplicate keys
                         localStorage.removeItem('cachedMenuItems');
                         localStorage.removeItem('cachedCategories');
@@ -2243,6 +2243,13 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
                     grid.innerHTML = '<div class="loading-menu" data-i18n="loadingMenu">' + loadTxt + '</div>';
                 }
                 return;
+            }
+
+            // Restore baked thumbnails for images dropped from the cached copy (quota).
+            if (cache !== window.BREW_COFFEE_INITIAL_DATA && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+                var bakedImg = {};
+                window.BREW_COFFEE_INITIAL_DATA.items.forEach(function(it) { if (it && it.id && it.image) bakedImg[it.id] = it.image; });
+                cache.items.forEach(function(it) { if (it && it._imgStripped && bakedImg[it.id]) { it.image = bakedImg[it.id]; delete it._imgStripped; } });
             }
 
             window._fastCachedMenu = cache;
@@ -3071,8 +3078,8 @@ var isMenuExpirePreviewRequested = window.isMenuExpirePreviewRequested;
       window.Timestamp = Timestamp;
     </script>
     <script src="js/firebase.js?v=126"></script>
-    <script src="js/menu-data.js?v=137"></script>
-    <script src="js/app.js?v=209"></script>
+    <script src="js/menu-data.js?v=139"></script>
+    <script src="js/app.js?v=211"></script>
     <script src="js/local-api.js?v=120"></script>
     <!-- Smart Serve In-App Viewer Modal with Back Button -->
     <div class="ss-viewer-overlay" id="ssViewerOverlay" aria-hidden="true" role="dialog" aria-label="Smart Serve">

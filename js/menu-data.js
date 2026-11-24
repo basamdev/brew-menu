@@ -275,6 +275,13 @@
         _items.push.apply(_items, newItems);
     }
 
+    function setCategories(newCategories) {
+        if (!Array.isArray(newCategories)) return;
+        _categories.length = 0;
+        _categories.push.apply(_categories, newCategories);
+        sortCategoriesList(_categories);
+    }
+
     function getItems() { return getCombinedItems(_items); }
     function getCategories() { return getCombinedCategories(_categories); }
 
@@ -308,6 +315,7 @@
         getItems: getItems,
         setItems: setItems,
         getCategories: getCategories,
+        setCategories: setCategories,
         filterItems: filterItems,
         unsubscribeAll: unsubscribeAll,
         syncTestMode: function () {}

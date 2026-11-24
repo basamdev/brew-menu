@@ -70,7 +70,17 @@ let itemsActiveCategory = 'all';
 
 /* ============ OFFLINE CACHE (localStorage backup for admin) ============ */
 
+/* The full menu (with inline base64 images) is several MB — bigger than the
+   browser's localStorage quota. Writes used to fail silently and the admin then
+   re-read a stale/partial list from storage, so a newly saved item or category
+   could vanish from the screen. The admin now keeps the live lists in memory and
+   only stores a slimmed copy for fast/offline start-up. */
+var _adminItemsMem = null;
+var _adminCatsMem = null;
+var _pendingCategorySaves = {};
+
 function readCachedMenuItemsFlat() {
+    if (_adminItemsMem && _adminItemsMem.length) return _adminItemsMem.slice();
     try {
         var items = JSON.parse(localStorage.getItem('cachedMenuItems') || '[]');
         if (Array.isArray(items) && items.length > 0) return items;
@@ -120,14 +130,20 @@ try {
 
 function writeCachedMenuItemsFlat(items) {
     if (!items || !Array.isArray(items)) return;
+    _adminItemsMem = items.slice();
     // Always remove redundant cashier cache key to free up storage space
     try { localStorage.removeItem('cachedCashierItems'); } catch (e) {}
+    // The slim restaurant cache below is the single stored copy; the old full
+    // duplicate key overflowed the storage quota.
+    try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
 
-    // Sync restaurant-isolated menu cache
+    // Sync restaurant-isolated menu cache — always pass current categories so a
+    // new item save cannot wipe categories that were just added in admin.
     try {
         var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+        var currentCats = readCachedCategories();
         if (typeof MenuCache !== 'undefined' && typeof MenuCache.set === 'function') {
-            MenuCache.set(rId, items, []);
+            MenuCache.set(rId, items, currentCats);
         } else {
             var cacheKey = 'smartserve_menu_cache_' + rId;
             var existingRaw = localStorage.getItem(cacheKey);
@@ -139,36 +155,13 @@ function writeCachedMenuItemsFlat(items) {
                 restaurantId: rId,
                 version: 2,
                 timestamp: Date.now(),
-                categories: existingCats,
+                categories: (currentCats && currentCats.length) ? currentCats : existingCats,
                 items: items
             };
+            payload.items = (typeof slimMenuItemsForStorage === 'function') ? slimMenuItemsForStorage(items, 1600000) : items;
             localStorage.setItem(cacheKey, JSON.stringify(payload));
         }
     } catch (e) {}
-
-    // 1. Try writing directly with full images intact
-    try {
-        localStorage.setItem('cachedMenuItems', JSON.stringify(items));
-        return;
-    } catch (e) {}
-
-    // 2. If quota exceeded, evict non-essential items (sales, expenses, etc.) and try again
-    evictNonEssentialCacheKeys();
-    try {
-        localStorage.setItem('cachedMenuItems', JSON.stringify(items));
-        return;
-    } catch (e2) {}
-
-    // 3. Clear larger historical financial caches if still full, NEVER strip item images
-    try {
-        localStorage.removeItem('cachedSales');
-        localStorage.removeItem('cachedExpenses');
-        localStorage.removeItem('cachedFavorites');
-        localStorage.removeItem('menu_ratings');
-        localStorage.setItem('cachedMenuItems', JSON.stringify(items));
-    } catch (e3) {
-        // Continue from memory with full images intact
-    }
 }
 
 function syncCashierCacheFromMenuFlat(items) {
@@ -302,7 +295,9 @@ function upsertCachedMenuItem(id, data) {
     items = items.map(function (it) {
         if (it.id === id) {
             found = true;
-            return Object.assign({}, it, flat, { id: id });
+            var merged = Object.assign({}, it, flat, { id: id });
+            if (flat.image) delete merged._imgStripped;
+            return merged;
         }
         return it;
     });
@@ -471,7 +466,7 @@ function warmAdminOfflineCache(done) {
             if (isNaN(ao) && !isNaN(bo)) return 1;
             return String(a.id || '').localeCompare(String(b.id || ''));
         });
-        safeSetItem('cachedCategories', JSON.stringify(categories));
+        writeCachedCategories(mergeServerCategories(categories));
     }).catch(function () {}));
     tasks.push(warmExpensesCacheFromServer());
     tasks.push(warmSalesCacheFromServer());
@@ -909,6 +904,27 @@ function jsToRestFields(obj) {
         } else if (typeof v === 'number' && !isNaN(v)) {
             if (Number.isInteger(v)) fields[key] = { integerValue: String(v) };
             else fields[key] = { doubleValue: v };
+        } else if (Array.isArray(v)) {
+            fields[key] = {
+                arrayValue: {
+                    values: v.map(function (item) {
+                        if (item === undefined || item === null) return { nullValue: null };
+                        if (typeof item === 'string') return { stringValue: item };
+                        if (typeof item === 'boolean') return { booleanValue: item };
+                        if (typeof item === 'number' && !isNaN(item)) {
+                            return Number.isInteger(item)
+                                ? { integerValue: String(item) }
+                                : { doubleValue: item };
+                        }
+                        if (typeof item === 'object') {
+                            return { mapValue: { fields: jsToRestFields(item) } };
+                        }
+                        return { stringValue: String(item) };
+                    })
+                }
+            };
+        } else if (typeof v === 'object') {
+            fields[key] = { mapValue: { fields: jsToRestFields(v) } };
         }
     });
     return fields;
@@ -918,15 +934,21 @@ function writeDocumentViaRest(collectionName, docId, plainData, isCreate) {
     if (!isAdminAuthenticated()) return Promise.reject(new Error('Not signed in'));
     var cfg = window.firebaseConfig;
     if (!cfg || !cfg.projectId) return Promise.reject(new Error('No config'));
-    var payload = { fields: jsToRestFields(plainData) };
+    var fields = jsToRestFields(plainData);
+    var payload = { fields: fields };
     return auth.currentUser.getIdToken().then(function (token) {
-        var base = getFirestoreRestBaseUrl() + encodeURIComponent(cfg.projectId) +
-            '/databases/(default)/documents/' + encodeURIComponent(collectionName);
-        var url = isCreate
-            ? base + '?documentId=' + encodeURIComponent(docId)
-            : base + '/' + encodeURIComponent(docId);
+        // Always PATCH with an update mask: it creates the doc if missing, only
+        // touches the fields we send (keeps created_at etc.), and is safe to repeat
+        // when the SDK write already landed late (POST returned 409 and showed a
+        // false "failed" alert, which led to duplicate items).
+        var mask = Object.keys(fields).map(function (k) {
+            return 'updateMask.fieldPaths=' + encodeURIComponent(k);
+        }).join('&');
+        var url = getFirestoreRestBaseUrl() + encodeURIComponent(cfg.projectId) +
+            '/databases/(default)/documents/' + encodeURIComponent(collectionName) +
+            '/' + encodeURIComponent(docId) + (mask ? '?' + mask : '');
         return fetch(url, {
-            method: isCreate ? 'POST' : 'PATCH',
+            method: 'PATCH',
             cache: 'no-store',
             headers: {
                 Authorization: 'Bearer ' + token,
@@ -1999,12 +2021,80 @@ function renderRecentSalesTable(sales, S, container) {
 
 /* ============ MANAGE ITEMS ============ */
 
-function readCachedCategories() {
-    try {
-        return JSON.parse(localStorage.getItem('cachedCategories') || '[]');
-    } catch (e) {
-        return [];
+function normalizeCategoryCacheEntry(c) {
+    if (!c || !c.id) return null;
+    if (c.data && typeof c.data === 'object') return c;
+    var data = {};
+    Object.keys(c).forEach(function (k) {
+        if (k !== 'id' && k !== 'virtual') data[k] = c[k];
+    });
+    return { id: c.id, data: data, virtual: c.virtual };
+}
+
+function writeCachedCategories(list) {
+    if (!Array.isArray(list)) return;
+    _adminCatsMem = list.slice();
+    safeSetItem('cachedCategories', JSON.stringify(list));
+    if (typeof MenuData !== 'undefined' && MenuData.setCategories) {
+        MenuData.setCategories(list.slice());
     }
+}
+
+/* Server list is the truth; categories saved in the last 2 minutes that the
+   server list does not show yet are kept so they don't flicker away. */
+function mergeServerCategories(serverCats) {
+    var list = (serverCats || []).filter(function (c) { return c && c.id; }).slice();
+    var have = {};
+    list.forEach(function (c) { have[normalizeCategoryId(c.id)] = true; });
+    var now = Date.now();
+    Object.keys(_pendingCategorySaves).forEach(function (id) {
+        var p = _pendingCategorySaves[id];
+        if (have[normalizeCategoryId(id)] || now - p.ts > 120000) {
+            delete _pendingCategorySaves[id];
+            return;
+        }
+        list.push({ id: id, data: p.data });
+    });
+    return list;
+}
+
+/* Firestore doc ids are the category name; make sure "Add" never overwrites an
+   existing category that already uses that id (case-insensitive). */
+function uniqueCategoryDocId(base) {
+    var taken = {};
+    readCachedCategories().forEach(function (c) {
+        if (c && c.id && !c.virtual) taken[normalizeCategoryId(c.id)] = true;
+    });
+    if (!taken[normalizeCategoryId(base)]) return base;
+    for (var n = 2; n < 1000; n++) {
+        var candidate = base + '-' + n;
+        if (!taken[normalizeCategoryId(candidate)]) return candidate;
+    }
+    return base + '-' + Date.now();
+}
+
+function readCachedCategories() {
+    if (_adminCatsMem && _adminCatsMem.length) return _adminCatsMem.slice();
+    try {
+        var cats = JSON.parse(localStorage.getItem('cachedCategories') || '[]');
+        if (Array.isArray(cats) && cats.length > 0) return cats;
+    } catch (e) {}
+    try {
+        if (typeof MenuData !== 'undefined' && MenuData.getCategories) {
+            var mem = MenuData.getCategories();
+            if (Array.isArray(mem) && mem.length > 0) return mem.slice();
+        }
+    } catch (e) {}
+    try {
+        var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+        if (typeof MenuCache !== 'undefined' && MenuCache.get) {
+            var cache = MenuCache.get(rId);
+            if (cache && Array.isArray(cache.categories) && cache.categories.length) {
+                return cache.categories.map(normalizeCategoryCacheEntry).filter(Boolean);
+            }
+        }
+    } catch (e) {}
+    return [];
 }
 
 function upsertCachedCategory(id, data) {
@@ -2012,26 +2102,45 @@ function upsertCachedCategory(id, data) {
     var cats = readCachedCategories();
     var idx = -1;
     for (var i = 0; i < cats.length; i++) {
-        if (cats[i].id === id) { idx = i; break; }
+        if (cats[i] && (cats[i].id === id || normalizeCategoryId(cats[i].id) === normalizeCategoryId(id))) {
+            idx = i;
+            break;
+        }
     }
     var entry = { id: id, data: data };
     if (idx >= 0) cats[idx] = entry;
     else cats.push(entry);
-    safeSetItem('cachedCategories', JSON.stringify(cats));
+    _pendingCategorySaves[id] = { data: data, ts: Date.now() };
+    writeCachedCategories(cats);
+    try {
+        var rId = (typeof getMenuRestaurantId === 'function') ? getMenuRestaurantId() : 'brew-coffee';
+        if (typeof MenuCache !== 'undefined' && MenuCache.get && MenuCache.set) {
+            var existing = MenuCache.get(rId);
+            if (existing && Array.isArray(existing.items) && existing.items.length) {
+                MenuCache.set(rId, existing.items, cats);
+            }
+        }
+    } catch (e) {}
 }
 
 function refreshCategoriesCache(callback) {
+    function storeMerged(serverCats) {
+        // Merge so a category just saved locally is not wiped before Firestore
+        // snapshot / REST catch up.
+        var merged = mergeServerCategories(serverCats || []);
+        writeCachedCategories(merged);
+        if (callback) callback(merged);
+    }
+
     if (!MenuData.getCategories().length) {
         MenuData.loadCategories(5000, function (categories) {
-            safeSetItem('cachedCategories', JSON.stringify(categories));
-            if (callback) callback(categories);
+            storeMerged(categories);
         }, function () {
             if (callback) callback(readCachedCategories());
         });
         return;
     }
-    safeSetItem('cachedCategories', JSON.stringify(MenuData.getCategories()));
-    if (callback) callback(MenuData.getCategories());
+    storeMerged(MenuData.getCategories());
 }
 
 function normalizeCategoryId(id) {
@@ -2247,6 +2356,7 @@ function loadManageItems() {
         refreshCategoriesCache(function () {
             refreshCategoryFilterOptions();
             refreshItemCategoryDropdown();
+            renderCurrentAdminItemsList();
         });
     }, function (err) {
         clearTimeout(loadTimer);
@@ -2341,7 +2451,7 @@ function computeNewItemOrder(category) {
         var data = typeof d.data === 'function' ? d.data() : (d.data || d);
         if (!data || !data.category) return false;
         var c = String(data.category).toLowerCase().trim();
-        return c === catLower || c.indexOf(catLower) !== -1 || catLower.indexOf(c) !== -1;
+        return c === catLower;
     });
 
     if (!catDocs.length) return 0;
@@ -2426,7 +2536,7 @@ function filterItemDocs(docs, searchTerm, cat) {
             var dc = item.category;
             if (!dc) return false;
             var dcLower = String(dc).toLowerCase().trim();
-            return dcLower === catLower || dcLower.indexOf(catLower) !== -1;
+            return dcLower === catLower;
         });
     }
     return filtered;
@@ -2621,15 +2731,12 @@ function loadCategoriesDropdown() {
 
     if (!window.db) return Promise.resolve();
 
-    if (!MenuData.getCategories().length) {
+    if (!MenuData.getCategories().length && !readCachedCategories().length) {
         return new Promise(function (resolve) {
-            MenuData.loadCategories(12000, function (categories) {
-                safeSetItem('cachedCategories', JSON.stringify(categories));
-                refreshItemCategoryDropdown();
-                resolve();
-            }, function () {
-                resolve();
-            });
+            var done = false;
+            function finish() { if (done) return; done = true; refreshItemCategoryDropdown(); resolve(); }
+            refreshCategoriesCache(finish);
+            setTimeout(finish, 5000);
         });
     }
 
@@ -2667,8 +2774,8 @@ function getAllItemCategoryIdsForFilter() {
         if (c && c.id) addName(c.id);
     });
     try {
-        JSON.parse(localStorage.getItem('cachedMenuItems') || '[]').forEach(function (it) {
-            addName(it.category);
+        readCachedMenuItemsFlat().forEach(function (it) {
+            addName(it && it.category);
         });
     } catch (e) {}
     try {
@@ -2697,8 +2804,8 @@ function buildCategorySelectOptions(categories, itemCategoryIds, lang, S, allOpt
         html += '<option value="' + escapeHtmlAttr(c.id) + '">' + escapeHtmlText(name) + '</option>';
     });
     (itemCategoryIds || []).forEach(function (id) {
-        if (!id || seen[id]) return;
-        seen[id] = true;
+        if (!id || seen[String(id).toLowerCase()]) return;
+        seen[String(id).toLowerCase()] = true;
         var label = getCategoryLabel(id, lang, buildCategoryMapFromCache());
         html += '<option value="' + escapeHtmlAttr(id) + '">' + escapeHtmlText(label) + '</option>';
     });
@@ -2816,7 +2923,7 @@ function refreshItemCategoryDropdown() {
     var prev = select.value;
     select.innerHTML = buildCategorySelectOptions(
         readCachedCategories(),
-        [],
+        getUniqueItemCategoryIds(_itemsSnapDocs),
         lang,
         S,
         false
@@ -2842,8 +2949,9 @@ function loadCategoryFilter() {
 
     if (!MenuData.getCategories().length) {
         MenuData.loadCategories(6000, function (categories) {
-            safeSetItem('cachedCategories', JSON.stringify(categories));
+            writeCachedCategories(mergeServerCategories(categories || []));
             refreshCategoryFilterOptions();
+            refreshItemCategoryDropdown();
         }, function (err) {
             console.error('Error loading category filter:', err);
             refreshCategoryFilterOptions();
@@ -2851,7 +2959,7 @@ function loadCategoryFilter() {
         return;
     }
 
-    safeSetItem('cachedCategories', JSON.stringify(MenuData.getCategories()));
+    writeCachedCategories(mergeServerCategories(MenuData.getCategories()));
     refreshCategoryFilterOptions();
 }
 
@@ -3144,10 +3252,7 @@ function persistCategoryOrder(catList) {
     renderCategoriesTable(catList);
     showAdminToast(toastMsg);
 
-    safeSetItem('cachedCategories', JSON.stringify(catList));
-    if (typeof MenuData !== 'undefined' && MenuData.setCategories) {
-        MenuData.setCategories(catList);
-    }
+    writeCachedCategories(catList);
 
     if (window.db && typeof writeBatch === 'function') {
         try {
@@ -3409,17 +3514,6 @@ function renderItemsList(items) {
             catMap[normalizeCategoryId(c.id)] = c.data;
         });
         paintRows(catMap);
-    } else {
-        MenuData.loadCategories(5000, function (categories) {
-            var catMap = {};
-            categories.forEach(function (c) {
-                catMap[normalizeCategoryId(c.id)] = c.data;
-            });
-            safeSetItem('cachedCategories', JSON.stringify(categories));
-            paintRows(catMap);
-        }, function () {
-            paintRows(buildCategoryMapFromCache());
-        });
     }
 }
 
@@ -3687,7 +3781,12 @@ function fileToCompressedDataURL(file, maxDim, quality) {
         // Keep transparency for non-JPEG sources (PNG/WebP/GIF/SVG icons) by
         // exporting PNG — JPEG has no alpha and would turn transparent areas
         // into an ugly black background. Photos (JPEG) stay JPEG to keep size down.
-        var keepAlpha = file.type !== 'image/jpeg' && file.type !== 'image/jpg';
+        // Large PNG data URLs (300KB–500KB each) were filling the device storage
+        // and slowing the customer menu. Photos without transparency are saved as
+        // JPEG; transparent images use WebP (PNG only where WebP is unsupported),
+        // and anything still over ~250KB is scaled down further.
+        var MAX_CHARS = 250000;
+        var mayHaveAlpha = file.type !== 'image/jpeg' && file.type !== 'image/jpg';
         var reader = new FileReader();
         reader.onload = function () {
             var img = new Image();
@@ -3695,15 +3794,34 @@ function fileToCompressedDataURL(file, maxDim, quality) {
                 var w = img.width, h = img.height;
                 if (w > h && w > maxDim) { h = Math.round(h * maxDim / w); w = maxDim; }
                 else if (h >= w && h > maxDim) { w = Math.round(w * maxDim / h); h = maxDim; }
-                var canvas = document.createElement('canvas');
-                canvas.width = w; canvas.height = h;
-                var ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, w, h);
-                ctx.drawImage(img, 0, 0, w, h);
+                function encode(cw, ch) {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = cw; canvas.height = ch;
+                    var ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, cw, ch);
+                    ctx.drawImage(img, 0, 0, cw, ch);
+                    var transparent = false;
+                    if (mayHaveAlpha) {
+                        try {
+                            var px = ctx.getImageData(0, 0, cw, ch).data;
+                            for (var p = 3; p < px.length; p += 4) {
+                                if (px[p] < 250) { transparent = true; break; }
+                            }
+                        } catch (e) { transparent = true; }
+                    }
+                    if (!transparent) return canvas.toDataURL('image/jpeg', quality);
+                    var webp = canvas.toDataURL('image/webp', 0.85);
+                    if (webp.indexOf('data:image/webp') === 0) return webp;
+                    return canvas.toDataURL('image/png');
+                }
                 try {
-                    resolve(keepAlpha
-                        ? canvas.toDataURL('image/png')
-                        : canvas.toDataURL('image/jpeg', quality));
+                    var out = encode(w, h);
+                    for (var tries = 0; out.length > MAX_CHARS && tries < 5; tries++) {
+                        w = Math.max(64, Math.round(w * 0.8));
+                        h = Math.max(64, Math.round(h * 0.8));
+                        out = encode(w, h);
+                    }
+                    resolve(out);
                 } catch (e) { reject(e); }
             };
             img.onerror = function () { reject(new Error('Could not load that image')); };
@@ -3716,13 +3834,13 @@ function fileToCompressedDataURL(file, maxDim, quality) {
 
 /* Picking a file fills the given (hidden/url) input with the compressed data
    URL and updates the preview image. */
-function wireImageFileInput(fileInputId, targetInputId, previewId) {
+function wireImageFileInput(fileInputId, targetInputId, previewId, maxDim) {
     var fileInput = document.getElementById(fileInputId);
     if (!fileInput) return;
     fileInput.addEventListener('change', function () {
         var file = fileInput.files && fileInput.files[0];
         if (!file) return;
-        fileToCompressedDataURL(file).then(function (dataUrl) {
+        fileToCompressedDataURL(file, maxDim).then(function (dataUrl) {
             var target = document.getElementById(targetInputId);
             if (target) target.value = dataUrl;
             var preview = document.getElementById(previewId);
@@ -3785,7 +3903,7 @@ function saveQuickCategory() {
         updated_at: now
     };
 
-    var categoryId = sanitizeCategoryDocId(nameEn, nameKu, nameAr);
+    var categoryId = uniqueCategoryDocId(sanitizeCategoryDocId(nameEn, nameKu, nameAr));
     var newCatRef = doc(db, 'categories', categoryId);
     applyMenuCloudWrite({
         collection: 'categories',
@@ -3888,6 +4006,12 @@ function saveItem() {
     var imgUrl = document.getElementById('itemImageURL').value.trim();
     var placeholderImg = 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27300%27%3E%3Crect fill=%23e0e0e0 width=%27400%27 height=%27300%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 font-size=%2724%27 text-anchor=%27middle%27 dy=%27.3em%27 fill=%23999%27%3ENo+Image%3C/text%3E%3C/svg%3E';
     var finalImg = imgUrl || placeholderImg;
+    var editingId = document.getElementById('itemId').value;
+    var keepExistingImage = false;
+    if (!imgUrl && editingId) {
+        var cachedForImg = getMenuItemFromLocalCache(editingId);
+        keepExistingImage = !!(cachedForImg && cachedForImg._imgStripped);
+    }
 
     if (finalImg.length > 950000) {
         clearTimeout(readyTimer);
@@ -3942,6 +4066,7 @@ function saveItem() {
         savedOrder = computeNewItemOrder(category);
     }
     plainData.order = savedOrder;
+    if (keepExistingImage) delete plainData.image;
 
     var ref;
     var promise;
@@ -4174,9 +4299,9 @@ function loadManageCategories() {
 function getMenuCategoryNames() {
     var names = {};
     try {
-        JSON.parse(localStorage.getItem('cachedMenuItems') || '[]').forEach(function (it) {
+        readCachedMenuItemsFlat().forEach(function (it) {
             var c = it && (it.category || (it.v && it.v.category));
-            if (c) names[c] = true;
+            if (c && String(c).toLowerCase().trim() !== 'water') names[c] = true;
         });
     } catch (e) {}
     try {
@@ -4348,7 +4473,8 @@ function loadCategoriesList() {
                 if (ao !== bo) return ao - bo;
                 return String(a.id).localeCompare(String(b.id));
             });
-            safeSetItem('cachedCategories', JSON.stringify(categories));
+            categories = mergeServerCategories(categories);
+            writeCachedCategories(categories);
             // Show exactly what is in Firebase (no leftover virtual/extra categories).
             renderCategoriesTable(categories);
         }).catch(function () { /* fallback to MenuData path below */ });
@@ -4384,8 +4510,8 @@ function loadCategoriesList() {
     }
 
     function applyCategories(categories) {
-        var merged = mergeCategoryLists(categories, readCachedCategories());
-        safeSetItem('cachedCategories', JSON.stringify(merged));
+        var merged = mergeServerCategories(categories);
+        writeCachedCategories(merged);
         var have = {};
         merged.forEach(function (c) { have[c.id] = true; });
         renderCategoriesTable(mergeMenuCategories(merged, have));
@@ -4513,7 +4639,7 @@ function wireCategoryEvents() {
             }
         });
     }
-    wireImageFileInput('categoryImageFile', 'categoryImageURL', 'categoryImagePreview');
+    wireImageFileInput('categoryImageFile', 'categoryImageURL', 'categoryImagePreview', 320);
 }
 
 function syncCategoriesFromItems() {
@@ -4592,7 +4718,7 @@ function saveCategory() {
     var categoryId = document.getElementById('categoryId').value.trim();
     var isCreate = !categoryId;
     if (isCreate) {
-        categoryId = sanitizeCategoryDocId(nameEn, nameKu, nameAr);
+        categoryId = uniqueCategoryDocId(sanitizeCategoryDocId(nameEn, nameKu, nameAr));
     }
 
     var existing = readCachedCategories().find(function (c) { return c && c.id === categoryId; });
@@ -4723,7 +4849,10 @@ function deleteCategory(categoryId) {
 function removeCategoryFromCacheAndUi(categoryId) {
     var idLower = normalizeCategoryId(categoryId);
     var cats = readCachedCategories().filter(function (c) { return normalizeCategoryId(c.id) !== idLower; });
-    safeSetItem('cachedCategories', JSON.stringify(cats));
+    Object.keys(_pendingCategorySaves).forEach(function (k) {
+        if (normalizeCategoryId(k) === idLower) delete _pendingCategorySaves[k];
+    });
+    writeCachedCategories(cats);
 
     try {
         var names = JSON.parse(localStorage.getItem('cachedMenuCategoryNames') || '[]');
@@ -4901,6 +5030,11 @@ function normalizeCashierItemEntry(it) {
 }
 
 function getCashierItemsFromLocalStorage() {
+    var mem = readCachedMenuItemsFlat();
+    if (mem && mem.length) {
+        var memItems = mem.map(normalizeCashierItemEntry).filter(Boolean);
+        if (memItems.length) return memItems;
+    }
     var keys = ['cachedCashierItems', 'cachedMenuItems'];
     for (var i = 0; i < keys.length; i++) {
         var raw = localStorage.getItem(keys[i]);

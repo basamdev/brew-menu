@@ -55,6 +55,34 @@ try {
     }
 } catch (e) {}
 
+/* Drop the largest inline (data:) images from a cached copy of the menu until it
+   fits the character budget. Marks items with _imgStripped so callers know the
+   real image lives only in Firestore. Never used for data sent to Firestore. */
+function slimMenuItemsForStorage(items, budgetChars) {
+    if (!Array.isArray(items)) return [];
+    var list = items.map(function (it) { return it; });
+    var size = JSON.stringify(list).length;
+    if (size <= budgetChars) return list;
+    var order = list.map(function (it, i) {
+        var img = it && typeof it.image === 'string' ? it.image : '';
+        return { i: i, len: img.indexOf('data:') === 0 ? img.length : 0 };
+    }).filter(function (x) { return x.len > 20000; }).sort(function (a, b) { return b.len - a.len; });
+    for (var k = 0; k < order.length && size > budgetChars; k++) {
+        var it = list[order[k].i];
+        var copy = Object.assign({}, it, { image: '', _imgStripped: true });
+        list[order[k].i] = copy;
+        size -= order[k].len;
+    }
+    return list;
+}
+
+/* localStorage.setItem that reports success instead of failing silently. */
+function trySetItem(key, value) {
+    try { localStorage.setItem(key, value); return true; } catch (e) {}
+    try { evictNonEssentialCacheKeys(); localStorage.setItem(key, value); return true; } catch (e2) {}
+    return false;
+}
+
 function safeSetItem(key, value) {
     try {
         localStorage.setItem(key, value);
@@ -69,8 +97,6 @@ function safeSetItem(key, value) {
             try {
                 localStorage.removeItem('cachedSales');
                 localStorage.removeItem('cachedExpenses');
-                localStorage.removeItem('cachedFavorites');
-                localStorage.removeItem('menu_ratings');
                 localStorage.setItem(key, value);
             } catch (e3) {
                 // Keep running in memory with full data
@@ -81,14 +107,14 @@ function safeSetItem(key, value) {
 
 // Keys that can be dropped to free space when the quota is hit. `cachedCategories`
 // and `cachedMenuItems` are intentionally excluded to keep the menu UI intact.
+// Favorites and ratings are customer data, so they are never evicted.
 var NON_ESSENTIAL_CACHE_KEYS = [
     'cachedCashierItems',
+    'cachedMenuItems',
     'cachedMenuItemsSig',
     'cachedMenuCategoryNames',
     'cachedSales',
-    'cachedExpenses',
-    'cachedFavorites',
-    'menu_ratings'
+    'cachedExpenses'
 ];
 
 function evictNonEssentialCacheKeys() {
@@ -104,7 +130,13 @@ function evictNonEssentialCacheKeys() {
 var MenuCache = (function () {
     var CACHE_PREFIX = 'smartserve_menu_cache_';
     var MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days TTL
-    var CURRENT_SCHEMA_VERSION = 2;
+    var CURRENT_SCHEMA_VERSION = 3;
+    // Keep the cached menu well under the ~5MB browser localStorage quota (Safari
+    // counts UTF-16, so the real limit is ~2.5M characters). When a write overflows
+    // the quota it silently fails, the cache goes stale, and new items/categories
+    // never show up — so large inline images are dropped from the cached copy only
+    // (Firestore keeps the real image and the live data repaints it).
+    var CACHE_BUDGET_CHARS = 1600000;
 
     function getStorageKey(restaurantId) {
         var rId = String(restaurantId || '').trim().toLowerCase() || 'brew-coffee';
@@ -170,7 +202,7 @@ var MenuCache = (function () {
             }
             if (isValid(parsed, canonicalId)) {
                 // If stored cache has fewer items than our authentic initial data (e.g. from an incomplete previous fetch), prefer initial data
-                if (isBrew && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
+                if (isBrew && !(Number(parsed.version) >= 3) && typeof window !== 'undefined' && window.BREW_COFFEE_INITIAL_DATA && Array.isArray(window.BREW_COFFEE_INITIAL_DATA.items)) {
                     if (parsed.items.length < window.BREW_COFFEE_INITIAL_DATA.items.length) {
                         try {
                             safeSetItem(key, JSON.stringify(window.BREW_COFFEE_INITIAL_DATA));
@@ -180,7 +212,7 @@ var MenuCache = (function () {
                         return window.BREW_COFFEE_INITIAL_DATA;
                     }
                 }
-                return parsed;
+                return fillStrippedImages(parsed);
             } else {
                 console.warn('[MenuCache] Discarding invalid/expired cache for', canonicalId);
                 try { localStorage.removeItem(key); } catch (e) {}
@@ -222,13 +254,13 @@ var MenuCache = (function () {
         };
 
         try {
-            // Free quota by removing redundant duplicate keys
+            // Free quota by removing the flat items duplicate. Categories must stay
+            // available for admin dropdowns — re-sync them after the combined write.
             try { localStorage.removeItem('cachedMenuItems'); } catch (e) {}
-            try { localStorage.removeItem('cachedCategories'); } catch (e) {}
 
             var jsonStr = JSON.stringify(payload);
-            // If payload exceeds 3.5MB, reuse optimized thumbnails to prevent QuotaExceededError
-            if (jsonStr.length > 3500000) {
+            // If payload is over budget, reuse optimized thumbnails to prevent QuotaExceededError
+            if (jsonStr.length > CACHE_BUDGET_CHARS) {
                 var imgMap = {};
                 if (existing && Array.isArray(existing.items)) {
                     existing.items.forEach(function (it) {
@@ -252,8 +284,32 @@ var MenuCache = (function () {
                 });
                 jsonStr = JSON.stringify(payload);
             }
+            if (jsonStr.length > CACHE_BUDGET_CHARS) {
+                payload.items = slimMenuItemsForStorage(payload.items, CACHE_BUDGET_CHARS - (jsonStr.length - JSON.stringify(payload.items).length));
+                jsonStr = JSON.stringify(payload);
+            }
 
-            safeSetItem(getStorageKey(rId), jsonStr);
+            if (!trySetItem(getStorageKey(rId), jsonStr)) {
+                console.warn('[MenuCache] Could not store menu cache (storage full) for', rId);
+            }
+
+            // Keep admin/category UI in sync — never leave cachedCategories empty
+            // after a menu item save (that was wiping newly added categories).
+            try {
+                if (finalCategories.length > 0) {
+                    var normalizedCats = finalCategories.map(function (c) {
+                        if (!c || !c.id) return c;
+                        if (c.data && typeof c.data === 'object') return c;
+                        var data = {};
+                        Object.keys(c).forEach(function (k) {
+                            if (k !== 'id' && k !== 'virtual') data[k] = c[k];
+                        });
+                        return { id: c.id, data: data, virtual: c.virtual };
+                    });
+                    safeSetItem('cachedCategories', JSON.stringify(normalizedCats));
+                }
+            } catch (catSyncErr) {}
+
             return true;
         } catch (e) {
             console.warn('[MenuCache] Save error for', rId, e);
@@ -262,6 +318,18 @@ var MenuCache = (function () {
             }
             return false;
         }
+    }
+
+    // Put back baked thumbnails for images that were dropped from the cached copy.
+    function fillStrippedImages(cache) {
+        var init = (typeof window !== 'undefined') ? window.BREW_COFFEE_INITIAL_DATA : null;
+        if (!cache || !Array.isArray(cache.items) || !init || !Array.isArray(init.items)) return cache;
+        var byId = {};
+        init.items.forEach(function (it) { if (it && it.id && it.image) byId[it.id] = it.image; });
+        cache.items.forEach(function (it) {
+            if (it && it._imgStripped && byId[it.id]) { it.image = byId[it.id]; delete it._imgStripped; }
+        });
+        return cache;
     }
 
     function clear(restaurantId) {
@@ -1678,12 +1746,19 @@ function applyMenuItemsUpdate(items, options) {
     renderCategories(items, { autoSelect: false, forceRebuild: false });
     const catBarChanged = scroll && scroll.dataset.categorySig !== prevCatSig;
 
-    if (catBarChanged) {
-        autoSelectCategoryAfterRender(true);
-    } else if (_activeCategory && (!options.background || !container.querySelector('.menu-card'))) {
+    // The item signature changed (checked above), so the painted cards are out of
+    // date: repaint them in place, keeping the customer's scroll position.
+    var keepY = window.scrollY || window.pageYOffset || 0;
+    if (isEmenuPage()) {
+        ensureAllCategoriesRendered(true);
+        if (catBarChanged) autoSelectCategoryAfterRender(true);
+    } else if (_activeCategory) {
         switchCategory(_activeCategory, { silent: true, forceRender: true });
-    } else if (items.length > 0 && (!container.children.length || !container.querySelector('.menu-card'))) {
+    } else {
         autoSelectCategoryAfterRender(true);
+    }
+    if (keepY > 0 && Math.abs((window.scrollY || 0) - keepY) > 2) {
+        window.scrollTo(0, keepY);
     }
     setupCategoryScrollSpy();
 }
